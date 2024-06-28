@@ -1,11 +1,15 @@
-import { type Token, TokenType, type LexerIterValue } from "./types";
+import { type Token, TokenType } from "./types";
+import { clamp } from "./utils";
 /**
  * A lexer that will read a latex file and return a series of tokens.
  */
 export class Lexer {
   private position: number = 0;
-
   constructor(private input: string) {}
+
+  seek(position: number) {
+    this.position = clamp(position, 0, this.input.length);
+  }
 
   public peek(): Token {
     if (this.position >= this.input.length) {
@@ -34,16 +38,15 @@ export class Lexer {
         return { type: TokenType.LBracket, literal: "[" };
       case "]":
         return { type: TokenType.RBracket, literal: "]" };
+
       case "%":
         return { type: TokenType.Percent, literal: "%" };
       case "$":
         return { type: TokenType.Dollar, literal: "$" };
-
       case "&":
         return { type: TokenType.Ampersand, literal: "&" };
       case "#":
         return { type: TokenType.Hash, literal: "#" };
-
       case "_":
         return { type: TokenType.Underscore, literal: "_" };
       case "^":
@@ -54,14 +57,26 @@ export class Lexer {
       case "\t":
         return { type: TokenType.Tab, literal: "\t" };
 
-      case "~":
-        return { type: TokenType.Tilde, literal: "~" };
-
       case "\n":
         return { type: TokenType.EndLine, literal: "\n" };
       default:
-        return { type: TokenType.Char, literal: char };
+        return this.readContent();
     }
+  }
+
+  private readContent(): Token {
+    let content: string = "";
+    while (true) {
+      const token = this.input.at(this.position++);
+      if (!token || token.match(/[\\{}%$&#_^~\n\t ]/)) {
+        break;
+      }
+
+      content += token;
+      this.position++;
+    }
+
+    return { type: TokenType.Content, literal: content };
   }
 
   public nextToken(): Token {
@@ -70,7 +85,7 @@ export class Lexer {
     return token;
   }
 
-  public next(): LexerIterValue {
+  public next(): IteratorResult<Token> {
     const token = this.nextToken();
     if (token.type === TokenType.EOF) {
       return { done: true, value: token };

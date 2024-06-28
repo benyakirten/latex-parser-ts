@@ -14,7 +14,7 @@ export type Token =
   | CaretToken
   | TildeToken
   | ForwardSlashToken
-  | CharToken
+  | ContentToken
   | TabToken
   | SpaceToken
   | EndLineToken
@@ -100,8 +100,8 @@ type EndLineToken = {
   literal: "\n";
 };
 
-type CharToken = {
-  type: TokenType.Char;
+type ContentToken = {
+  type: TokenType.Content;
   literal: string;
 };
 
@@ -137,13 +137,8 @@ export enum TokenType {
   Tilde,
   ForwardSlash,
   EndLine,
-  Char,
+  Content,
   Space,
   Tab,
   EOF,
 }
-
-export type LexerIterValue = {
-  done: boolean;
-  value: Token;
-};
