@@ -3,86 +3,124 @@ import { clamp } from "./utils";
 /**
  * A lexer that will read a latex file and return a series of tokens.
  */
-export class Lexer {
+export class LatexLexer {
+  static #BREAK_CHARACTERS = new Set([
+    "[",
+    "]",
+    "(",
+    ")",
+    "{",
+    "}",
+    "%",
+    "$",
+    "&",
+    "#",
+    "_",
+    "^",
+    "~",
+    "\n",
+    "\t",
+    " ",
+    "\\",
+    "/",
+  ]);
+
   private position: number = 0;
   constructor(private input: string) {}
 
-  seek(position: number) {
+  public seek(position: number) {
+    if (position < 0) {
+      position = this.input.length + position;
+    }
+
     this.position = clamp(position, 0, this.input.length);
   }
 
-  public peek(): Token {
-    if (this.position >= this.input.length) {
+  public nextToken(): Token {
+    const char = this.input.at(this.position);
+    if (!char) {
       return { type: TokenType.EOF, literal: "" };
     }
 
-    const char = this.input[this.position];
-
+    let token: Token;
     switch (char) {
       case "/":
-        return { type: TokenType.ForwardSlash, literal: "/" };
+        token = { type: TokenType.ForwardSlash, literal: "/" };
+        break;
       case "\\":
-        return { type: TokenType.BackSlash, literal: "\\" };
+        token = { type: TokenType.BackSlash, literal: "\\" };
+        break;
 
       case "(":
-        return { type: TokenType.LParen, literal: "(" };
+        token = { type: TokenType.LParen, literal: "(" };
+        break;
       case ")":
-        return { type: TokenType.RParen, literal: ")" };
+        token = { type: TokenType.RParen, literal: ")" };
+        break;
 
       case "{":
-        return { type: TokenType.LBrace, literal: "{" };
+        token = { type: TokenType.LBrace, literal: "{" };
+        break;
       case "}":
-        return { type: TokenType.RBrace, literal: "}" };
+        token = { type: TokenType.RBrace, literal: "}" };
+        break;
 
       case "[":
-        return { type: TokenType.LBracket, literal: "[" };
+        token = { type: TokenType.LBracket, literal: "[" };
+        break;
       case "]":
-        return { type: TokenType.RBracket, literal: "]" };
+        token = { type: TokenType.RBracket, literal: "]" };
+        break;
 
       case "%":
-        return { type: TokenType.Percent, literal: "%" };
+        token = { type: TokenType.Percent, literal: "%" };
+        break;
       case "$":
-        return { type: TokenType.Dollar, literal: "$" };
+        token = { type: TokenType.Dollar, literal: "$" };
+        break;
       case "&":
-        return { type: TokenType.Ampersand, literal: "&" };
+        token = { type: TokenType.Ampersand, literal: "&" };
+        break;
       case "#":
-        return { type: TokenType.Hash, literal: "#" };
+        token = { type: TokenType.Hash, literal: "#" };
+        break;
       case "_":
-        return { type: TokenType.Underscore, literal: "_" };
+        token = { type: TokenType.Underscore, literal: "_" };
+        break;
       case "^":
-        return { type: TokenType.Caret, literal: "^" };
+        token = { type: TokenType.Caret, literal: "^" };
+        break;
 
       case " ":
-        return { type: TokenType.Space, literal: " " };
+        token = { type: TokenType.Space, literal: " " };
+        break;
       case "\t":
-        return { type: TokenType.Tab, literal: "\t" };
+        token = { type: TokenType.Tab, literal: "\t" };
+        break;
 
       case "\n":
-        return { type: TokenType.EndLine, literal: "\n" };
+        token = { type: TokenType.EndOfLine, literal: "\n" };
+        break;
       default:
         return this.readContent();
     }
+
+    this.position++;
+    return token;
   }
 
   private readContent(): Token {
     let content: string = "";
-    while (true) {
-      const token = this.input.at(this.position++);
-      if (!token || token.match(/[\\{}%$&#_^~\n\t ]/)) {
-        break;
-      }
+    let item = this.input.at(this.position);
 
-      content += token;
+    while (item && !LatexLexer.#BREAK_CHARACTERS.has(item)) {
+      content += item;
+
       this.position++;
+      item = this.input.at(this.position);
     }
 
     return { type: TokenType.Content, literal: content };
-  }
-
-  public nextToken(): Token {
-    const token = this.peek();
-    this.position++;
-    return token;
   }
 
   public next(): IteratorResult<Token> {

@@ -17,7 +17,7 @@ export type Token =
   | ContentToken
   | TabToken
   | SpaceToken
-  | EndLineToken
+  | EndOfLineToken
   | EOFToken;
 
 type BackslashToken = {
@@ -95,8 +95,8 @@ type ForwardSlashToken = {
   literal: "/";
 };
 
-type EndLineToken = {
-  type: TokenType.EndLine;
+type EndOfLineToken = {
+  type: TokenType.EndOfLine;
   literal: "\n";
 };
 
@@ -136,7 +136,7 @@ export enum TokenType {
   Caret,
   Tilde,
   ForwardSlash,
-  EndLine,
+  EndOfLine,
   Content,
   Space,
   Tab,
