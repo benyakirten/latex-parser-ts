@@ -1,0 +1,15 @@
+{
+  "name": "latex-parser",
+  "module": "index.ts",
+  "type": "module",
+  "author": {
+    "name": "Ben Horowitz",
+    "email": "ben@benyakiredits.com"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
