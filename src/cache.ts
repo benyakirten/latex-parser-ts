@@ -6,10 +6,10 @@ import type { LexerCache, Token } from "./types";
  * tests to see where the breakpoint is.
  */
 export class SimpleCache implements LexerCache {
-  private _cache: Map<number, Token>;
+  #cache: Map<number, Token>;
 
   constructor(cache?: Map<number, Token>) {
-    this._cache = cache ?? new Map();
+    this.#cache = cache ?? new Map();
   }
 
   /**
@@ -17,9 +17,9 @@ export class SimpleCache implements LexerCache {
    * NOTE: Need performance tests to measure when this is needed.
    */
   evict(start: number, end: number): LexerCache {
-    for (const p of this._cache.keys()) {
+    for (const p of this.#cache.keys()) {
       if (p >= start && p <= end) {
-        this._cache.delete(p);
+        this.#cache.delete(p);
       }
     }
 
@@ -27,27 +27,27 @@ export class SimpleCache implements LexerCache {
   }
 
   public add(position: number, token: Token): LexerCache {
-    this._cache.set(position, token);
+    this.#cache.set(position, token);
     return this;
   }
 
   public insert(position: number, tokens: Token[]): LexerCache {
-    let offset = position;
-    const entries: [number, Token][] = [];
+    let offset = 0;
+    const movedEntries: [number, Token][] = [];
 
-    for (const [p, t] of this._cache.entries()) {
+    for (const [p, t] of this.#cache.entries()) {
       if (p >= position) {
-        entries.push([p, t]);
+        movedEntries.push([p, t]);
       }
     }
 
     for (const token of tokens) {
-      this._cache.set(offset, token);
+      this.#cache.set(position + offset, token);
       offset += token.literal.length;
     }
 
-    for (const [p, t] of entries) {
-      this._cache.set(offset + p, t);
+    for (const [p, t] of movedEntries) {
+      this.#cache.set(offset + p, t);
     }
 
     return this;
@@ -64,24 +64,24 @@ export class SimpleCache implements LexerCache {
     }
 
     const offset = end - start;
-    for (const [p, t] of this._cache.entries()) {
+    for (const [p, t] of this.#cache.entries()) {
       if (p < start) {
         continue;
       }
 
       if (p >= start && p <= end) {
-        this._cache.delete(p);
+        this.#cache.delete(p);
         continue;
       }
 
-      this._cache.set(p - offset, t);
+      this.#cache.set(p - offset, t);
     }
 
     return this;
   }
 
   public get(position: number): Token | null {
-    return this._cache.get(position) ?? null;
+    return this.#cache.get(position) ?? null;
   }
 }
 
@@ -89,7 +89,7 @@ export class NoCache implements LexerCache {
   evict(): LexerCache {
     return this;
   }
-  add(): LexerCache {
+  add() {
     return this;
   }
   insert(): LexerCache {
