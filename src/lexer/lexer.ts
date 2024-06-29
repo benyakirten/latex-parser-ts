@@ -1,5 +1,5 @@
 import { NoCache } from "./cache";
-import { clamp } from "./utils";
+import { clamp } from "../utils";
 import { type Token, type LexerCache, TokenType } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
@@ -43,7 +43,7 @@ export class LatexLexer {
     this.position = clamp(position, 0, this.input.length);
   }
 
-  public insert(position: number, value: string): LatexLexer {
+  public insert(position: number, value: string): IterableIterator<Token> {
     if (position < 0) {
       position = this.input.length + position;
     }
@@ -54,7 +54,7 @@ export class LatexLexer {
     const iter = new LatexLexer(value);
     this.cache.insert(position, [...iter]);
 
-    return this;
+    return iter;
   }
 
   public remove(start: number, end: number): LatexLexer {

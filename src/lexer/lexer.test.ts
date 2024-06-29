@@ -145,10 +145,19 @@ describe("LatexLexer", () => {
 
   describe("insert", () => {
     it("should insert items into the lexer's input", () => {
-      lexer.insert(1, "somecommand\\");
+      const gotIter = lexer.insert(1, "somecommand\\");
+      const wantIter = (function* () {
+        yield { type: TokenType.Content, literal: "somecommand" };
+        yield { type: TokenType.BackSlash, literal: "\\" };
+      })();
 
-      const got = [...lexer];
-      const want: Token[] = [
+      for (const gotToken of gotIter) {
+        const wantToken = wantIter.next().value;
+        expect(wantToken).toEqual(gotToken);
+      }
+
+      const gotLexedItems = [...lexer];
+      const wantLexedItems: Token[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "somecommand" },
         { type: TokenType.BackSlash, literal: "\\" },
@@ -161,7 +170,7 @@ describe("LatexLexer", () => {
         { type: TokenType.RBrace, literal: "}" },
       ];
 
-      expect(got).toEqual(want);
+      expect(gotLexedItems).toEqual(wantLexedItems);
     });
 
     it("should insert by distance from the end if the position is negative", () => {
