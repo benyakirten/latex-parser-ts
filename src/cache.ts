@@ -63,18 +63,21 @@ export class SimpleCache implements LexerCache {
       [start, end] = [end, start];
     }
 
-    const offset = end - start;
+    // If we removed 2-10, we want to shift item in slot 11 to 2, which is 10 - 2 + 1
+    const offset = end - start + 1;
+    const itemsToShift: [number, Token][] = [];
     for (const [p, t] of this.#cache.entries()) {
-      if (p < start) {
-        continue;
-      }
-
-      if (p >= start && p <= end) {
+      if (p > end) {
+        // Store the items to shift so we don't mutate the map while iterating through it (quirk of JavaScript).
+        itemsToShift.push([p - offset, t]);
+        // Remove up to the designated position.
+      } else if (p >= start && p < end) {
         this.#cache.delete(p);
-        continue;
       }
+    }
 
-      this.#cache.set(p - offset, t);
+    for (const [p, t] of itemsToShift) {
+      this.#cache.set(p, t);
     }
 
     return this;
