@@ -1,5 +1,6 @@
-import { type Token, TokenType } from "./types";
+import { NoCache } from "./cache";
 import { clamp } from "./utils";
+import { type Token, type LexerCache, TokenType } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
  */
@@ -26,7 +27,13 @@ export class LatexLexer {
   ]);
 
   private position: number = 0;
-  constructor(private input: string) {}
+  private cache: LexerCache;
+  constructor(
+    private input: string,
+    cache?: LexerCache,
+  ) {
+    this.cache = cache ?? new NoCache();
+  }
 
   public seek(position: number) {
     if (position < 0) {
@@ -36,10 +43,36 @@ export class LatexLexer {
     this.position = clamp(position, 0, this.input.length);
   }
 
+  public insert(position: number, value: string): LatexLexer {
+    position = clamp(position, 0, this.input.length);
+    this.input = this.input.slice(0, position) + value + this.input.slice(position);
+
+    const iter = new LatexLexer(value);
+    this.cache.insert(position, [...iter]);
+
+    return this;
+  }
+
+  public remove(start: number, end: number): LatexLexer {
+    start = clamp(start, 0, this.input.length);
+    end = clamp(end, 0, this.input.length);
+
+    this.input = this.input.slice(0, start) + this.input.slice(end);
+    this.cache.remove(start, end);
+
+    return this;
+  }
+
   public nextToken(): Token {
     const char = this.input.at(this.position);
     if (!char) {
       return { type: TokenType.EOF, literal: "" };
+    }
+
+    const cachedItem = this.cache.get(this.position);
+    if (cachedItem) {
+      this.position += cachedItem.literal.length;
+      return cachedItem;
     }
 
     let token: Token;
@@ -105,12 +138,14 @@ export class LatexLexer {
         return this.readContent();
     }
 
+    this.cache.add(this.position, token);
     this.position++;
     return token;
   }
 
   private readContent(): Token {
     let content: string = "";
+    const startPosition = this.position;
     let item = this.input.at(this.position);
 
     while (item && !LatexLexer.#BREAK_CHARACTERS.has(item)) {
@@ -120,7 +155,10 @@ export class LatexLexer {
       item = this.input.at(this.position);
     }
 
-    return { type: TokenType.Content, literal: content };
+    const token: Token = { type: TokenType.Content, literal: content };
+    this.cache.add(startPosition, token);
+
+    return token;
   }
 
   public next(): IteratorResult<Token> {

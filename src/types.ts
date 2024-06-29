@@ -142,3 +142,11 @@ export enum TokenType {
   Tab,
   EOF,
 }
+
+export interface LexerCache {
+  add(position: number, token: Token): LexerCache;
+  insert(position: number, token: Token[]): LexerCache;
+  remove(start: number, end: number): LexerCache;
+  get(position: number): Token | null;
+  evict(start: number, end: number): LexerCache;
+}
