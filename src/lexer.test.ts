@@ -317,7 +317,7 @@ describe("LatexLexer", () => {
     });
   });
 
-  describe.todo("caching", () => {
+  describe("caching", () => {
     const insertSpy = jest.fn();
     const removeSpy = jest.fn();
     const addSpy = jest.fn();
@@ -336,8 +336,7 @@ describe("LatexLexer", () => {
       }
 
       public get(position: number): Token | null {
-        getSpy(position);
-        return null;
+        return getSpy(position);
       }
 
       insert(position: number, token: Token[]): LexerCache {
@@ -358,12 +357,49 @@ describe("LatexLexer", () => {
       getSpy.mockClear();
       evictSpy.mockClear();
 
-      lexer = new LatexLexer(FULL_LATEX_DOC, new MockCache());
-      lexer;
+      getSpy.mockReturnValue(null);
+
+      lexer = new LatexLexer(SHORT_LATEX_DOC, new MockCache());
     });
 
-    it("should lex then insert the new items into the cache when insert is called", () => {
-      // TODO
+    it("should call insert with the lexed items when insert is called", () => {
+      lexer.insert(1, "somecommand\\");
+      expect(insertSpy).toHaveBeenCalledTimes(1);
+      expect(insertSpy).toHaveBeenCalledWith(1, [
+        { type: TokenType.Content, literal: "somecommand" },
+        { type: TokenType.BackSlash, literal: "\\" },
+      ]);
+    });
+
+    it("should call remove on the cache with the same start and end values when remove is called", () => {
+      lexer.remove(1, 9);
+      expect(removeSpy).toHaveBeenCalledTimes(1);
+      expect(removeSpy).toHaveBeenCalledWith(1, 9);
+    });
+
+    it("should call remove with the adjusted values when remove is called with irregular values", () => {
+      lexer.remove(9, -100);
+      expect(removeSpy).toHaveBeenCalledTimes(1);
+      expect(removeSpy).toHaveBeenCalledWith(0, 9);
+    });
+
+    it("should attempt to get the token from the cache when nextToken is called", () => {
+      lexer.nextToken();
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith(0);
+    });
+
+    it("should add the token to the cache when nextToken is called and the value does not exist in the cache", () => {
+      getSpy.mockReturnValue(null);
+      lexer.nextToken();
+      expect(addSpy).toHaveBeenCalledTimes(1);
+      expect(addSpy).toHaveBeenCalledWith(0, { type: TokenType.BackSlash, literal: "\\" });
+    });
+
+    it("should not add the token to the cache when nextToken is called and the value exists in the cache", () => {
+      getSpy.mockReturnValue({ type: TokenType.BackSlash, literal: "\\" });
+      lexer.nextToken();
+      expect(addSpy).not.toHaveBeenCalled();
     });
   });
 });
