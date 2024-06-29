@@ -25,6 +25,16 @@ describe("SimpleCache", () => {
     cache = new SimpleCache();
   });
 
+  const tokens: Token[] = [
+    { type: TokenType.Hash, literal: "#" },
+    { type: TokenType.Space, literal: " " },
+    { type: TokenType.Content, literal: "content1" },
+    { type: TokenType.Ampersand, literal: "&" },
+    { type: TokenType.Content, literal: "content2" },
+    { type: TokenType.Caret, literal: "^" },
+    { type: TokenType.Dollar, literal: "$" },
+  ];
+
   describe("get and set", () => {
     it("should store and retrieve data in the cache", () => {
       const token: Token = { type: TokenType.Hash, literal: "#" };
@@ -40,12 +50,7 @@ describe("SimpleCache", () => {
 
   describe("insert", () => {
     it("should insert multiple tokens into the cache and shift affected items forward in the cache", () => {
-      const tokens: Token[] = [
-        { type: TokenType.Hash, literal: "#" },
-        { type: TokenType.Space, literal: " " },
-        { type: TokenType.Content, literal: "content1" },
-      ];
-      cache.insert(0, tokens);
+      cache.insert(0, tokens.slice(0, 3));
       let got0 = cache.get(0);
       let got1 = cache.get(1);
       let got2 = cache.get(2);
@@ -53,14 +58,7 @@ describe("SimpleCache", () => {
       expect(got1).toEqual(tokens[1]);
       expect(got2).toEqual(tokens[2]);
 
-      const tokens2: Token[] = [
-        { type: TokenType.Ampersand, literal: "&" },
-        { type: TokenType.Content, literal: "content2" },
-        { type: TokenType.Caret, literal: "^" },
-        { type: TokenType.Dollar, literal: "$" },
-      ];
-
-      cache.insert(2, tokens2);
+      cache.insert(2, tokens.slice(3));
 
       got0 = cache.get(0);
       got1 = cache.get(1);
@@ -72,26 +70,16 @@ describe("SimpleCache", () => {
 
       expect(got0).toEqual(tokens[0]);
       expect(got1).toEqual(tokens[1]);
-      expect(got2).toEqual(tokens2[0]);
-      expect(got3).toEqual(tokens2[1]);
-      expect(got4).toEqual(tokens2[2]);
-      expect(got5).toEqual(tokens2[3]);
+      expect(got2).toEqual(tokens[3]);
+      expect(got3).toEqual(tokens[4]);
+      expect(got4).toEqual(tokens[5]);
+      expect(got5).toEqual(tokens[6]);
       expect(got6).toEqual(tokens[2]);
     });
   });
 
   describe("remove", () => {
     it("should remove data from the cache and shift affected items back in the cache", () => {
-      const tokens: Token[] = [
-        { type: TokenType.Hash, literal: "#" },
-        { type: TokenType.Space, literal: " " },
-        { type: TokenType.Content, literal: "content1" },
-        { type: TokenType.Ampersand, literal: "&" },
-        { type: TokenType.Content, literal: "content2" },
-        { type: TokenType.Caret, literal: "^" },
-        { type: TokenType.Dollar, literal: "$" },
-      ];
-
       cache.insert(0, tokens);
       cache.remove(2, 10);
 

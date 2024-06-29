@@ -3,15 +3,16 @@ import { it, expect, describe, beforeEach } from "bun:test";
 import { LatexLexer } from "./lexer";
 import { TokenType, type Token } from "./types";
 
+const LATEX_DOC = `\\documentclass[12pt]{article}
+\\( E = mc^2 \\). And here is a displayed equation:
+\\[
+\\int_a^b f(x)\\,dx
+\\]
+\\\tbegin{figure:sample}[h]
+\\includegraphics[width=0.5\\textwidth]{example.jpg}`;
+
 describe("LatexLexer", () => {
   it("should correctly lex a latex document", () => {
-    const LATEX_DOC = `\\documentclass[12pt]{article}
-    \\( E = mc^2 \\). And here is a displayed equation:
-    \\[
-    \\int_a^b f(x)\\,dx
-    \\]
-    \\\tbegin{figure:sample}[h]
-    \\includegraphics[width=0.5\\textwidth]{example.jpg}`;
     const lexer = new LatexLexer(LATEX_DOC);
 
     const want: Token[] = [
