@@ -58,14 +58,14 @@ export class LatexLexer {
   }
 
   public remove(start: number, end: number): LatexLexer {
-    if (start === end) {
-      return this;
-    }
-
     start = clamp(start, 0, this.input.length);
     end = clamp(end, 0, this.input.length);
     if (start > end) {
       [start, end] = [end, start];
+    }
+
+    if (start === end) {
+      return this;
     }
 
     this.input = this.input.slice(0, start) + this.input.slice(end);

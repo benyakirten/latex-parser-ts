@@ -1,9 +1,9 @@
-import { it, expect, describe, beforeEach } from "bun:test";
+import { it, expect, describe, beforeEach, jest } from "bun:test";
 
 import { LatexLexer } from "./lexer";
-import { TokenType, type Token } from "./types";
+import { TokenType, type LexerCache, type Token } from "./types";
 
-const LATEX_DOC = `\\documentclass[12pt]{article}
+const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
 \\( E = mc^2 \\). And here is a displayed equation:
 \\[
 \\int_a^b f(x)\\,dx
@@ -11,9 +11,16 @@ const LATEX_DOC = `\\documentclass[12pt]{article}
 \\\tbegin{figure:sample}[h]
 \\includegraphics[width=0.5\\textwidth]{example.jpg}`;
 
+const SHORT_LATEX_DOC = `\\documentclass[12pt]{article}`;
+
 describe("LatexLexer", () => {
+  let lexer: LatexLexer;
+  beforeEach(() => {
+    lexer = new LatexLexer(SHORT_LATEX_DOC);
+  });
+
   it("should correctly lex a latex document", () => {
-    const lexer = new LatexLexer(LATEX_DOC);
+    const lexer = new LatexLexer(FULL_LATEX_DOC);
 
     const want: Token[] = [
       { type: TokenType.BackSlash, literal: "\\" },
@@ -99,11 +106,6 @@ describe("LatexLexer", () => {
   });
 
   describe("seek", () => {
-    let lexer: LatexLexer;
-    beforeEach(() => {
-      lexer = new LatexLexer(`\\documentclass[12pt]{article}`);
-    });
-
     it("should correctly set the position based off the seek method", () => {
       lexer.seek(1);
       let got = lexer.nextToken();
@@ -142,11 +144,6 @@ describe("LatexLexer", () => {
   });
 
   describe("insert", () => {
-    let lexer: LatexLexer;
-    beforeEach(() => {
-      lexer = new LatexLexer(`\\documentclass[12pt]{article}`);
-    });
-
     it("should insert items into the lexer's input", () => {
       lexer.insert(1, "somecommand\\");
 
@@ -224,25 +221,149 @@ describe("LatexLexer", () => {
     });
   });
 
-  describe.todo("remove", () => {
+  describe("remove", () => {
     it("should remove the segment from the lexer's input", () => {
-      // TODO
+      lexer.remove(1, 9);
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "class" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "article" },
+        { type: TokenType.RBrace, literal: "}" },
+      ];
+
+      expect(got).toEqual(want);
+    });
+
+    it("should remove the segment from the lexer's input when the start value is negative", () => {
+      lexer.remove(-100, 9);
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.Content, literal: "class" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "article" },
+        { type: TokenType.RBrace, literal: "}" },
+      ];
+
+      expect(got).toEqual(want);
+    });
+
+    it("should reverse the start and end values if the start value is greater than the end value", () => {
+      lexer.remove(9, -100);
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.Content, literal: "class" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "article" },
+        { type: TokenType.RBrace, literal: "}" },
+      ];
+
+      expect(got).toEqual(want);
     });
 
     it("should be able to handle a negative start and end value", () => {
-      // TODO
+      lexer.remove(-100, -50);
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "documentclass" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "article" },
+        { type: TokenType.RBrace, literal: "}" },
+      ];
+
+      expect(got).toEqual(want);
     });
 
-    it("should be able to handle a very large end value", () => {
-      // TODO
+    it("should remove to the end of the document if the end value is very large", () => {
+      lexer.remove(9, 10000);
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "document" },
+      ];
+
+      expect(got).toEqual(want);
     });
 
     it("should not alter the doc if the start and end values are the same", () => {
-      // TODO
+      lexer.remove(9, 9);
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "documentclass" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "article" },
+        { type: TokenType.RBrace, literal: "}" },
+      ];
+
+      expect(got).toEqual(want);
     });
   });
 
   describe.todo("caching", () => {
-    // TODO
+    const insertSpy = jest.fn();
+    const removeSpy = jest.fn();
+    const addSpy = jest.fn();
+    const getSpy = jest.fn();
+    const evictSpy = jest.fn();
+
+    class MockCache implements LexerCache {
+      public remove(start: number, end: number): LexerCache {
+        removeSpy(start, end);
+        return this;
+      }
+
+      public add(start: number, token: Token): LexerCache {
+        addSpy(start, token);
+        return this;
+      }
+
+      public get(position: number): Token | null {
+        getSpy(position);
+        return null;
+      }
+
+      insert(position: number, token: Token[]): LexerCache {
+        insertSpy(position, token);
+        return this;
+      }
+      evict(start: number, end: number): LexerCache {
+        evictSpy(start, end);
+        return this;
+      }
+    }
+
+    let lexer: LatexLexer;
+    beforeEach(() => {
+      insertSpy.mockClear();
+      removeSpy.mockClear();
+      addSpy.mockClear();
+      getSpy.mockClear();
+      evictSpy.mockClear();
+
+      lexer = new LatexLexer(FULL_LATEX_DOC, new MockCache());
+      lexer;
+    });
+
+    it("should lex then insert the new items into the cache when insert is called", () => {
+      // TODO
+    });
   });
 });
