@@ -140,4 +140,109 @@ describe("LatexLexer", () => {
       expect(got).toEqual({ type: TokenType.EOF, literal: "" });
     });
   });
+
+  describe("insert", () => {
+    let lexer: LatexLexer;
+    beforeEach(() => {
+      lexer = new LatexLexer(`\\documentclass[12pt]{article}`);
+    });
+
+    it("should insert items into the lexer's input", () => {
+      lexer.insert(1, "somecommand\\");
+
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "somecommand" },
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "documentclass" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "article" },
+        { type: TokenType.RBrace, literal: "}" },
+      ];
+
+      expect(got).toEqual(want);
+    });
+
+    it("should insert by distance from the end if the position is negative", () => {
+      lexer.insert(-1, "fast:introduction");
+
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "documentclass" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "articlefast:introduction" },
+        { type: TokenType.RBrace, literal: "}" },
+      ];
+
+      expect(got).toEqual(want);
+    });
+
+    it("should insert at the beginning for a sufficiently large negative value", () => {
+      lexer.insert(-10000, "\\somecommand");
+
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "somecommand" },
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "documentclass" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "article" },
+        { type: TokenType.RBrace, literal: "}" },
+      ];
+      expect(got).toEqual(want);
+    });
+
+    it("should insert at the end for a sufficiently large positive value", () => {
+      lexer.insert(1000, "$");
+
+      const got = [...lexer];
+      const want: Token[] = [
+        { type: TokenType.BackSlash, literal: "\\" },
+        { type: TokenType.Content, literal: "documentclass" },
+        { type: TokenType.LBracket, literal: "[" },
+        { type: TokenType.Content, literal: "12pt" },
+        { type: TokenType.RBracket, literal: "]" },
+        { type: TokenType.LBrace, literal: "{" },
+        { type: TokenType.Content, literal: "article" },
+        { type: TokenType.RBrace, literal: "}" },
+        { type: TokenType.Dollar, literal: "$" },
+      ];
+
+      expect(got).toEqual(want);
+    });
+  });
+
+  describe.todo("remove", () => {
+    it("should remove the segment from the lexer's input", () => {
+      // TODO
+    });
+
+    it("should be able to handle a negative start and end value", () => {
+      // TODO
+    });
+
+    it("should be able to handle a very large end value", () => {
+      // TODO
+    });
+
+    it("should not alter the doc if the start and end values are the same", () => {
+      // TODO
+    });
+  });
+
+  describe.todo("caching", () => {
+    // TODO
+  });
 });

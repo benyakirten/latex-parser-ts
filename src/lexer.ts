@@ -44,6 +44,10 @@ export class LatexLexer {
   }
 
   public insert(position: number, value: string): LatexLexer {
+    if (position < 0) {
+      position = this.input.length + position;
+    }
+
     position = clamp(position, 0, this.input.length);
     this.input = this.input.slice(0, position) + value + this.input.slice(position);
 
@@ -54,8 +58,15 @@ export class LatexLexer {
   }
 
   public remove(start: number, end: number): LatexLexer {
+    if (start === end) {
+      return this;
+    }
+
     start = clamp(start, 0, this.input.length);
     end = clamp(end, 0, this.input.length);
+    if (start > end) {
+      [start, end] = [end, start];
+    }
 
     this.input = this.input.slice(0, start) + this.input.slice(end);
     this.cache.remove(start, end);
