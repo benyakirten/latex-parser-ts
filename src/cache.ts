@@ -18,7 +18,7 @@ export class SimpleCache implements LexerCache {
    */
   evict(start: number, end: number): LexerCache {
     for (const p of this.#cache.keys()) {
-      if (p >= start && p <= end) {
+      if (p >= start && p < end) {
         this.#cache.delete(p);
       }
     }
