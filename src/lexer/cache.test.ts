@@ -1,7 +1,7 @@
 import { it, expect, describe, beforeEach } from "bun:test";
 
 import { NoCache, SimpleCache } from "./cache";
-import { TokenType, type LexerCache, type Token } from "./types";
+import { TokenType, type LexerCache, type LatexToken } from "./types";
 
 describe("NoCache", () => {
   it("should not store any data in the cache", () => {
@@ -25,7 +25,7 @@ describe("SimpleCache", () => {
     cache = new SimpleCache();
   });
 
-  const tokens: Token[] = [
+  const tokens: LatexToken[] = [
     { type: TokenType.Hash, literal: "#" },
     { type: TokenType.Space, literal: " " },
     { type: TokenType.Content, literal: "content1" },
@@ -37,17 +37,17 @@ describe("SimpleCache", () => {
 
   describe("get and set", () => {
     it("should store and retrieve data in the cache", () => {
-      const token: Token = { type: TokenType.Hash, literal: "#" };
+      const token: LatexToken = { type: TokenType.Hash, literal: "#" };
       cache.add(0, token);
       const got = cache.get(0);
       expect(got).toEqual(token);
     });
 
     it("should overwrite the value at that position if it already exists", () => {
-      const token1: Token = { type: TokenType.Hash, literal: "#" };
+      const token1: LatexToken = { type: TokenType.Hash, literal: "#" };
       cache.add(0, token1);
 
-      const token2: Token = { type: TokenType.Ampersand, literal: "&" };
+      const token2: LatexToken = { type: TokenType.Ampersand, literal: "&" };
       cache.add(0, token2);
 
       const got = cache.get(0);

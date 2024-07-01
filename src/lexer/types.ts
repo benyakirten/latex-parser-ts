@@ -1,4 +1,4 @@
-export type Token =
+export type LatexToken =
   | BackslashToken
   | LParenToken
   | RParenToken
@@ -144,9 +144,9 @@ export enum TokenType {
 }
 
 export interface LexerCache {
-  add(position: number, token: Token): LexerCache;
-  insert(position: number, token: Token[]): LexerCache;
+  add(position: number, token: LatexToken): LexerCache;
+  insert(position: number, token: LatexToken[]): LexerCache;
   remove(start: number, end: number): LexerCache;
-  get(position: number): Token | null;
+  get(position: number): LatexToken | null;
   evict(start: number, end: number): LexerCache;
 }

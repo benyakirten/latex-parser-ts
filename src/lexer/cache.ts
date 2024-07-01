@@ -1,4 +1,4 @@
-import type { LexerCache, Token } from "./types";
+import type { LexerCache, LatexToken } from "./types";
 
 /**
  * A simple caching behavior that stores by their position.
@@ -6,9 +6,9 @@ import type { LexerCache, Token } from "./types";
  * tests to see where the breakpoint is.
  */
 export class SimpleCache implements LexerCache {
-  #cache: Map<number, Token>;
+  #cache: Map<number, LatexToken>;
 
-  constructor(cache?: Map<number, Token>) {
+  constructor(cache?: Map<number, LatexToken>) {
     this.#cache = cache ?? new Map();
   }
 
@@ -26,14 +26,14 @@ export class SimpleCache implements LexerCache {
     return this;
   }
 
-  public add(position: number, token: Token): LexerCache {
+  public add(position: number, token: LatexToken): LexerCache {
     this.#cache.set(position, token);
     return this;
   }
 
-  public insert(position: number, tokens: Token[]): LexerCache {
+  public insert(position: number, tokens: LatexToken[]): LexerCache {
     let offset = 0;
-    const movedEntries: [number, Token][] = [];
+    const movedEntries: [number, LatexToken][] = [];
 
     for (const [p, t] of this.#cache.entries()) {
       if (p >= position) {
@@ -65,7 +65,7 @@ export class SimpleCache implements LexerCache {
 
     // If we removed 2-10, we want to shift item in slot 11 to 2, which is 10 - 2 + 1
     const offset = end - start + 1;
-    const itemsToShift: [number, Token][] = [];
+    const itemsToShift: [number, LatexToken][] = [];
     for (const [p, t] of this.#cache.entries()) {
       if (p > end) {
         // Store the items to shift so we don't mutate the map while iterating through it (quirk of JavaScript).
@@ -83,7 +83,7 @@ export class SimpleCache implements LexerCache {
     return this;
   }
 
-  public get(position: number): Token | null {
+  public get(position: number): LatexToken | null {
     return this.#cache.get(position) ?? null;
   }
 }
@@ -101,7 +101,7 @@ export class NoCache implements LexerCache {
   remove(): LexerCache {
     return this;
   }
-  get(): Token | null {
+  get(): LatexToken | null {
     return null;
   }
 }

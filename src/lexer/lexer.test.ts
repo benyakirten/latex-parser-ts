@@ -1,7 +1,7 @@
 import { it, expect, describe, beforeEach, jest } from "bun:test";
 
 import { LatexLexer } from "./lexer";
-import { TokenType, type LexerCache, type Token } from "./types";
+import { TokenType, type LexerCache, type LatexToken } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
 \\( E = mc^2 \\). And here is a displayed equation:
@@ -22,7 +22,7 @@ describe("LatexLexer", () => {
   it("should correctly lex a latex document", () => {
     const lexer = new LatexLexer(FULL_LATEX_DOC);
 
-    const want: Token[] = [
+    const want: LatexToken[] = [
       { type: TokenType.BackSlash, literal: "\\" },
       { type: TokenType.Content, literal: "documentclass" },
       { type: TokenType.LBracket, literal: "[" },
@@ -157,7 +157,7 @@ describe("LatexLexer", () => {
       }
 
       const gotLexedItems = [...lexer];
-      const wantLexedItems: Token[] = [
+      const wantLexedItems: LatexToken[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "somecommand" },
         { type: TokenType.BackSlash, literal: "\\" },
@@ -177,7 +177,7 @@ describe("LatexLexer", () => {
       lexer.insert(-1, "fast:introduction");
 
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "documentclass" },
         { type: TokenType.LBracket, literal: "[" },
@@ -195,7 +195,7 @@ describe("LatexLexer", () => {
       lexer.insert(-10000, "\\somecommand");
 
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "somecommand" },
         { type: TokenType.BackSlash, literal: "\\" },
@@ -214,7 +214,7 @@ describe("LatexLexer", () => {
       lexer.insert(1000, "$");
 
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "documentclass" },
         { type: TokenType.LBracket, literal: "[" },
@@ -234,7 +234,7 @@ describe("LatexLexer", () => {
     it("should remove the segment from the lexer's input", () => {
       lexer.remove(1, 9);
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "class" },
         { type: TokenType.LBracket, literal: "[" },
@@ -251,7 +251,7 @@ describe("LatexLexer", () => {
     it("should remove the segment from the lexer's input when the start value is negative", () => {
       lexer.remove(-100, 9);
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.Content, literal: "class" },
         { type: TokenType.LBracket, literal: "[" },
         { type: TokenType.Content, literal: "12pt" },
@@ -267,7 +267,7 @@ describe("LatexLexer", () => {
     it("should reverse the start and end values if the start value is greater than the end value", () => {
       lexer.remove(9, -100);
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.Content, literal: "class" },
         { type: TokenType.LBracket, literal: "[" },
         { type: TokenType.Content, literal: "12pt" },
@@ -283,7 +283,7 @@ describe("LatexLexer", () => {
     it("should be able to handle a negative start and end value", () => {
       lexer.remove(-100, -50);
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "documentclass" },
         { type: TokenType.LBracket, literal: "[" },
@@ -300,7 +300,7 @@ describe("LatexLexer", () => {
     it("should remove to the end of the document if the end value is very large", () => {
       lexer.remove(9, 10000);
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "document" },
       ];
@@ -311,7 +311,7 @@ describe("LatexLexer", () => {
     it("should not alter the doc if the start and end values are the same", () => {
       lexer.remove(9, 9);
       const got = [...lexer];
-      const want: Token[] = [
+      const want: LatexToken[] = [
         { type: TokenType.BackSlash, literal: "\\" },
         { type: TokenType.Content, literal: "documentclass" },
         { type: TokenType.LBracket, literal: "[" },
@@ -339,16 +339,16 @@ describe("LatexLexer", () => {
         return this;
       }
 
-      public add(start: number, token: Token): LexerCache {
+      public add(start: number, token: LatexToken): LexerCache {
         addSpy(start, token);
         return this;
       }
 
-      public get(position: number): Token | null {
+      public get(position: number): LatexToken | null {
         return getSpy(position);
       }
 
-      insert(position: number, token: Token[]): LexerCache {
+      insert(position: number, token: LatexToken[]): LexerCache {
         insertSpy(position, token);
         return this;
       }

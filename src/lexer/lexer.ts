@@ -1,6 +1,6 @@
 import { NoCache } from "./cache";
 import { clamp } from "../utils";
-import { type Token, type LexerCache, TokenType } from "./types";
+import { type LatexToken, type LexerCache, TokenType } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
  */
@@ -43,7 +43,13 @@ export class LatexLexer {
     this.position = clamp(position, 0, this.input.length);
   }
 
-  public insert(position: number, value: string): IterableIterator<Token> {
+  public peek(): LatexToken | null {
+    // TODO
+
+    return null;
+  }
+
+  public insert(position: number, value: string): IterableIterator<LatexToken> {
     if (position < 0) {
       position = this.input.length + position;
     }
@@ -74,7 +80,9 @@ export class LatexLexer {
     return this;
   }
 
-  public nextToken(): Token {
+  // TODO: Add peek method where this just peeks, reads
+  // then advances the position by the length of the token
+  public nextToken(): LatexToken {
     const char = this.input.at(this.position);
     if (!char) {
       return { type: TokenType.EOF, literal: "" };
@@ -86,7 +94,7 @@ export class LatexLexer {
       return cachedItem;
     }
 
-    let token: Token;
+    let token: LatexToken;
     switch (char) {
       case "/":
         token = { type: TokenType.ForwardSlash, literal: "/" };
@@ -154,7 +162,8 @@ export class LatexLexer {
     return token;
   }
 
-  private readContent(): Token {
+  // TODO: Make this not modify the position
+  private readContent(): LatexToken {
     let content: string = "";
     const startPosition = this.position;
     let item = this.input.at(this.position);
@@ -166,13 +175,13 @@ export class LatexLexer {
       item = this.input.at(this.position);
     }
 
-    const token: Token = { type: TokenType.Content, literal: content };
+    const token: LatexToken = { type: TokenType.Content, literal: content };
     this.cache.add(startPosition, token);
 
     return token;
   }
 
-  public next(): IteratorResult<Token> {
+  public next(): IteratorResult<LatexToken> {
     const token = this.nextToken();
     if (token.type === TokenType.EOF) {
       return { done: true, value: token };

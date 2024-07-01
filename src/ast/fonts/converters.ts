@@ -1,3 +1,4 @@
+import type { LatexToken } from "../../lexer/types";
 import {
   FontSelectionType,
   LatexFontShape,
@@ -81,9 +82,6 @@ function getAuthorCommandText(authorCommand: string): string {
   return authorCommand;
 }
 
-/**
- * Command should be the whole command, e.g. fontencoding
- */
 export function parseSelectionCommand(fontCommands: SelectionCommand[]): LatexFont {
   const parsedCommand: LatexFont = {};
   for (const command of fontCommands) {
@@ -98,4 +96,9 @@ export function parseSelectionCommand(fontCommands: SelectionCommand[]): LatexFo
   }
 
   return parsedCommand;
+}
+
+export function parseSelectionCommandSections(tokens: LatexToken[]) {
+  tokens;
+  // TODO
 }
