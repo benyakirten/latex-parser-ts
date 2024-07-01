@@ -3,6 +3,8 @@ import { clamp } from "../utils";
 import { type LatexToken, type LexerCache, TokenType } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
+ * It acts similar to a cursor in Rust where it will keep track of the
+ * current position. It has peek and seek methods to change the current position.
  */
 export class LatexLexer {
   static #BREAK_CHARACTERS = new Set([
@@ -43,12 +45,6 @@ export class LatexLexer {
     this.position = clamp(position, 0, this.input.length);
   }
 
-  public peek(): LatexToken | null {
-    // TODO
-
-    return null;
-  }
-
   public insert(position: number, value: string): IterableIterator<LatexToken> {
     if (position < 0) {
       position = this.input.length + position;
@@ -80,9 +76,7 @@ export class LatexLexer {
     return this;
   }
 
-  // TODO: Add peek method where this just peeks, reads
-  // then advances the position by the length of the token
-  public nextToken(): LatexToken {
+  public peek(): LatexToken {
     const char = this.input.at(this.position);
     if (!char) {
       return { type: TokenType.EOF, literal: "" };
@@ -90,7 +84,6 @@ export class LatexLexer {
 
     const cachedItem = this.cache.get(this.position);
     if (cachedItem) {
-      this.position += cachedItem.literal.length;
       return cachedItem;
     }
 
@@ -154,29 +147,34 @@ export class LatexLexer {
         token = { type: TokenType.EndOfLine, literal: "\n" };
         break;
       default:
-        return this.readContent();
+        token = this.readContent();
     }
 
     this.cache.add(this.position, token);
-    this.position++;
     return token;
   }
 
-  // TODO: Make this not modify the position
+  public nextToken(): LatexToken {
+    const token = this.peek();
+    this.position += token.literal.length;
+
+    return token;
+  }
+
   private readContent(): LatexToken {
     let content: string = "";
-    const startPosition = this.position;
-    let item = this.input.at(this.position);
+    let position = this.position;
+    let item = this.input.at(position);
 
     while (item && !LatexLexer.#BREAK_CHARACTERS.has(item)) {
       content += item;
 
-      this.position++;
-      item = this.input.at(this.position);
+      position++;
+      item = this.input.at(position);
     }
 
     const token: LatexToken = { type: TokenType.Content, literal: content };
-    this.cache.add(startPosition, token);
+    this.cache.add(position - content.length, token);
 
     return token;
   }

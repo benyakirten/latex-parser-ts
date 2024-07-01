@@ -105,6 +105,16 @@ describe("LatexLexer", () => {
     expect(got).toEqual(want);
   });
 
+  describe("peek", () => {
+    it("should read the next token without advancing the lexer", () => {
+      const got = lexer.peek();
+      expect(got).toEqual({ type: TokenType.BackSlash, literal: "\\" });
+
+      const got2 = lexer.peek();
+      expect(got2).toEqual({ type: TokenType.BackSlash, literal: "\\" });
+    });
+  });
+
   describe("seek", () => {
     it("should correctly set the position based off the seek method", () => {
       lexer.seek(1);
