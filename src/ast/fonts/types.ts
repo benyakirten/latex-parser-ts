@@ -107,6 +107,7 @@ export type LatexFont = {
   weight?: LatexFontWeight;
   width?: LatexFontWidth;
   shape?: LatexFontShape;
+  lineSpread?: number;
 };
 
 // I tried to source these but couldn't find a good singular source.
@@ -132,7 +133,7 @@ export type SelectionCommand =
   | SelectionCommandFontSize
   | SelectionCommandFontLineSpread;
 
-export enum FontSelectionType {
+export enum SelectionCommandType {
   Encoding,
   Family,
   Series,
@@ -142,33 +143,33 @@ export enum FontSelectionType {
 }
 
 type SelectionCommandFontEncoding = {
-  type: FontSelectionType.Encoding;
+  type: SelectionCommandType.Encoding;
   encoding: LatexFontEncoding;
 };
 
 type SelectionCommandFontFamily = {
-  type: FontSelectionType.Family;
+  type: SelectionCommandType.Family;
   family: string;
 };
 
 type SelectionCommandFontSeries = {
-  type: FontSelectionType.Series;
+  type: SelectionCommandType.Series;
   weight: LatexFontWeight;
   width: LatexFontWidth;
 };
 
 type SelectionCommandFontShape = {
-  type: FontSelectionType.Shape;
+  type: SelectionCommandType.Shape;
   shape: LatexFontShape;
 };
 
 type SelectionCommandFontSize = {
-  type: FontSelectionType.Size;
+  type: SelectionCommandType.Size;
   size: LatexFontMeasurement;
   baselineskip: LatexFontMeasurement;
 };
 
 type SelectionCommandFontLineSpread = {
-  type: FontSelectionType.LineSpread;
+  type: SelectionCommandType.LineSpread;
   value: number;
 };

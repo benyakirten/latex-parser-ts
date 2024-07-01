@@ -1,7 +1,7 @@
 import type { LatexLexer } from "../../lexer/lexer";
 import { TokenType } from "../../lexer/types";
 import {
-  FontSelectionType,
+  SelectionCommandType,
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
   LatexFontShape,
@@ -84,19 +84,32 @@ function getAuthorCommandText(authorCommand: string): string {
 }
 
 function parseSelectionCommand(fontCommands: SelectionCommand[]): LatexFont {
-  const parsedCommand: LatexFont = {};
+  const latexFont: LatexFont = {};
   for (const command of fontCommands) {
     switch (command.type) {
-      case FontSelectionType.Encoding:
-      case FontSelectionType.Family:
-      case FontSelectionType.Series:
-      case FontSelectionType.Shape:
-      case FontSelectionType.Size:
-      case FontSelectionType.LineSpread:
+      case SelectionCommandType.Encoding:
+        latexFont.encoding = command.encoding;
+        break;
+      case SelectionCommandType.Family:
+        latexFont.family = command.family;
+        break;
+      case SelectionCommandType.Series:
+        latexFont.weight = command.weight;
+        latexFont.width = command.width;
+        break;
+      case SelectionCommandType.Shape:
+        latexFont.shape = command.shape;
+        break;
+      case SelectionCommandType.Size:
+        latexFont.size = command.size;
+        latexFont.baselineskip = command.baselineskip;
+        break;
+      case SelectionCommandType.LineSpread:
+        latexFont.lineSpread = command.value;
     }
   }
 
-  return parsedCommand;
+  return latexFont;
 }
 
 // TODO: Decide on error shape
@@ -130,7 +143,7 @@ function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommand {
     };
 
     return {
-      type: FontSelectionType.Encoding,
+      type: SelectionCommandType.Encoding,
       encoding: fontEncoding,
     };
   }
@@ -164,7 +177,7 @@ function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommand {
   };
 
   return {
-    type: FontSelectionType.Encoding,
+    type: SelectionCommandType.Encoding,
     encoding: fontEncoding,
   };
 }
