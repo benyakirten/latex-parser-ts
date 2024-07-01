@@ -1,3 +1,4 @@
+import type { LatexLexer } from "../../lexer/lexer";
 import type { LatexToken } from "../../lexer/types";
 import {
   FontSelectionType,
@@ -98,7 +99,14 @@ export function parseSelectionCommand(fontCommands: SelectionCommand[]): LatexFo
   return parsedCommand;
 }
 
-export function parseSelectionCommandSections(tokens: LatexToken[]) {
-  tokens;
-  // TODO
+export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
+  // TODO:
+  // 1. Parse tokens into selection commands
+  // 2. Parse selection commands into a latex font
+
+  while (true) {
+    //
+  }
+
+  return {};
 }

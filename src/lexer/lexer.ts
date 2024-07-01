@@ -76,8 +76,9 @@ export class LatexLexer {
     return this;
   }
 
-  public peek(): LatexToken {
-    const char = this.input.at(this.position);
+  public peek(advance: number = 0): LatexToken {
+    const position = this.position + advance;
+    const char = this.input.at(position);
     if (!char) {
       return { type: TokenType.EOF, literal: "" };
     }
@@ -147,7 +148,7 @@ export class LatexLexer {
         token = { type: TokenType.EndOfLine, literal: "\n" };
         break;
       default:
-        token = this.readContent();
+        token = this.readContent(position);
     }
 
     this.cache.add(this.position, token);
@@ -161,9 +162,8 @@ export class LatexLexer {
     return token;
   }
 
-  private readContent(): LatexToken {
+  private readContent(position: number): LatexToken {
     let content: string = "";
-    let position = this.position;
     let item = this.input.at(position);
 
     while (item && !LatexLexer.#BREAK_CHARACTERS.has(item)) {

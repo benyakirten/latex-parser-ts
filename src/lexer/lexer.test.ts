@@ -113,6 +113,14 @@ describe("LatexLexer", () => {
       const got2 = lexer.peek();
       expect(got2).toEqual({ type: TokenType.BackSlash, literal: "\\" });
     });
+
+    it("should be able to peek multiple characters in advance", () => {
+      const got1 = lexer.peek(1);
+      expect(got1).toEqual({ type: TokenType.Content, literal: "documentclass" });
+
+      const got2 = lexer.peek(14);
+      expect(got2).toEqual({ type: TokenType.LBracket, literal: "[" });
+    });
   });
 
   describe("seek", () => {
