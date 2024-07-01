@@ -12,6 +12,7 @@ import {
   type LatexFontEncodingLocal,
   type SelectionCommand,
 } from "./types";
+import { parseFontEncoding } from "./utils";
 
 export function parseAuthorCommand(authorCommand: string): LatexFont | null {
   const parsedCommand = getAuthorCommandText(authorCommand);
@@ -134,60 +135,26 @@ function getContentWrappedByBraces(lexer: LatexLexer): string {
 
 function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommand {
   const rawCommand = getContentWrappedByBraces(lexer);
-  let encoding: LatexFontEncodingNormalValue;
-
-  if (rawCommand.toLocaleUpperCase().startsWith("L")) {
-    const fontEncoding: LatexFontEncodingLocal = {
-      type: LatexFontEncodingType.Local,
-      encoding: rawCommand,
-    };
-
-    return {
-      type: SelectionCommandType.Encoding,
-      encoding: fontEncoding,
-    };
-  }
-
-  switch (rawCommand.toLocaleUpperCase()) {
-    case "OT1":
-      encoding = LatexFontEncodingNormalValue.KnuthTexText;
-      break;
-    case "T1":
-      encoding = LatexFontEncodingNormalValue.ExtendedText;
-      break;
-    case "OML":
-      encoding = LatexFontEncodingNormalValue.MathItalic;
-      break;
-    case "OMS":
-      encoding = LatexFontEncodingNormalValue.MathSymbols;
-      break;
-    case "OMX":
-      encoding = LatexFontEncodingNormalValue.MathLargeSymbols;
-      break;
-    case "U":
-      encoding = LatexFontEncodingNormalValue.Unknown;
-      break;
-    default:
-      throw new Error(`Unrecognized encoding value: ${rawCommand}`);
-  }
-
-  const fontEncoding = {
-    type: LatexFontEncodingType.Normal,
-    encoding,
-  };
+  const encoding = parseFontEncoding(rawCommand);
 
   return {
     type: SelectionCommandType.Encoding,
-    encoding: fontEncoding,
+    encoding,
   };
 }
 
 function parseFontFamilyCommand(lexer: LatexLexer): SelectionCommand {
-  // TODO
+  const family = getContentWrappedByBraces(lexer);
+  return {
+    type: SelectionCommandType.Family,
+    family,
+  };
 }
 
 function parseFontSeriesCommand(lexer: LatexLexer): SelectionCommand {
-  // TODO
+  const series = getContentWrappedByBraces(lexer);
+  let weight: LatexFontWeight;
+  let width: LatexFontWidth;
 }
 
 function parseFontShapeCommand(lexer: LatexLexer): SelectionCommand {
