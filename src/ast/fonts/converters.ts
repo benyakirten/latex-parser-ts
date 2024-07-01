@@ -12,7 +12,7 @@ import {
   type LatexFontEncodingLocal,
   type SelectionCommand,
 } from "./types";
-import { parseFontEncoding } from "./utils";
+import { parseFontEncoding, parseFontSeries } from "./utils";
 
 export function parseAuthorCommand(authorCommand: string): LatexFont | null {
   const parsedCommand = getAuthorCommandText(authorCommand);
@@ -152,9 +152,13 @@ function parseFontFamilyCommand(lexer: LatexLexer): SelectionCommand {
 }
 
 function parseFontSeriesCommand(lexer: LatexLexer): SelectionCommand {
-  const series = getContentWrappedByBraces(lexer);
-  let weight: LatexFontWeight;
-  let width: LatexFontWidth;
+  const rawSeries = getContentWrappedByBraces(lexer);
+  const { width, weight } = parseFontSeries(rawSeries);
+  return {
+    type: SelectionCommandType.Series,
+    width,
+    weight,
+  };
 }
 
 function parseFontShapeCommand(lexer: LatexLexer): SelectionCommand {
