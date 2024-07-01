@@ -1,12 +1,15 @@
 import type { LatexLexer } from "../../lexer/lexer";
-import type { LatexToken } from "../../lexer/types";
+import { TokenType } from "../../lexer/types";
 import {
   FontSelectionType,
+  LatexFontEncodingNormalValue,
+  LatexFontEncodingType,
   LatexFontShape,
   LatexFontSizeUnit,
   LatexFontWeight,
   LatexFontWidth,
   type LatexFont,
+  type LatexFontEncodingLocal,
   type SelectionCommand,
 } from "./types";
 
@@ -19,14 +22,11 @@ export function parseAuthorCommand(authorCommand: string): LatexFont | null {
     case "md":
       return { shape: LatexFontShape.Normal, width: LatexFontWidth.Medium };
     case "rm":
-      // Want serif font family
-      return null;
+      return { family: "prefers-serif" };
     case "sf":
-      // Want sans-serif font family
-      return null;
+      return { family: "prefers-sans" };
     case "tt":
-      // Want monospace family
-      return null;
+      return { family: "prefers-monospace" };
     case "bf":
       return { weight: LatexFontWeight.Bold, width: LatexFontWidth.Expanded };
     case "it":
@@ -83,7 +83,7 @@ function getAuthorCommandText(authorCommand: string): string {
   return authorCommand;
 }
 
-export function parseSelectionCommand(fontCommands: SelectionCommand[]): LatexFont {
+function parseSelectionCommand(fontCommands: SelectionCommand[]): LatexFont {
   const parsedCommand: LatexFont = {};
   for (const command of fontCommands) {
     switch (command.type) {
@@ -99,14 +99,139 @@ export function parseSelectionCommand(fontCommands: SelectionCommand[]): LatexFo
   return parsedCommand;
 }
 
+// TODO: Decide on error shape
+function getContentWrappedByBraces(lexer: LatexLexer): string {
+  const openBrace = lexer.nextToken();
+  if (openBrace.type !== TokenType.LBrace) {
+    throw new Error("Expected {content}");
+  }
+
+  const encoding = lexer.nextToken();
+  if (encoding.type !== TokenType.Content) {
+    throw new Error("Expected {content}");
+  }
+
+  const closeBrace = lexer.nextToken();
+  if (closeBrace.type !== TokenType.RBrace) {
+    throw new Error("Expected {content}");
+  }
+
+  return encoding.literal;
+}
+
+function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommand {
+  const rawCommand = getContentWrappedByBraces(lexer);
+  let encoding: LatexFontEncodingNormalValue;
+
+  if (rawCommand.toLocaleUpperCase().startsWith("L")) {
+    const fontEncoding: LatexFontEncodingLocal = {
+      type: LatexFontEncodingType.Local,
+      encoding: rawCommand,
+    };
+
+    return {
+      type: FontSelectionType.Encoding,
+      encoding: fontEncoding,
+    };
+  }
+
+  switch (rawCommand.toLocaleUpperCase()) {
+    case "OT1":
+      encoding = LatexFontEncodingNormalValue.KnuthTexText;
+      break;
+    case "T1":
+      encoding = LatexFontEncodingNormalValue.ExtendedText;
+      break;
+    case "OML":
+      encoding = LatexFontEncodingNormalValue.MathItalic;
+      break;
+    case "OMS":
+      encoding = LatexFontEncodingNormalValue.MathSymbols;
+      break;
+    case "OMX":
+      encoding = LatexFontEncodingNormalValue.MathLargeSymbols;
+      break;
+    case "U":
+      encoding = LatexFontEncodingNormalValue.Unknown;
+      break;
+    default:
+      throw new Error(`Unrecognized encoding value: ${rawCommand}`);
+  }
+
+  const fontEncoding = {
+    type: LatexFontEncodingType.Normal,
+    encoding,
+  };
+
+  return {
+    type: FontSelectionType.Encoding,
+    encoding: fontEncoding,
+  };
+}
+
+function parseFontFamilyCommand(lexer: LatexLexer): SelectionCommand {
+  // TODO
+}
+
+function parseFontSeriesCommand(lexer: LatexLexer): SelectionCommand {
+  // TODO
+}
+
+function parseFontShapeCommand(lexer: LatexLexer): SelectionCommand {
+  // TODO
+}
+
+function parseFontSizeCommand(lexer: LatexLexer): SelectionCommand {
+  // TODO
+}
+
+function parseFontLinespreadCommand(lexer: LatexLexer): SelectionCommand {
+  // TODO
+}
+
+function parseSelectionCommandSection(rawCommand: string, lexer: LatexLexer): SelectionCommand {
+  switch (rawCommand.toLowerCase()) {
+    case "fontencoding":
+      return parseFontEncodingCommand(lexer);
+    case "fontfamily":
+      return parseFontFamilyCommand(lexer);
+    case "fontseries":
+      return parseFontSeriesCommand(lexer);
+    case "fontshape":
+      return parseFontShapeCommand(lexer);
+    case "fontsize":
+      return parseFontSizeCommand(lexer);
+    case "linespread":
+      return parseFontLinespreadCommand(lexer);
+    default:
+      throw new Error("Unrecognized command");
+  }
+}
+
 export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
   // TODO:
   // 1. Parse tokens into selection commands
   // 2. Parse selection commands into a latex font
 
+  const selectionCommands: SelectionCommand[] = [];
   while (true) {
-    //
+    let token = lexer.nextToken();
+    if (token.type !== TokenType.BackSlash) {
+      throw new Error("Expected font related command");
+    }
+
+    token = lexer.nextToken();
+    if (token.type !== TokenType.Content) {
+      throw new Error("Expected font related command");
+    }
+
+    if (token.literal.toLocaleLowerCase() === "selectfont") {
+      break;
+    }
+
+    const command = parseSelectionCommandSection(token.literal, lexer);
+    selectionCommands.push(command);
   }
 
-  return {};
+  return parseSelectionCommand(selectionCommands);
 }

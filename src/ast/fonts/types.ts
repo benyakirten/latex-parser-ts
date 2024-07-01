@@ -1,14 +1,30 @@
 // These are to choose fonts
 // Such as condensed and bold will be condensed bold X font
 
-export enum LatexFontEncoding {
+export enum LatexFontEncodingType {
+  Normal,
+  Local,
+}
+
+export type LatexFontEncoding = LatexFontEncodingLocal | LatexFontEncodingNormal;
+
+export type LatexFontEncodingLocal = {
+  type: LatexFontEncodingType.Local;
+  encoding: string;
+};
+
+export type LatexFontEncodingNormal = {
+  type: LatexFontEncodingType.Normal;
+  encoding: LatexFontEncodingNormalValue;
+};
+
+export enum LatexFontEncodingNormalValue {
   KnuthTexText = "ot1",
-  TextExtended = "t1",
+  ExtendedText = "t1",
   MathItalic = "oml",
   MathSymbols = "oms",
   MathLargeSymbols = "omx",
   Unknown = "u",
-  LocalEncoding = "l",
 }
 
 /** corresponds to font-stretch */
@@ -78,9 +94,14 @@ export type LatexFontMeasurement = {
   unit: LatexFontSizeUnit;
 };
 
+export type LatexFontFamilyPreference =
+  | "prefers-serif"
+  | "prefers-sans-serif"
+  | "prefers-monospace";
+
 export type LatexFont = {
   encoding?: LatexFontEncoding;
-  family?: string;
+  family?: LatexFontFamilyPreference | string;
   size?: LatexFontMeasurement;
   baselineskip?: LatexFontMeasurement;
   weight?: LatexFontWeight;
@@ -104,12 +125,12 @@ export const latexFontCorrespondence: Record<string, string> = {
 };
 
 export type SelectionCommand =
-  | FontEncodingSelectionCommand
-  | FontFamilySelectionCommand
-  | FontSeriesSelectionCommand
-  | FontShapeSelectionCommand
-  | FontSizeSelectionCommand
-  | FontLineSpreadSelectionCommand;
+  | SelectionCommandFontEncoding
+  | SelectionCommandFontFamily
+  | SelectionCommandFontSeries
+  | SelectionCommandFontShape
+  | SelectionCommandFontSize
+  | SelectionCommandFontLineSpread;
 
 export enum FontSelectionType {
   Encoding,
@@ -120,34 +141,34 @@ export enum FontSelectionType {
   LineSpread,
 }
 
-type FontEncodingSelectionCommand = {
+type SelectionCommandFontEncoding = {
   type: FontSelectionType.Encoding;
   encoding: LatexFontEncoding;
 };
 
-type FontFamilySelectionCommand = {
+type SelectionCommandFontFamily = {
   type: FontSelectionType.Family;
   family: string;
 };
 
-type FontSeriesSelectionCommand = {
+type SelectionCommandFontSeries = {
   type: FontSelectionType.Series;
   weight: LatexFontWeight;
   width: LatexFontWidth;
 };
 
-type FontShapeSelectionCommand = {
+type SelectionCommandFontShape = {
   type: FontSelectionType.Shape;
   shape: LatexFontShape;
 };
 
-type FontSizeSelectionCommand = {
+type SelectionCommandFontSize = {
   type: FontSelectionType.Size;
   size: LatexFontMeasurement;
   baselineskip: LatexFontMeasurement;
 };
 
-type FontLineSpreadSelectionCommand = {
+type SelectionCommandFontLineSpread = {
   type: FontSelectionType.LineSpread;
   value: number;
 };
