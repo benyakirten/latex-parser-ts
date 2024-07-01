@@ -63,8 +63,7 @@ export function parseFontSeries(rawCommand: string): {
     return series;
   }
 
-  const rawWeight = matches[1];
-  const rawWidth = matches[2];
+  const [_, rawWeight, rawWidth] = matches;
 
   switch (rawWeight) {
     case "ul":
