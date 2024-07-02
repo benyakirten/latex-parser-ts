@@ -73,66 +73,66 @@ export function parseFontSeries(rawCommand: string): LatexFontSeries {
     throw new Error(`Both weight and width are not reecognized: ${rawCommand}`);
   }
 
-  switch (rawWeight.toLocaleLowerCase()) {
-    case "ul":
-      series.weight = LatexFontWeight.UltraLight;
-      break;
-    case "el":
-      series.weight = LatexFontWeight.ExtraLight;
-      break;
-    case "l":
-      series.weight = LatexFontWeight.Light;
-      break;
-    case "sl":
-      series.weight = LatexFontWeight.SemiLight;
-      break;
-    case "sb":
-      series.weight = LatexFontWeight.SemiBold;
-      break;
-    case "b":
-      series.weight = LatexFontWeight.Bold;
-      break;
-    case "eb":
-      series.weight = LatexFontWeight.ExtraBold;
-      break;
-    case "ub":
-      series.weight = LatexFontWeight.UltraBold;
-      break;
-    case undefined:
-      break;
-    default:
-      throw new Error(`Unrecognized weight: ${rawWeight}`);
+  if (rawWeight) {
+    switch (rawWeight.toLocaleLowerCase()) {
+      case "ul":
+        series.weight = LatexFontWeight.UltraLight;
+        break;
+      case "el":
+        series.weight = LatexFontWeight.ExtraLight;
+        break;
+      case "l":
+        series.weight = LatexFontWeight.Light;
+        break;
+      case "sl":
+        series.weight = LatexFontWeight.SemiLight;
+        break;
+      case "sb":
+        series.weight = LatexFontWeight.SemiBold;
+        break;
+      case "b":
+        series.weight = LatexFontWeight.Bold;
+        break;
+      case "eb":
+        series.weight = LatexFontWeight.ExtraBold;
+        break;
+      case "ub":
+        series.weight = LatexFontWeight.UltraBold;
+        break;
+      default:
+        throw new Error(`Unrecognized weight: ${rawWeight}`);
+    }
   }
 
-  switch (rawWidth.toLocaleLowerCase()) {
-    case "uc":
-      series.width = LatexFontWidth.UltraCondensed;
-      break;
-    case "ec":
-      series.width = LatexFontWidth.ExtraCondensed;
-      break;
-    case "c":
-      series.width = LatexFontWidth.Condensed;
-      break;
-    case "sc":
-      series.width = LatexFontWidth.SemiCondensed;
-      break;
-    case "sx":
-      series.width = LatexFontWidth.SemiExpanded;
-      break;
-    case "x":
-      series.width = LatexFontWidth.Expanded;
-      break;
-    case "ex":
-      series.width = LatexFontWidth.ExtraExpanded;
-      break;
-    case "ux":
-      series.width = LatexFontWidth.UltraExpanded;
-      break;
-    case undefined:
-      break;
-    default:
-      throw new Error(`Unrecognized width: ${rawWidth}`);
+  if (rawWidth) {
+    switch (rawWidth.toLocaleLowerCase()) {
+      case "uc":
+        series.width = LatexFontWidth.UltraCondensed;
+        break;
+      case "ec":
+        series.width = LatexFontWidth.ExtraCondensed;
+        break;
+      case "c":
+        series.width = LatexFontWidth.Condensed;
+        break;
+      case "sc":
+        series.width = LatexFontWidth.SemiCondensed;
+        break;
+      case "sx":
+        series.width = LatexFontWidth.SemiExpanded;
+        break;
+      case "x":
+        series.width = LatexFontWidth.Expanded;
+        break;
+      case "ex":
+        series.width = LatexFontWidth.ExtraExpanded;
+        break;
+      case "ux":
+        series.width = LatexFontWidth.UltraExpanded;
+        break;
+      default:
+        throw new Error(`Unrecognized width: ${rawWidth}`);
+    }
   }
 
   return series;

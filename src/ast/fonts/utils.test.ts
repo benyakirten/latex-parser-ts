@@ -4,6 +4,8 @@ import { parseFontEncoding, parseFontSeries, parseFontShape, parseFontMeasuremen
 import {
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
+  LatexFontWeight,
+  LatexFontWidth,
   type LatexFontMeasurement,
   type LatexFontSeries,
   type LatexFontShape,
@@ -34,25 +36,20 @@ describe("parseFontEncoding", () => {
   });
 });
 
-describe.todo("parseFontSeries", () => {
-  test.each<[LatexFontSeries, string]>([])(
-    "should return a series of %o for an input of %s",
-    (want, input) => {
-      const got = parseFontSeries(input);
-      expect(got).toEqual(want);
-    },
-  );
-
-  it("should throw if the width is not recognized", () => {
-    // TODO
-  });
-
-  it("should throw if the weight is not recognized", () => {
-    // TODO
+describe("parseFontSeries", () => {
+  test.each<[LatexFontSeries, string]>([
+    [{ weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium }, "m"],
+    [{ weight: LatexFontWeight.Medium, width: LatexFontWidth.ExtraCondensed }, "ec"],
+    [{ weight: LatexFontWeight.SemiBold, width: LatexFontWidth.UltraExpanded }, "sbux"],
+    [{ weight: LatexFontWeight.UltraLight, width: LatexFontWidth.Medium }, "ul"],
+    [{ weight: LatexFontWeight.Light, width: LatexFontWidth.Condensed }, "lc"],
+  ])("should return a series of %o for an input of %s", (want, input) => {
+    const got = parseFontSeries(input);
+    expect(got).toEqual(want);
   });
 
   it("should throw if neiter the weight nor the width are recognized", () => {
-    // TODO
+    expect(() => parseFontSeries("")).toThrow();
   });
 });
 
