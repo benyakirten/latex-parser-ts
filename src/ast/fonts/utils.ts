@@ -167,7 +167,8 @@ export function parseFontShape(rawCommand: string): LatexFontShape {
  * Three capture groups: (initla digit)(.followingdigits)(unit)
  * If the unit is not present, it is assumed to be pt.
  */
-const FONT_SIZE_RE = /^([0-9]+)(\.[0-9]+)?(pt|mm|cm|in|ex|em|mu|sp)?$/;
+const FONT_SIZE_RE =
+  /^([0-9]+)(\.[0-9]+)?(pt|mm|cm|in|ex|em|mu|sp|vmin|vmax|vh|vw|cc|bp|dd|pc|px)?$/;
 export function parseFontMeasurement(rawMeasurement: string): LatexFontMeasurement {
   const matches = rawMeasurement.match(FONT_SIZE_RE);
   if (!matches || matches.length !== 4) {
