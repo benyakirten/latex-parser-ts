@@ -1,6 +1,6 @@
-import { expect, describe, test } from "bun:test";
+import { expect, describe, test, it } from "bun:test";
 
-import { parseSelectionCommandSections } from "./selection";
+import { parseSelectionCommandSections, parseUseFont } from "./selection";
 import {
   LatexFontWeight,
   LatexFontWidth,
@@ -65,10 +65,52 @@ describe("parseSelectionCommandSections", () => {
     "\\fontencoding{oml}\\fontsize{11}{13ex}",
     "\\fontencoding{none}\\selectfont",
     "\\fontshape{none}\\selectfont",
+    "\\fontfamily{}\\selectfont",
     "\\fontsize{12none}{12}\\selectfont",
     "\\fontsize{none}{12}\\selectfont",
   ])("should throw an error for an input of %s", (input) => {
     const lexer = new LatexLexer(input);
     expect(() => parseSelectionCommandSections(lexer)).toThrow();
+  });
+});
+
+describe("parseUseFont", () => {
+  it("should parse the encoding, family, weight, width and shape of a font", () => {
+    const lexer = new LatexLexer("\\usefont{oml}{ptm}{sluc}{it}");
+    const got = parseUseFont(lexer);
+    expect(got).toEqual({
+      encoding: {
+        type: LatexFontEncodingType.Normal,
+        encoding: LatexFontEncodingNormalValue.MathItalic,
+      },
+      family: "ptm",
+      weight: LatexFontWeight.SemiLight,
+      width: LatexFontWidth.UltraCondensed,
+      shape: LatexFontShape.Italic,
+    });
+  });
+
+  it("should throw if the command is not recognized", () => {
+    const lexer = new LatexLexer("\\fontstuff{oml}{ptm}{sluc}{it}");
+    expect(() => parseUseFont(lexer)).toThrow();
+  });
+
+  it("should throw if less than four arguments are provided", () => {
+    const lexer = new LatexLexer("\\usefont{oml}{ptm}{sluc}");
+    expect(() => parseUseFont(lexer)).toThrow();
+  });
+
+  it("should throw if any of the arguments cannot be parsed", () => {
+    let lexer = new LatexLexer("\\usefont{oml}{ptm}{sluc}{unknown}");
+    expect(() => parseUseFont(lexer)).toThrow();
+
+    lexer = new LatexLexer("\\usefont{oml}{ptm}{}{it}");
+    expect(() => parseUseFont(lexer)).toThrow();
+
+    lexer = new LatexLexer("\\usefont{oml}{}{sluc}{it}");
+    expect(() => parseUseFont(lexer)).toThrow();
+
+    lexer = new LatexLexer("\\usefont{unknown}{ptm}{sluc}{it}");
+    expect(() => parseUseFont(lexer)).toThrow();
   });
 });

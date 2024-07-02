@@ -11,7 +11,13 @@ import {
   type SelectionCommandFontShape,
   type SelectionCommandFontSize,
 } from "../types";
-import { parseFontEncoding, parseFontMeasurement, parseFontSeries, parseFontShape } from "../utils";
+import {
+  parseFontEncoding,
+  parseFontFamily,
+  parseFontMeasurement,
+  parseFontSeries,
+  parseFontShape,
+} from "../utils";
 
 function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFont {
   const latexFont: LatexFont = {};
@@ -74,7 +80,8 @@ function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommandFontEncodi
 }
 
 function parseFontFamilyCommand(lexer: LatexLexer): SelectionCommandFontFamily {
-  const family = getContentWrappedByBraces(lexer);
+  const rawFamily = getContentWrappedByBraces(lexer);
+  const family = parseFontFamily(rawFamily);
   return {
     type: SelectionCommandType.Family,
     family,
@@ -179,8 +186,9 @@ export function parseUseFont(lexer: LatexLexer): LatexFont {
     throw new Error("Expected font related command");
   }
 
-  if (token.literal.toLocaleLowerCase() === "usefont") {
-    throw new Error("Expected usefont command name");
+  const literal = token.literal.toLocaleLowerCase();
+  if (literal !== "usefont") {
+    throw new Error(`Expected usefont command name, received ${literal}`);
   }
 
   const encoding = parseFontEncodingCommand(lexer).encoding;

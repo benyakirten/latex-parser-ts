@@ -1,6 +1,12 @@
 import { expect, describe, test, it } from "bun:test";
 
-import { parseFontEncoding, parseFontSeries, parseFontShape, parseFontMeasurement } from "./utils";
+import {
+  parseFontEncoding,
+  parseFontSeries,
+  parseFontShape,
+  parseFontMeasurement,
+  parseFontFamily,
+} from "./utils";
 import {
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
@@ -106,5 +112,16 @@ describe("parseFontMeasurement;", () => {
 
   it("should throw an error if the unit is not recognized", () => {
     expect(() => parseFontMeasurement("1.2unknown")).toThrow();
+  });
+});
+
+describe("parseFontFamily", () => {
+  it("should throw if the font family is an empty string", () => {
+    expect(() => parseFontFamily("")).toThrow();
+  });
+
+  it("should return the font family if it is not empty", () => {
+    const got = parseFontFamily("ptm");
+    expect(got).toEqual("ptm");
   });
 });

@@ -54,6 +54,13 @@ export function parseFontEncoding(rawCommand: string): LatexFontEncoding {
   return fontEncoding;
 }
 
+export function parseFontFamily(rawCommand: string): string {
+  if (!rawCommand) {
+    throw new Error("Font family is empty");
+  }
+  return rawCommand;
+}
+
 const FONT_SERIES_RE = /^([ues]?[lb])?([ues]?[cx])?$/;
 // TODO: Decide error handling and unknown values.
 export function parseFontSeries(rawCommand: string): LatexFontSeries {
