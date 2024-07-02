@@ -1,6 +1,16 @@
 import type { LatexLexer } from "../../../lexer/lexer";
 import { TokenType } from "../../../lexer/types";
-import { SelectionCommandType, type LatexFont, type SelectionCommand } from "../types";
+import {
+  SelectionCommandType,
+  type LatexFont,
+  type SelectionCommand,
+  type SelectionCommandFontEncoding,
+  type SelectionCommandFontFamily,
+  type SelectionCommandFontLineSpread,
+  type SelectionCommandFontSeries,
+  type SelectionCommandFontShape,
+  type SelectionCommandFontSize,
+} from "../types";
 import { parseFontEncoding, parseFontMeasurement, parseFontSeries, parseFontShape } from "../utils";
 
 function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFont {
@@ -53,7 +63,7 @@ function getContentWrappedByBraces(lexer: LatexLexer): string {
   return encoding.literal;
 }
 
-function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommand {
+function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommandFontEncoding {
   const rawCommand = getContentWrappedByBraces(lexer);
   const encoding = parseFontEncoding(rawCommand);
 
@@ -63,7 +73,7 @@ function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommand {
   };
 }
 
-function parseFontFamilyCommand(lexer: LatexLexer): SelectionCommand {
+function parseFontFamilyCommand(lexer: LatexLexer): SelectionCommandFontFamily {
   const family = getContentWrappedByBraces(lexer);
   return {
     type: SelectionCommandType.Family,
@@ -71,7 +81,7 @@ function parseFontFamilyCommand(lexer: LatexLexer): SelectionCommand {
   };
 }
 
-function parseFontSeriesCommand(lexer: LatexLexer): SelectionCommand {
+function parseFontSeriesCommand(lexer: LatexLexer): SelectionCommandFontSeries {
   const rawSeries = getContentWrappedByBraces(lexer);
   const { width, weight } = parseFontSeries(rawSeries);
   return {
@@ -81,7 +91,7 @@ function parseFontSeriesCommand(lexer: LatexLexer): SelectionCommand {
   };
 }
 
-function parseFontShapeCommand(lexer: LatexLexer): SelectionCommand {
+function parseFontShapeCommand(lexer: LatexLexer): SelectionCommandFontShape {
   const rawShape = getContentWrappedByBraces(lexer);
   const shape = parseFontShape(rawShape);
   return {
@@ -90,7 +100,7 @@ function parseFontShapeCommand(lexer: LatexLexer): SelectionCommand {
   };
 }
 
-function parseFontSizeCommand(lexer: LatexLexer): SelectionCommand {
+function parseFontSizeCommand(lexer: LatexLexer): SelectionCommandFontSize {
   const rawFontSize = getContentWrappedByBraces(lexer);
   const rawBaselineskip = getContentWrappedByBraces(lexer);
 
@@ -104,7 +114,7 @@ function parseFontSizeCommand(lexer: LatexLexer): SelectionCommand {
   };
 }
 
-function parseFontLinespreadCommand(lexer: LatexLexer): SelectionCommand {
+function parseFontLinespreadCommand(lexer: LatexLexer): SelectionCommandFontLineSpread {
   const rawLineSpread = getContentWrappedByBraces(lexer);
   const lineSpread = parseFloat(rawLineSpread);
   return {
@@ -132,6 +142,7 @@ function parseSelectionCommandSection(rawCommand: string, lexer: LatexLexer): Se
   }
 }
 
+/** Expects the lexer to be at the backslash before the command name (e.g.. \fontsize) */
 export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
   const selectionCommands: SelectionCommand[] = [];
   while (true) {
@@ -156,6 +167,26 @@ export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
   return parseSelectionCommands(selectionCommands);
 }
 
+/** Expects the lexer to be at the backslash before the command name (e.g.. \usefont) */
 export function parseUseFont(lexer: LatexLexer): LatexFont {
-  // TODO
+  let token = lexer.nextToken();
+  if (token.type !== TokenType.BackSlash) {
+    throw new Error("Expected font related command");
+  }
+
+  token = lexer.nextToken();
+  if (token.type !== TokenType.Content) {
+    throw new Error("Expected font related command");
+  }
+
+  if (token.literal.toLocaleLowerCase() === "usefont") {
+    throw new Error("Expected usefont command name");
+  }
+
+  const encoding = parseFontEncodingCommand(lexer).encoding;
+  const family = parseFontFamilyCommand(lexer).family;
+  const { weight, width } = parseFontSeriesCommand(lexer);
+  const shape = parseFontShapeCommand(lexer).shape;
+
+  return { encoding, family, weight, width, shape };
 }

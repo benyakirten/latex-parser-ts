@@ -162,34 +162,34 @@ export enum SelectionCommandType {
   LineSpread,
 }
 
-type SelectionCommandFontEncoding = {
+export type SelectionCommandFontEncoding = {
   type: SelectionCommandType.Encoding;
   encoding: LatexFontEncoding;
 };
 
-type SelectionCommandFontFamily = {
+export type SelectionCommandFontFamily = {
   type: SelectionCommandType.Family;
   family: string;
 };
 
-type SelectionCommandFontSeries = {
+export type SelectionCommandFontSeries = {
   type: SelectionCommandType.Series;
   weight: LatexFontWeight;
   width: LatexFontWidth;
 };
 
-type SelectionCommandFontShape = {
+export type SelectionCommandFontShape = {
   type: SelectionCommandType.Shape;
   shape: LatexFontShape;
 };
 
-type SelectionCommandFontSize = {
+export type SelectionCommandFontSize = {
   type: SelectionCommandType.Size;
   size: LatexFontMeasurement;
   baselineSkip: LatexFontMeasurement;
 };
 
-type SelectionCommandFontLineSpread = {
+export type SelectionCommandFontLineSpread = {
   type: SelectionCommandType.LineSpread;
   value: number;
 };
