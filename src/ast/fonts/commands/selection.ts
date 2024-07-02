@@ -40,6 +40,7 @@ function getContentWrappedByBraces(lexer: LatexLexer): string {
   }
 
   const encoding = lexer.nextToken();
+
   if (encoding.type !== TokenType.Content) {
     throw new Error("Expected {content}");
   }
@@ -153,4 +154,8 @@ export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
   }
 
   return parseSelectionCommands(selectionCommands);
+}
+
+export function parseUseFont(lexer: LatexLexer): LatexFont {
+  // TODO
 }

@@ -4,6 +4,7 @@ import {
   LatexFontWidth,
   LatexFontWeight,
   LatexFontSizeUnit,
+  LatexFontFamilyPreference,
 } from "../types";
 
 export function parseAuthorCommand(authorCommand: string): LatexFont | null {
@@ -14,17 +15,17 @@ export function parseAuthorCommand(authorCommand: string): LatexFont | null {
       return {
         shape: LatexFontShape.Normal,
         width: LatexFontWidth.Medium,
-        family: "prefers-serif",
+        family: LatexFontFamilyPreference.PrefersSerif,
       };
     case "textrm":
     case "rmfamily":
-      return { family: "prefers-serif" };
+      return { family: LatexFontFamilyPreference.PrefersSerif };
     case "textsf":
     case "sffamily":
-      return { family: "prefers-sans" };
+      return { family: LatexFontFamilyPreference.PrefersSansSerif };
     case "texttt":
     case "ttfamily":
-      return { family: "prefers-monospace" };
+      return { family: LatexFontFamilyPreference.PrefersMonospace };
     case "textmd":
     case "mdseries":
       return { weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium };

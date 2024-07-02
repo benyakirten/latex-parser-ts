@@ -8,6 +8,7 @@ import {
   type LatexFontEncoding,
   type LatexFontEncodingLocal,
   type LatexFontMeasurement,
+  type LatexFontSeries,
 } from "./types";
 
 export function parseFontEncoding(rawCommand: string): LatexFontEncoding {
@@ -55,11 +56,11 @@ export function parseFontEncoding(rawCommand: string): LatexFontEncoding {
 
 const FONT_SERIES_RE = /^([ues]?[lb])?([ues]?[cx])?$/;
 // TODO: Decide error handling and unknown values.
-export function parseFontSeries(rawCommand: string): {
-  weight: LatexFontWeight;
-  width: LatexFontWidth;
-} {
+export function parseFontSeries(rawCommand: string): LatexFontSeries {
   const series = { weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium };
+  if (rawCommand === "m") {
+    return series;
+  }
 
   const matches = rawCommand.match(FONT_SERIES_RE);
   if (!matches || matches.length !== 3) {
@@ -67,6 +68,10 @@ export function parseFontSeries(rawCommand: string): {
   }
 
   const [_, rawWeight, rawWidth] = matches;
+
+  if (!rawWeight && !rawWidth) {
+    throw new Error(`Both weight and width are not reecognized: ${rawCommand}`);
+  }
 
   switch (rawWeight.toLocaleLowerCase()) {
     case "ul":

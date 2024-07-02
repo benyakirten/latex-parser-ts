@@ -27,6 +27,11 @@ export enum LatexFontEncodingNormalValue {
   Unknown = "u",
 }
 
+export type LatexFontSeries = {
+  weight: LatexFontWeight;
+  width: LatexFontWidth;
+};
+
 /** corresponds to font-stretch */
 export enum LatexFontWidth {
   UltraCondensed = "uc",
@@ -108,10 +113,11 @@ export type LatexFontMeasurement = {
   unit: LatexFontSizeUnit;
 };
 
-export type LatexFontFamilyPreference =
-  | "prefers-serif"
-  | "prefers-sans-serif"
-  | "prefers-monospace";
+export enum LatexFontFamilyPreference {
+  PrefersSerif = "prefers-serif",
+  PrefersSansSerif = "prefers-sans-serif",
+  PrefersMonospace = "prefers-monospace",
+}
 
 export type LatexFont = {
   encoding?: LatexFontEncoding;

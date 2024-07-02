@@ -1,25 +1,39 @@
 import { expect, describe, test } from "bun:test";
 
 import { parseAuthorCommand } from "./author";
-import { LatexFontShape, LatexFontSizeUnit, LatexFontWeight, LatexFontWidth } from "../types";
+import {
+  LatexFontFamilyPreference,
+  LatexFontShape,
+  LatexFontSizeUnit,
+  LatexFontWeight,
+  LatexFontWidth,
+} from "../types";
 
 describe("parseAuthorCommand", () => {
   test.each([
     [null, "unknown"],
     [
-      { shape: LatexFontShape.Normal, width: LatexFontWidth.Medium, family: "prefers-serif" },
+      {
+        shape: LatexFontShape.Normal,
+        width: LatexFontWidth.Medium,
+        family: LatexFontFamilyPreference.PrefersSerif,
+      },
       "textnormal",
     ],
     [
-      { shape: LatexFontShape.Normal, width: LatexFontWidth.Medium, family: "prefers-serif" },
+      {
+        shape: LatexFontShape.Normal,
+        width: LatexFontWidth.Medium,
+        family: LatexFontFamilyPreference.PrefersSerif,
+      },
       "normalfont",
     ],
-    [{ family: "prefers-serif" }, "textrm"],
-    [{ family: "prefers-serif" }, "rmfamily"],
-    [{ family: "prefers-sans" }, "textsf"],
-    [{ family: "prefers-sans" }, "sffamily"],
-    [{ family: "prefers-monospace" }, "texttt"],
-    [{ family: "prefers-monospace" }, "ttfamily"],
+    [{ family: LatexFontFamilyPreference.PrefersSerif }, "textrm"],
+    [{ family: LatexFontFamilyPreference.PrefersSerif }, "rmfamily"],
+    [{ family: LatexFontFamilyPreference.PrefersSansSerif }, "textsf"],
+    [{ family: LatexFontFamilyPreference.PrefersSansSerif }, "sffamily"],
+    [{ family: LatexFontFamilyPreference.PrefersMonospace }, "texttt"],
+    [{ family: LatexFontFamilyPreference.PrefersMonospace }, "ttfamily"],
     [{ weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium }, "textmd"],
     [{ weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium }, "mdseries"],
     [{ weight: LatexFontWeight.Bold, width: LatexFontWidth.Expanded }, "textbf"],
