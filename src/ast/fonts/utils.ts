@@ -1,10 +1,13 @@
 import {
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
+  LatexFontShape,
+  LatexFontSizeUnit,
   LatexFontWeight,
   LatexFontWidth,
   type LatexFontEncoding,
   type LatexFontEncodingLocal,
+  type LatexFontMeasurement,
 } from "./types";
 
 export function parseFontEncoding(rawCommand: string): LatexFontEncoding {
@@ -65,7 +68,7 @@ export function parseFontSeries(rawCommand: string): {
 
   const [_, rawWeight, rawWidth] = matches;
 
-  switch (rawWeight) {
+  switch (rawWeight.toLocaleLowerCase()) {
     case "ul":
       series.weight = LatexFontWeight.UltraLight;
       break;
@@ -96,7 +99,7 @@ export function parseFontSeries(rawCommand: string): {
       throw new Error(`Unrecognized weight: ${rawWeight}`);
   }
 
-  switch (rawWidth) {
+  switch (rawWidth.toLocaleLowerCase()) {
     case "uc":
       series.width = LatexFontWidth.UltraCondensed;
       break;
@@ -128,4 +131,87 @@ export function parseFontSeries(rawCommand: string): {
   }
 
   return series;
+}
+
+export function parseFontShape(rawCommand: string): LatexFontShape {
+  switch (rawCommand.toLocaleLowerCase()) {
+    case "n":
+      return LatexFontShape.Normal;
+    case "it":
+      return LatexFontShape.Italic;
+    case "sl":
+      return LatexFontShape.Slanted;
+    case "sc":
+      return LatexFontShape.CapsAndSmallCaps;
+    case "scit":
+      return LatexFontShape.CapsAndSmallCapsItalics;
+    case "scsl":
+      return LatexFontShape.CapsAndSmallCapsSlanted;
+    case "sw":
+      return LatexFontShape.Swash;
+    case "ssc":
+      return LatexFontShape.SpacedCapsAndSmallCaps;
+    default:
+      throw new Error(`Unrecognized font shape: ${rawCommand}`);
+  }
+}
+
+/**
+ * Three capture groups: (initla digit)(.followingdigits)(unit)
+ * If the unit is not present, it is assumed to be pt.
+ */
+const FONT_SIZE_RE = /^([0-9]+)(\.[0-9]+)?(pt|mm|cm|in|ex|em|mu|sp)?$/;
+export function parseFontMeasurement(rawMeasurement: string): LatexFontMeasurement {
+  const matches = rawMeasurement.match(FONT_SIZE_RE);
+  if (!matches || matches.length !== 4) {
+    throw new Error(`Unrecognized font measurement: ${rawMeasurement}`);
+  }
+
+  const [_, rawValue, rawFloatPoint, rawUnit] = matches;
+  const floatingPoint = rawFloatPoint || ".0";
+  const value = parseFloat(`${rawValue}${floatingPoint}`);
+
+  const unit = parseFontSizeUnit(rawUnit);
+
+  return { value, unit };
+}
+
+function parseFontSizeUnit(rawUnit?: string): LatexFontSizeUnit {
+  switch (rawUnit) {
+    case "in":
+      return LatexFontSizeUnit.Inch;
+    case "mm":
+      return LatexFontSizeUnit.Millimeter;
+    case "cm":
+      return LatexFontSizeUnit.Centimeter;
+    case "pc":
+      return LatexFontSizeUnit.Pica;
+    case "dd":
+      return LatexFontSizeUnit.DidotPoint;
+    case "cc":
+      return LatexFontSizeUnit.Cicero;
+    case "sp":
+      return LatexFontSizeUnit.ScaledPoint;
+    case "bp":
+      return LatexFontSizeUnit.BigPoint;
+    case "em":
+      return LatexFontSizeUnit.Em;
+    case "ex":
+      return LatexFontSizeUnit.Ex;
+    case "mu":
+      return LatexFontSizeUnit.Mu;
+    case "px":
+      return LatexFontSizeUnit.Pixel;
+    case "vh":
+      return LatexFontSizeUnit.ViewportHeight;
+    case "vw":
+      return LatexFontSizeUnit.ViewportWidth;
+    case "vmin":
+      return LatexFontSizeUnit.ViewportMin;
+    case "vmax":
+      return LatexFontSizeUnit.ViewportMax;
+    case "pt":
+    default:
+      return LatexFontSizeUnit.Point;
+  }
 }

@@ -87,6 +87,20 @@ export enum LatexFontSizeUnit {
   Point = "pt",
   Inch = "in",
   Millimeter = "mm",
+  Centimeter = "cm",
+  Pica = "pc",
+  DidotPoint = "dd",
+  Cicero = "cc",
+  ScaledPoint = "sp",
+  BigPoint = "bp",
+  Em = "em",
+  Ex = "ex",
+  Mu = "mu", // 1/18 em
+  Pixel = "px",
+  ViewportHeight = "vh",
+  ViewportWidth = "vw",
+  ViewportMin = "vmin",
+  ViewportMax = "vmax",
 }
 
 export type LatexFontMeasurement = {
