@@ -4,11 +4,11 @@ import { parseFontEncoding, parseFontSeries, parseFontShape, parseFontMeasuremen
 import {
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
+  LatexFontShape,
   LatexFontWeight,
   LatexFontWidth,
   type LatexFontMeasurement,
   type LatexFontSeries,
-  type LatexFontShape,
 } from "./types";
 
 describe("parseFontEncoding", () => {
@@ -53,17 +53,24 @@ describe("parseFontSeries", () => {
   });
 });
 
-describe.todo("parseFontShape", () => {
-  test.each<[LatexFontShape, string]>([])(
-    "should return a shape of %o for an input of %s",
-    (want, input) => {
-      const got = parseFontShape(input);
-      expect(got).toEqual(want);
-    },
-  );
+describe("parseFontShape", () => {
+  test.each<[LatexFontShape, string]>([
+    [LatexFontShape.CapsAndSmallCaps, "sc"],
+    [LatexFontShape.CapsAndSmallCapsItalics, "scit"],
+    [LatexFontShape.CapsAndSmallCapsOblique, "scsl"],
+    [LatexFontShape.Italic, "it"],
+    [LatexFontShape.Normal, "n"],
+    [LatexFontShape.Oblique, "sl"],
+    [LatexFontShape.SpacedCapsAndSmallCaps, "ssc"],
+    [LatexFontShape.Swash, "sw"],
+    [LatexFontShape.UprightItalic, "ui"],
+  ])("should return a shape of %o for an input of %s", (want, input) => {
+    const got = parseFontShape(input);
+    expect(got).toEqual(want);
+  });
 
   it("should throw an error if the shape is not recognized", () => {
-    // TODO
+    expect(() => parseFontShape("unknown")).toThrow();
   });
 });
 

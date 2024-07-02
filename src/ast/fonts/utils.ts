@@ -156,6 +156,8 @@ export function parseFontShape(rawCommand: string): LatexFontShape {
       return LatexFontShape.Swash;
     case "ssc":
       return LatexFontShape.SpacedCapsAndSmallCaps;
+    case "ui":
+      return LatexFontShape.UprightItalic;
     default:
       throw new Error(`Unrecognized font shape: ${rawCommand}`);
   }
