@@ -1,7 +1,7 @@
-import type { LatexLexer } from "../../lexer/lexer";
-import { TokenType } from "../../lexer/types";
-import { SelectionCommandType, type LatexFont, type SelectionCommand } from "./types";
-import { parseFontEncoding, parseFontMeasurement, parseFontSeries, parseFontShape } from "./utils";
+import type { LatexLexer } from "../../../lexer/lexer";
+import { TokenType } from "../../../lexer/types";
+import { SelectionCommandType, type LatexFont, type SelectionCommand } from "../types";
+import { parseFontEncoding, parseFontMeasurement, parseFontSeries, parseFontShape } from "../utils";
 
 function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFont {
   const latexFont: LatexFont = {};
