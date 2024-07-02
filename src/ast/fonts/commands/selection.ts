@@ -22,7 +22,7 @@ function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFon
         break;
       case SelectionCommandType.Size:
         latexFont.size = command.size;
-        latexFont.baselineskip = command.baselineskip;
+        latexFont.baselineSkip = command.baselineSkip;
         break;
       case SelectionCommandType.LineSpread:
         latexFont.lineSpread = command.value;
@@ -94,12 +94,12 @@ function parseFontSizeCommand(lexer: LatexLexer): SelectionCommand {
   const rawBaselineskip = getContentWrappedByBraces(lexer);
 
   const fontSize = parseFontMeasurement(rawFontSize);
-  const baselineskip = parseFontMeasurement(rawBaselineskip);
+  const baselineSkip = parseFontMeasurement(rawBaselineskip);
 
   return {
     type: SelectionCommandType.Size,
     size: fontSize,
-    baselineskip,
+    baselineSkip,
   };
 }
 

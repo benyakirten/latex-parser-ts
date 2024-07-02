@@ -140,13 +140,13 @@ export function parseFontShape(rawCommand: string): LatexFontShape {
     case "it":
       return LatexFontShape.Italic;
     case "sl":
-      return LatexFontShape.Slanted;
+      return LatexFontShape.Oblique;
     case "sc":
       return LatexFontShape.CapsAndSmallCaps;
     case "scit":
       return LatexFontShape.CapsAndSmallCapsItalics;
     case "scsl":
-      return LatexFontShape.CapsAndSmallCapsSlanted;
+      return LatexFontShape.CapsAndSmallCapsOblique;
     case "sw":
       return LatexFontShape.Swash;
     case "ssc":

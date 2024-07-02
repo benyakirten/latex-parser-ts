@@ -7,35 +7,50 @@ import {
 } from "../types";
 
 export function parseAuthorCommand(authorCommand: string): LatexFont | null {
-  const parsedCommand = getAuthorCommandText(authorCommand);
-
   // Source: https://www.latex-project.org/help/documentation/fntguide.pdf
-  switch (parsedCommand) {
-    case "normal":
-    case "md":
-      return { shape: LatexFontShape.Normal, width: LatexFontWidth.Medium };
-    case "rm":
+  switch (authorCommand) {
+    case "normalfont":
+    case "textnormal":
+      return {
+        shape: LatexFontShape.Normal,
+        width: LatexFontWidth.Medium,
+        family: "prefers-serif",
+      };
+    case "textrm":
+    case "rmfamily":
       return { family: "prefers-serif" };
-    case "sf":
+    case "textsf":
+    case "sffamily":
       return { family: "prefers-sans" };
-    case "tt":
+    case "texttt":
+    case "ttfamily":
       return { family: "prefers-monospace" };
-    case "bf":
+    case "textmd":
+    case "mdseries":
+      return { weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium };
+    case "bfseries":
+    case "textbf":
       return { weight: LatexFontWeight.Bold, width: LatexFontWidth.Expanded };
-    case "it":
+    case "textit":
+    case "itshape":
       return { shape: LatexFontShape.Italic };
-    case "sl":
-      return { shape: LatexFontShape.Slanted };
-    case "sc":
+    case "textsl":
+    case "slshape":
+      return { shape: LatexFontShape.Oblique };
+    case "textsc":
+    case "scshape":
       return { shape: LatexFontShape.CapsAndSmallCaps };
-    case "ssc":
+    case "textssc":
+    case "sscshape":
       return { shape: LatexFontShape.SpacedCapsAndSmallCaps };
-    case "sw":
+    case "textsw":
+    case "swshape":
       return { shape: LatexFontShape.Swash };
-    case "ulc":
-    case "up":
-      // TODO: Figure out what these mean
-      console.error("ULC and UP author commands not supported");
+    case "textulc":
+    case "ulcshape":
+    case "textup":
+    case "upshape":
+      // ULC and UP shape author commands not supported since I do not know what they mean.
       return null;
     case "tiny":
       return { size: { value: 5, unit: LatexFontSizeUnit.Point } };
@@ -58,20 +73,4 @@ export function parseAuthorCommand(authorCommand: string): LatexFont | null {
     default:
       return null;
   }
-}
-
-function getAuthorCommandText(authorCommand: string): string {
-  if (authorCommand.startsWith("text")) {
-    const got = authorCommand.split("text");
-    return got[1];
-  }
-
-  for (const command of ["family", "series", "shape"]) {
-    if (authorCommand.endsWith(command)) {
-      const got = authorCommand.split(command);
-      return got[1];
-    }
-  }
-
-  return authorCommand;
 }

@@ -75,10 +75,10 @@ export enum LatexFontShape {
   Normal = "n",
   Italic = "it",
   UprightItalic = "ui",
-  Slanted = "sl", // AKA Oblique
+  Oblique = "sl", // AKA Slanted - Oblique is used since it's the CSS property name.
   CapsAndSmallCaps = "sc",
   CapsAndSmallCapsItalics = "scit",
-  CapsAndSmallCapsSlanted = "scsl",
+  CapsAndSmallCapsOblique = "scsl",
   Swash = "sw",
   SpacedCapsAndSmallCaps = "ssc",
 }
@@ -117,7 +117,7 @@ export type LatexFont = {
   encoding?: LatexFontEncoding;
   family?: LatexFontFamilyPreference | string;
   size?: LatexFontMeasurement;
-  baselineskip?: LatexFontMeasurement;
+  baselineSkip?: LatexFontMeasurement;
   weight?: LatexFontWeight;
   width?: LatexFontWidth;
   shape?: LatexFontShape;
@@ -180,7 +180,7 @@ type SelectionCommandFontShape = {
 type SelectionCommandFontSize = {
   type: SelectionCommandType.Size;
   size: LatexFontMeasurement;
-  baselineskip: LatexFontMeasurement;
+  baselineSkip: LatexFontMeasurement;
 };
 
 type SelectionCommandFontLineSpread = {
