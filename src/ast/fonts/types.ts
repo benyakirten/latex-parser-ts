@@ -114,9 +114,9 @@ export type LatexFontMeasurement = {
 };
 
 export enum LatexFontFamilyPreference {
-  PrefersSerif = "prefers-serif",
-  PrefersSansSerif = "prefers-sans-serif",
-  PrefersMonospace = "prefers-monospace",
+  PrefersSerif = "@@prefers-serif",
+  PrefersSansSerif = "@@prefers-sans-serif",
+  PrefersMonospace = "@@prefers-monospace",
 }
 
 export type LatexFont = {
