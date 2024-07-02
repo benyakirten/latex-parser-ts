@@ -5,6 +5,8 @@ import { type LatexToken, type LexerCache, TokenType } from "./types";
  * A lexer that will read a latex file and return a series of tokens.
  * It acts similar to a cursor in Rust where it will keep track of the
  * current position. It has peek and seek methods to change the current position.
+ *
+ * If no cache is provided, it defaults to no caching.
  */
 export class LatexLexer {
   static #BREAK_CHARACTERS = new Set([

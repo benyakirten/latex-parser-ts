@@ -113,7 +113,7 @@ function parseFontLinespreadCommand(lexer: LatexLexer): SelectionCommand {
 }
 
 function parseSelectionCommandSection(rawCommand: string, lexer: LatexLexer): SelectionCommand {
-  switch (rawCommand.toLowerCase()) {
+  switch (rawCommand.toLocaleLowerCase()) {
     case "fontencoding":
       return parseFontEncodingCommand(lexer);
     case "fontfamily":
@@ -132,10 +132,6 @@ function parseSelectionCommandSection(rawCommand: string, lexer: LatexLexer): Se
 }
 
 export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
-  // TODO:
-  // 1. Parse tokens into selection commands
-  // 2. Parse selection commands into a latex font
-
   const selectionCommands: SelectionCommand[] = [];
   while (true) {
     let token = lexer.nextToken();
