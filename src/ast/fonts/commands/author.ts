@@ -4,7 +4,7 @@ import {
   LatexFontWidth,
   LatexFontWeight,
   LatexFontSizeUnit,
-} from "./types";
+} from "../types";
 
 export function parseAuthorCommand(authorCommand: string): LatexFont | null {
   const parsedCommand = getAuthorCommandText(authorCommand);
