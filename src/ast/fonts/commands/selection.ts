@@ -1,5 +1,5 @@
 import type { LatexLexer } from "../../../lexer/lexer";
-import { TokenType } from "../../../lexer/types";
+import { LatexTokenType } from "../../../lexer/types";
 import {
   SelectionCommandType,
   type LatexFont,
@@ -51,18 +51,18 @@ function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFon
 // TODO: Decide on error shape
 function getContentWrappedByBraces(lexer: LatexLexer): string {
   const openBrace = lexer.nextToken();
-  if (openBrace.type !== TokenType.LBrace) {
+  if (openBrace.type !== LatexTokenType.LBrace) {
     throw new Error("Expected {content}");
   }
 
   const encoding = lexer.nextToken();
 
-  if (encoding.type !== TokenType.Content) {
+  if (encoding.type !== LatexTokenType.Content) {
     throw new Error("Expected {content}");
   }
 
   const closeBrace = lexer.nextToken();
-  if (closeBrace.type !== TokenType.RBrace) {
+  if (closeBrace.type !== LatexTokenType.RBrace) {
     throw new Error("Expected {content}");
   }
 
@@ -154,12 +154,12 @@ export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
   const selectionCommands: SelectionCommand[] = [];
   while (true) {
     let token = lexer.nextToken();
-    if (token.type !== TokenType.BackSlash) {
+    if (token.type !== LatexTokenType.BackSlash) {
       throw new Error("Expected font related command");
     }
 
     token = lexer.nextToken();
-    if (token.type !== TokenType.Content) {
+    if (token.type !== LatexTokenType.Content) {
       throw new Error("Expected font related command");
     }
 
@@ -177,12 +177,12 @@ export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
 /** Expects the lexer to be at the backslash before the command name (e.g.. \usefont) */
 export function parseUseFont(lexer: LatexLexer): LatexFont {
   let token = lexer.nextToken();
-  if (token.type !== TokenType.BackSlash) {
+  if (token.type !== LatexTokenType.BackSlash) {
     throw new Error("Expected font related command");
   }
 
   token = lexer.nextToken();
-  if (token.type !== TokenType.Content) {
+  if (token.type !== LatexTokenType.Content) {
     throw new Error("Expected font related command");
   }
 

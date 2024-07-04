@@ -1,17 +1,17 @@
 import { it, expect, describe, beforeEach } from "bun:test";
 
 import { NoCache, SimpleCache } from "./cache";
-import { TokenType, type LexerCache, type LatexToken } from "./types";
+import { LatexTokenType, type LexerCache, type LatexToken } from "./types";
 
 describe("NoCache", () => {
   it("should not store any data in the cache", () => {
     const cache: LexerCache = new NoCache();
-    cache.add(0, { type: TokenType.Hash, literal: "#" });
+    cache.add(0, { type: LatexTokenType.Hash, literal: "#" });
 
     let got = cache.get(0);
     expect(got).toBeNull();
 
-    cache.add(8, { type: TokenType.Space, literal: " " });
+    cache.add(8, { type: LatexTokenType.Space, literal: " " });
     cache.remove(0, 8);
     got = cache.get(0);
     expect(got).toBeNull();
@@ -26,28 +26,28 @@ describe("SimpleCache", () => {
   });
 
   const tokens: LatexToken[] = [
-    { type: TokenType.Hash, literal: "#" },
-    { type: TokenType.Space, literal: " " },
-    { type: TokenType.Content, literal: "content1" },
-    { type: TokenType.Ampersand, literal: "&" },
-    { type: TokenType.Content, literal: "content2" },
-    { type: TokenType.Caret, literal: "^" },
-    { type: TokenType.Dollar, literal: "$" },
+    { type: LatexTokenType.Hash, literal: "#" },
+    { type: LatexTokenType.Space, literal: " " },
+    { type: LatexTokenType.Content, literal: "content1" },
+    { type: LatexTokenType.Ampersand, literal: "&" },
+    { type: LatexTokenType.Content, literal: "content2" },
+    { type: LatexTokenType.Caret, literal: "^" },
+    { type: LatexTokenType.Dollar, literal: "$" },
   ];
 
   describe("get and set", () => {
     it("should store and retrieve data in the cache", () => {
-      const token: LatexToken = { type: TokenType.Hash, literal: "#" };
+      const token: LatexToken = { type: LatexTokenType.Hash, literal: "#" };
       cache.add(0, token);
       const got = cache.get(0);
       expect(got).toEqual(token);
     });
 
     it("should overwrite the value at that position if it already exists", () => {
-      const token1: LatexToken = { type: TokenType.Hash, literal: "#" };
+      const token1: LatexToken = { type: LatexTokenType.Hash, literal: "#" };
       cache.add(0, token1);
 
-      const token2: LatexToken = { type: TokenType.Ampersand, literal: "&" };
+      const token2: LatexToken = { type: LatexTokenType.Ampersand, literal: "&" };
       cache.add(0, token2);
 
       const got = cache.get(0);

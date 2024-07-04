@@ -1,146 +1,145 @@
 export type LatexToken =
-  | BackslashToken
-  | LParenToken
-  | RParenToken
-  | LBraceToken
-  | RBraceToken
-  | LBracketToken
-  | RBracketToken
-  | PercentToken
-  | DollarToken
-  | AmpersandToken
-  | HashToken
-  | UnderscoreToken
-  | CaretToken
-  | TildeToken
-  | ForwardSlashToken
+  | CommandToken
+  | MathToken
+  | BlockToken
+  | AccentToken
+  | CommentToken
+  | ColumnAlignToken
+  | PlaceholderToken
+  | SuperscriptToken
+  | SubscriptToken
   | ContentToken
-  | TabToken
-  | SpaceToken
-  | EndOfLineToken
-  | EOFToken;
+  | EndOfLineToken;
 
-type BackslashToken = {
-  type: TokenType.BackSlash;
-  literal: "\\";
+export type AccentToken = {
+  type: LatexTokenType.Accent;
+  literal: "\\^" | "\\~";
+  accent: LatexAccentType;
 };
 
-type LParenToken = {
-  type: TokenType.LParen;
-  literal: "(";
+export type RequiredArgument = {
+  type: LatexCommandArgumentType.Required;
+  content: LatexArgument;
 };
 
-type RParenToken = {
-  type: TokenType.RParen;
-  literal: ")";
+export type OptionalArgument = {
+  type: LatexCommandArgumentType.Optional;
+  content: LatexArgument | LabeledArgContent[];
 };
 
-type LBraceToken = {
-  type: TokenType.LBrace;
-  literal: "{";
+export type LatexArguments = (RequiredArgument | OptionalArgument)[];
+export type CommandToken = {
+  type: LatexTokenType.Command;
+  literal: `\\${string}`;
+  arguments: LatexArguments;
 };
 
-type RBraceToken = {
-  type: TokenType.RBrace;
-  literal: "}";
+export enum MathPosition {
+  Inline,
+  Block,
+  Centered,
+}
+
+type MathStartCharacter = "$" | "\\(" | "\\[";
+type MathEndCharacter = "$" | "\\)" | "\\]";
+export type MathToken = {
+  type: LatexTokenType.Math;
+  literal: `${MathStartCharacter}${string}${MathEndCharacter}`;
+  content: LatexToken[];
+  position: MathPosition;
 };
 
-type LBracketToken = {
-  type: TokenType.LBracket;
-  literal: "[";
+export type BlockToken = {
+  type: LatexTokenType.Block;
+  literal: `{${string}}`;
+  content: LatexToken[];
 };
 
-type RBracketToken = {
-  type: TokenType.RBracket;
-  literal: "]";
+export type LatexArgument = ContentToken | CommandToken;
+export type LabeledArgContent = { key: string; value: LatexArgument };
+
+export type CommentToken = {
+  type: LatexTokenType.Comment;
+  literal: `%${string}`;
 };
 
-type PercentToken = {
-  type: TokenType.Percent;
-  literal: "%";
-};
-
-type DollarToken = {
-  type: TokenType.Dollar;
-  literal: "$";
-};
-
-type AmpersandToken = {
-  type: TokenType.Ampersand;
+export type ColumnAlignToken = {
+  type: LatexTokenType.ColumnAlign;
   literal: "&";
 };
 
-type HashToken = {
-  type: TokenType.Hash;
-  literal: "#";
+export type PlaceholderToken = {
+  type: LatexTokenType.Placeholder;
+  literal: `#${string}`;
+  content: number;
 };
 
-type UnderscoreToken = {
-  type: TokenType.Underscore;
-  literal: "_";
-};
-
-type CaretToken = {
-  type: TokenType.Caret;
+export type SuperscriptToken = {
+  type: LatexTokenType.Superscript;
   literal: "^";
 };
 
-type TildeToken = {
-  type: TokenType.Tilde;
-  literal: "~";
+export type SubscriptToken = {
+  type: LatexTokenType.Subscript;
+  literal: "_";
 };
 
-type ForwardSlashToken = {
-  type: TokenType.ForwardSlash;
-  literal: "/";
-};
-
-type EndOfLineToken = {
-  type: TokenType.EndOfLine;
+export type EndOfLineToken = {
+  type: LatexTokenType.EndOfLine;
   literal: "\n";
+  continueText: boolean;
 };
 
-type ContentToken = {
-  type: TokenType.Content;
+export type ContentToken = {
+  type: LatexTokenType.Content;
   literal: string;
+  originalLength: number;
 };
 
-type SpaceToken = {
-  type: TokenType.Space;
-  literal: " ";
-};
+export enum LatexCommandArgumentType {
+  Optional,
+  Required,
+}
 
-type TabToken = {
-  type: TokenType.Tab;
-  literal: "\t";
-};
-
-type EOFToken = {
-  type: TokenType.EOF;
-  literal: "";
-};
-
-export enum TokenType {
-  BackSlash,
-  LParen,
-  RParen,
-  LBrace,
-  RBrace,
-  LBracket,
-  RBracket,
-  Percent,
-  Dollar,
-  Ampersand,
-  Hash,
-  Underscore,
-  Caret,
-  Tilde,
-  ForwardSlash,
-  EndOfLine,
-  Content,
+export enum LatexTokenType {
+  Command,
+  Math,
+  Block,
+  ColumnAlign,
+  Comment,
+  Superscript,
+  Subscript,
+  Placeholder,
+  NonBreakingSpace,
   Space,
   Tab,
-  EOF,
+  Content,
+  EndOfLine,
+  Accent,
+}
+
+export enum LatexCharType {
+  Backslash = "\\",
+  OpenBracket = "[",
+  CloseBracket = "]",
+  OpenParen = "(",
+  CloseParen = ")",
+  OpenBrace = "{",
+  CloseBrace = "}",
+  Percent = "%",
+  Dollar = "$",
+  Ampersand = "&",
+  Hash = "#",
+  Underscore = "_",
+  Caret = "^",
+  Newline = "\n",
+  Space = " ",
+  Tilde = "~",
+}
+
+export enum LatexAccentType {
+  Circumflex = "\\^",
+  Tilde = "\\~",
 }
 
 export interface LexerCache {

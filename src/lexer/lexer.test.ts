@@ -1,7 +1,7 @@
 import { it, expect, describe, beforeEach, jest } from "bun:test";
 
 import { LatexLexer } from "./lexer";
-import { TokenType, type LexerCache, type LatexToken } from "./types";
+import { LatexTokenType, type LexerCache, type LatexToken } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
 \\( E = mc^2 \\). And here is a displayed equation:
@@ -23,82 +23,82 @@ describe("LatexLexer", () => {
     const lexer = new LatexLexer(FULL_LATEX_DOC);
 
     const want: LatexToken[] = [
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.Content, literal: "documentclass" },
-      { type: TokenType.LBracket, literal: "[" },
-      { type: TokenType.Content, literal: "12pt" },
-      { type: TokenType.RBracket, literal: "]" },
-      { type: TokenType.LBrace, literal: "{" },
-      { type: TokenType.Content, literal: "article" },
-      { type: TokenType.RBrace, literal: "}" },
-      { type: TokenType.EndOfLine, literal: "\n" },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.LParen, literal: "(" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "E" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "=" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "mc" },
-      { type: TokenType.Caret, literal: "^" },
-      { type: TokenType.Content, literal: "2" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.RParen, literal: ")" },
-      { type: TokenType.Content, literal: "." },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "And" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "here" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "is" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "a" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "displayed" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "equation:" },
-      { type: TokenType.EndOfLine, literal: "\n" },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.LBracket, literal: "[" },
-      { type: TokenType.EndOfLine, literal: "\n" },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.Content, literal: "int" },
-      { type: TokenType.Underscore, literal: "_" },
-      { type: TokenType.Content, literal: "a" },
-      { type: TokenType.Caret, literal: "^" },
-      { type: TokenType.Content, literal: "b" },
-      { type: TokenType.Space, literal: " " },
-      { type: TokenType.Content, literal: "f" },
-      { type: TokenType.LParen, literal: "(" },
-      { type: TokenType.Content, literal: "x" },
-      { type: TokenType.RParen, literal: ")" },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.Content, literal: ",dx" },
-      { type: TokenType.EndOfLine, literal: "\n" },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.RBracket, literal: "]" },
-      { type: TokenType.EndOfLine, literal: "\n" },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.Tab, literal: "\t" },
-      { type: TokenType.Content, literal: "begin" },
-      { type: TokenType.LBrace, literal: "{" },
-      { type: TokenType.Content, literal: "figure:sample" },
-      { type: TokenType.RBrace, literal: "}" },
-      { type: TokenType.LBracket, literal: "[" },
-      { type: TokenType.Content, literal: "h" },
-      { type: TokenType.RBracket, literal: "]" },
-      { type: TokenType.EndOfLine, literal: "\n" },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.Content, literal: "includegraphics" },
-      { type: TokenType.LBracket, literal: "[" },
-      { type: TokenType.Content, literal: "width=0.5" },
-      { type: TokenType.BackSlash, literal: "\\" },
-      { type: TokenType.Content, literal: "textwidth" },
-      { type: TokenType.RBracket, literal: "]" },
-      { type: TokenType.LBrace, literal: "{" },
-      { type: TokenType.Content, literal: "example.jpg" },
-      { type: TokenType.RBrace, literal: "}" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.Content, literal: "documentclass" },
+      { type: LatexTokenType.LBracket, literal: "[" },
+      { type: LatexTokenType.Content, literal: "12pt" },
+      { type: LatexTokenType.RBracket, literal: "]" },
+      { type: LatexTokenType.LBrace, literal: "{" },
+      { type: LatexTokenType.Content, literal: "article" },
+      { type: LatexTokenType.RBrace, literal: "}" },
+      { type: LatexTokenType.EndOfLine, literal: "\n" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.LParen, literal: "(" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "E" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "=" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "mc" },
+      { type: LatexTokenType.Caret, literal: "^" },
+      { type: LatexTokenType.Content, literal: "2" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.RParen, literal: ")" },
+      { type: LatexTokenType.Content, literal: "." },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "And" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "here" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "is" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "a" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "displayed" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "equation:" },
+      { type: LatexTokenType.EndOfLine, literal: "\n" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.LBracket, literal: "[" },
+      { type: LatexTokenType.EndOfLine, literal: "\n" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.Content, literal: "int" },
+      { type: LatexTokenType.Underscore, literal: "_" },
+      { type: LatexTokenType.Content, literal: "a" },
+      { type: LatexTokenType.Caret, literal: "^" },
+      { type: LatexTokenType.Content, literal: "b" },
+      { type: LatexTokenType.Space, literal: " " },
+      { type: LatexTokenType.Content, literal: "f" },
+      { type: LatexTokenType.LParen, literal: "(" },
+      { type: LatexTokenType.Content, literal: "x" },
+      { type: LatexTokenType.RParen, literal: ")" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.Content, literal: ",dx" },
+      { type: LatexTokenType.EndOfLine, literal: "\n" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.RBracket, literal: "]" },
+      { type: LatexTokenType.EndOfLine, literal: "\n" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.Tab, literal: "\t" },
+      { type: LatexTokenType.Content, literal: "begin" },
+      { type: LatexTokenType.LBrace, literal: "{" },
+      { type: LatexTokenType.Content, literal: "figure:sample" },
+      { type: LatexTokenType.RBrace, literal: "}" },
+      { type: LatexTokenType.LBracket, literal: "[" },
+      { type: LatexTokenType.Content, literal: "h" },
+      { type: LatexTokenType.RBracket, literal: "]" },
+      { type: LatexTokenType.EndOfLine, literal: "\n" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.Content, literal: "includegraphics" },
+      { type: LatexTokenType.LBracket, literal: "[" },
+      { type: LatexTokenType.Content, literal: "width=0.5" },
+      { type: LatexTokenType.BackSlash, literal: "\\" },
+      { type: LatexTokenType.Content, literal: "textwidth" },
+      { type: LatexTokenType.RBracket, literal: "]" },
+      { type: LatexTokenType.LBrace, literal: "{" },
+      { type: LatexTokenType.Content, literal: "example.jpg" },
+      { type: LatexTokenType.RBrace, literal: "}" },
     ];
     const got = [...lexer];
 
@@ -108,18 +108,18 @@ describe("LatexLexer", () => {
   describe("peek", () => {
     it("should read the next token without advancing the lexer", () => {
       const got = lexer.peek();
-      expect(got).toEqual({ type: TokenType.BackSlash, literal: "\\" });
+      expect(got).toEqual({ type: LatexTokenType.BackSlash, literal: "\\" });
 
       const got2 = lexer.peek();
-      expect(got2).toEqual({ type: TokenType.BackSlash, literal: "\\" });
+      expect(got2).toEqual({ type: LatexTokenType.BackSlash, literal: "\\" });
     });
 
     it("should be able to peek multiple characters in advance", () => {
       const got1 = lexer.peek(1);
-      expect(got1).toEqual({ type: TokenType.Content, literal: "documentclass" });
+      expect(got1).toEqual({ type: LatexTokenType.Content, literal: "documentclass" });
 
       const got2 = lexer.peek(14);
-      expect(got2).toEqual({ type: TokenType.LBracket, literal: "[" });
+      expect(got2).toEqual({ type: LatexTokenType.LBracket, literal: "[" });
     });
   });
 
@@ -127,37 +127,37 @@ describe("LatexLexer", () => {
     it("should correctly set the position based off the seek method", () => {
       lexer.seek(1);
       let got = lexer.nextToken();
-      expect(got).toEqual({ type: TokenType.Content, literal: "documentclass" });
+      expect(got).toEqual({ type: LatexTokenType.Content, literal: "documentclass" });
 
       lexer.seek(0);
       got = lexer.nextToken();
-      expect(got).toEqual({ type: TokenType.BackSlash, literal: "\\" });
+      expect(got).toEqual({ type: LatexTokenType.BackSlash, literal: "\\" });
 
       lexer.seek(30);
       got = lexer.nextToken();
-      expect(got).toEqual({ type: TokenType.EOF, literal: "" });
+      expect(got).toEqual({ type: LatexTokenType.EOF, literal: "" });
     });
 
     it("if the seek value is less than 0 then it should set the position to the end minus the distance parameter", () => {
       lexer.seek(-8);
       let got = lexer.nextToken();
-      expect(got).toEqual({ type: TokenType.Content, literal: "article" });
+      expect(got).toEqual({ type: LatexTokenType.Content, literal: "article" });
 
       lexer.seek(-8);
       got = lexer.nextToken();
-      expect(got).toEqual({ type: TokenType.Content, literal: "article" });
+      expect(got).toEqual({ type: LatexTokenType.Content, literal: "article" });
     });
 
     it("should set the read position to the beginning of the document if the seek position is a negative number greater than the document's length", () => {
       lexer.seek(-10000);
       const got = lexer.nextToken();
-      expect(got).toEqual({ type: TokenType.BackSlash, literal: "\\" });
+      expect(got).toEqual({ type: LatexTokenType.BackSlash, literal: "\\" });
     });
 
     it("should set the position to the end of the document if the seek position is longer than the document's length", () => {
       lexer.seek(1000000);
       const got = lexer.nextToken();
-      expect(got).toEqual({ type: TokenType.EOF, literal: "" });
+      expect(got).toEqual({ type: LatexTokenType.EOF, literal: "" });
     });
   });
 
@@ -165,8 +165,8 @@ describe("LatexLexer", () => {
     it("should insert items into the lexer's input", () => {
       const gotIter = lexer.insert(1, "somecommand\\");
       const wantIter = (function* () {
-        yield { type: TokenType.Content, literal: "somecommand" };
-        yield { type: TokenType.BackSlash, literal: "\\" };
+        yield { type: LatexTokenType.Content, literal: "somecommand" };
+        yield { type: LatexTokenType.BackSlash, literal: "\\" };
       })();
 
       for (const gotToken of gotIter) {
@@ -176,16 +176,16 @@ describe("LatexLexer", () => {
 
       const gotLexedItems = [...lexer];
       const wantLexedItems: LatexToken[] = [
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "somecommand" },
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "documentclass" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "article" },
-        { type: TokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "somecommand" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "documentclass" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "article" },
+        { type: LatexTokenType.RBrace, literal: "}" },
       ];
 
       expect(gotLexedItems).toEqual(wantLexedItems);
@@ -196,14 +196,14 @@ describe("LatexLexer", () => {
 
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "documentclass" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "articlefast:introduction" },
-        { type: TokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "documentclass" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "articlefast:introduction" },
+        { type: LatexTokenType.RBrace, literal: "}" },
       ];
 
       expect(got).toEqual(want);
@@ -214,16 +214,16 @@ describe("LatexLexer", () => {
 
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "somecommand" },
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "documentclass" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "article" },
-        { type: TokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "somecommand" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "documentclass" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "article" },
+        { type: LatexTokenType.RBrace, literal: "}" },
       ];
       expect(got).toEqual(want);
     });
@@ -233,15 +233,15 @@ describe("LatexLexer", () => {
 
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "documentclass" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "article" },
-        { type: TokenType.RBrace, literal: "}" },
-        { type: TokenType.Dollar, literal: "$" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "documentclass" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "article" },
+        { type: LatexTokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.Dollar, literal: "$" },
       ];
 
       expect(got).toEqual(want);
@@ -253,14 +253,14 @@ describe("LatexLexer", () => {
       lexer.remove(1, 9);
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "class" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "article" },
-        { type: TokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "class" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "article" },
+        { type: LatexTokenType.RBrace, literal: "}" },
       ];
 
       expect(got).toEqual(want);
@@ -270,13 +270,13 @@ describe("LatexLexer", () => {
       lexer.remove(-100, 9);
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.Content, literal: "class" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "article" },
-        { type: TokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.Content, literal: "class" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "article" },
+        { type: LatexTokenType.RBrace, literal: "}" },
       ];
 
       expect(got).toEqual(want);
@@ -286,13 +286,13 @@ describe("LatexLexer", () => {
       lexer.remove(9, -100);
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.Content, literal: "class" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "article" },
-        { type: TokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.Content, literal: "class" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "article" },
+        { type: LatexTokenType.RBrace, literal: "}" },
       ];
 
       expect(got).toEqual(want);
@@ -302,14 +302,14 @@ describe("LatexLexer", () => {
       lexer.remove(-100, -50);
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "documentclass" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "article" },
-        { type: TokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "documentclass" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "article" },
+        { type: LatexTokenType.RBrace, literal: "}" },
       ];
 
       expect(got).toEqual(want);
@@ -319,8 +319,8 @@ describe("LatexLexer", () => {
       lexer.remove(9, 10000);
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "document" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "document" },
       ];
 
       expect(got).toEqual(want);
@@ -330,14 +330,14 @@ describe("LatexLexer", () => {
       lexer.remove(9, 9);
       const got = [...lexer];
       const want: LatexToken[] = [
-        { type: TokenType.BackSlash, literal: "\\" },
-        { type: TokenType.Content, literal: "documentclass" },
-        { type: TokenType.LBracket, literal: "[" },
-        { type: TokenType.Content, literal: "12pt" },
-        { type: TokenType.RBracket, literal: "]" },
-        { type: TokenType.LBrace, literal: "{" },
-        { type: TokenType.Content, literal: "article" },
-        { type: TokenType.RBrace, literal: "}" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "documentclass" },
+        { type: LatexTokenType.LBracket, literal: "[" },
+        { type: LatexTokenType.Content, literal: "12pt" },
+        { type: LatexTokenType.RBracket, literal: "]" },
+        { type: LatexTokenType.LBrace, literal: "{" },
+        { type: LatexTokenType.Content, literal: "article" },
+        { type: LatexTokenType.RBrace, literal: "}" },
       ];
 
       expect(got).toEqual(want);
@@ -393,8 +393,8 @@ describe("LatexLexer", () => {
       lexer.insert(1, "somecommand\\");
       expect(insertSpy).toHaveBeenCalledTimes(1);
       expect(insertSpy).toHaveBeenCalledWith(1, [
-        { type: TokenType.Content, literal: "somecommand" },
-        { type: TokenType.BackSlash, literal: "\\" },
+        { type: LatexTokenType.Content, literal: "somecommand" },
+        { type: LatexTokenType.BackSlash, literal: "\\" },
       ]);
     });
 
@@ -420,11 +420,11 @@ describe("LatexLexer", () => {
       getSpy.mockReturnValue(null);
       lexer.nextToken();
       expect(addSpy).toHaveBeenCalledTimes(1);
-      expect(addSpy).toHaveBeenCalledWith(0, { type: TokenType.BackSlash, literal: "\\" });
+      expect(addSpy).toHaveBeenCalledWith(0, { type: LatexTokenType.BackSlash, literal: "\\" });
     });
 
     it("should not add the token to the cache when nextToken is called and the value exists in the cache", () => {
-      getSpy.mockReturnValue({ type: TokenType.BackSlash, literal: "\\" });
+      getSpy.mockReturnValue({ type: LatexTokenType.BackSlash, literal: "\\" });
       lexer.nextToken();
       expect(addSpy).not.toHaveBeenCalled();
     });
