@@ -120,14 +120,14 @@ export class LatexLexer {
     return this;
   }
 
-  public readUntil(startPosition: number, stopFn: (char: string) => boolean): string {
-    let char = this.readChar(startPosition);
+  public readUntil(position: number, stopFn: (char: string) => boolean): string {
+    let char = this.readChar(position);
     let word: string = "";
 
-    while (char && stopFn(char)) {
+    while (char && !stopFn(char)) {
       word += char;
-      startPosition++;
-      char = this.readChar(startPosition);
+      position++;
+      char = this.readChar(position);
     }
 
     word = word.replaceAll("\\\n", "");
@@ -231,6 +231,7 @@ export class LatexLexer {
     let char = this.readChar(position);
     const stack: LatexCommandArgumentType[] = [];
 
+    let arg = "";
     while (true) {
       if (!char) {
         throw new Error("Command never closed");
@@ -239,6 +240,9 @@ export class LatexLexer {
       if (char === endCharacter && stack.length === 0) {
         break;
       }
+
+      arg += char;
+      position++;
 
       if (char === LatexCharType.OpenBrace) {
         stack.push(LatexCommandArgumentType.Required);
@@ -258,11 +262,10 @@ export class LatexLexer {
         stack.pop();
       }
 
-      position++;
       char = this.readChar(position);
     }
 
-    return this.input.slice(startPosition, position);
+    return arg;
   }
 
   // We are absolutely sure a command token should follow.
@@ -276,7 +279,7 @@ export class LatexLexer {
 
     const args: LatexArguments = [];
     // Since readUntil won't include the last character, we need to add + 1 to the position
-    let position = (startPosition += name.length) + 1;
+    let position = startPosition + name.length;
 
     while (true) {
       const char = this.readChar(position);
@@ -285,22 +288,21 @@ export class LatexLexer {
       }
 
       if (char === LatexCharType.OpenBrace) {
-        const content = this.getArgumentToClose(position, LatexCharType.CloseBrace);
+        const content = this.getArgumentToClose(position + 1, LatexCharType.CloseBrace);
         args.push(this.buildRequiredArg(content));
-        // getArgumentToCloe won't include the closing brace, so we need to add + 1
-        position += content.length + 1;
+        // getArgumentToClose won't include the opening or closing braces
+        position += content.length + 2;
         continue;
       } else if (char === LatexCharType.OpenBracket) {
-        const content = this.getArgumentToClose(position, LatexCharType.CloseBracket);
+        const content = this.getArgumentToClose(position + 1, LatexCharType.CloseBracket);
         args.push(this.buildOptionalArg(content));
-        position += content.length + 1;
+        position += content.length + 2;
         continue;
       }
 
       if (char === LatexCharType.Space || char === LatexCharType.Newline) {
         break;
       }
-
       throw new Error(`Character ${char} not expected while parsing command argument`);
     }
 
