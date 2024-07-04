@@ -92,6 +92,10 @@ export class LatexLexer {
     const iter = new LatexLexer(value);
     this.cache.insert(position, [...iter]);
 
+    if (this.position >= position) {
+      this.position += value.length;
+    }
+
     return iter;
   }
 
@@ -108,6 +112,10 @@ export class LatexLexer {
 
     this.input = this.input.slice(0, start) + this.input.slice(end);
     this.cache.remove(start, end);
+
+    if (this.position >= start) {
+      this.position -= end - start;
+    }
 
     return this;
   }
@@ -502,7 +510,12 @@ export class LatexLexer {
     if (!token) {
       return null;
     }
-    this.position += token.literal.length;
+
+    if (token.type === LatexTokenType.Content) {
+      this.position += token.originalLength;
+    } else {
+      this.position += token.literal.length;
+    }
 
     return token;
   }
