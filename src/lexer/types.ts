@@ -59,7 +59,8 @@ export type LabeledArgContent = { key: string; value: LatexToken };
 
 export type CommentToken = {
   type: LatexTokenType.Comment;
-  literal: `%${string}`;
+  literal: `%${string}\n`;
+  content: string;
 };
 
 export type ColumnAlignToken = {

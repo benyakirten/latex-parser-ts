@@ -423,6 +423,7 @@ export class LatexLexer {
     return {
       type: LatexTokenType.Comment,
       literal: `%${content}\n`,
+      content,
     };
   }
 
