@@ -216,16 +216,38 @@ export class LatexLexer {
     };
   }
 
-  private buildAccent(accentChar: LatexCharType.Tilde | LatexCharType.Caret): AccentToken {
+  private buildAccent(
+    position: number,
+    accentChar: LatexCharType.Tilde | LatexCharType.Caret,
+  ): AccentToken {
+    let content: string;
+    let literalItem: string;
+    const char = this.readChar(position);
+    if (!char) {
+      throw new Error("Expected at least one letter to follow accent");
+    }
+
+    if (char === LatexCharType.OpenBrace) {
+      content = this.getSectionWithPossibleNesting(position + 1, LatexCharType.CloseBrace);
+      literalItem = `{${content}}`;
+    } else {
+      content = char;
+      literalItem = char;
+    }
     return {
       type: LatexTokenType.Accent,
-      literal: `\\${accentChar}`,
+      literal: `\\${accentChar}${literalItem}`,
       accent:
         accentChar === LatexCharType.Tilde ? LatexAccentType.Tilde : LatexAccentType.Circumflex,
+      content,
     };
   }
 
-  private getArgumentToClose(startPosition: number, endCharacter: LatexCharType): string {
+  private getSectionWithPossibleNesting(
+    startPosition: number,
+    endCharacter: LatexCharType,
+    breakOnEnd?: boolean,
+  ): string {
     let position = startPosition;
     let char = this.readChar(position);
     const stack: LatexCommandArgumentType[] = [];
@@ -233,7 +255,11 @@ export class LatexLexer {
     let arg = "";
     while (true) {
       if (!char) {
-        throw new Error("Command never closed");
+        if (!breakOnEnd) {
+          throw new Error("Command never closed");
+        }
+
+        break;
       }
 
       if (char === endCharacter && stack.length === 0) {
@@ -287,15 +313,18 @@ export class LatexLexer {
       }
 
       if (char === LatexCharType.OpenBrace) {
-        // getArgumentToClose won't include the opening or closing braces
-        const content = this.getArgumentToClose(position + 1, LatexCharType.CloseBrace);
+        // getSectionWithPossibleNesting won't include the opening or closing braces
+        const content = this.getSectionWithPossibleNesting(position + 1, LatexCharType.CloseBrace);
         const requiredArg = this.buildRequiredArg(content);
 
         args.push(requiredArg);
         position += content.length + 2;
         continue;
       } else if (char === LatexCharType.OpenBracket) {
-        const content = this.getArgumentToClose(position + 1, LatexCharType.CloseBracket);
+        const content = this.getSectionWithPossibleNesting(
+          position + 1,
+          LatexCharType.CloseBracket,
+        );
         const optionalArg = this.buildOptionalArg(content);
 
         args.push(optionalArg);
@@ -330,7 +359,7 @@ export class LatexLexer {
     }
 
     if (nextChar === LatexCharType.Tilde || nextChar === LatexCharType.Caret) {
-      return this.buildAccent(nextChar);
+      return this.buildAccent(startPosition + 1, nextChar);
     }
 
     return this.createCommandToken(startPosition);
@@ -340,7 +369,7 @@ export class LatexLexer {
     return this.input.at(position);
   }
 
-  private assertOneToken(lexer: LatexLexer): LatexToken {
+  private assertOptionalArgTokenOption(lexer: LatexLexer): CommandToken | ContentToken {
     const tokens = lexer.readToEnd();
     if (tokens.length !== 1) {
       throw new Error("Required arguments must be a single token");
@@ -348,7 +377,11 @@ export class LatexLexer {
 
     const [token] = tokens;
 
-    return token;
+    if (token.type === LatexTokenType.Command || token.type === LatexTokenType.Content) {
+      return token;
+    }
+
+    throw new Error("An optional argument must either a singular command or content token");
   }
 
   private buildRequiredArg(content: string): RequiredArgument {
@@ -360,43 +393,99 @@ export class LatexLexer {
     };
   }
 
-  private parseOptionalLabeledArgs(argPairs: string[]): LabeledArgContent[] {
-    const labeledArgs: LabeledArgContent[] = [];
-    for (const pair of argPairs) {
-      const kv = pair.split("=");
-      if (kv.length !== 2) {
-        throw new Error(
-          "When multiple optional arguments are provided, they all must be labeled and separated with commas",
-        );
-      }
-      const [k, v] = kv;
+  private parseLabeledArgContent(kvPair: string): LabeledArgContent | null {
+    // Everything up to the equal signs is the key and everything else is the value.
+    // Since we've split on commas
+    const kv = kvPair.split("=");
+    // If it ends with = then it will split into two items,
+    // but the second will have 0 length. That indicates a failure
+    // for this since a value should have some length to it.
+    if (kv.length !== 2 || kv[1].length === 0) {
+      return null;
+    }
 
-      const lexer = new LatexLexer(v);
-      const arg = this.assertOneToken(lexer);
-      const labeledArg = { key: k.trimStart(), value: arg };
-      labeledArgs.push(labeledArg);
+    const [k, v] = kv;
+
+    const lexer = new LatexLexer(v);
+    const arg = this.assertOptionalArgTokenOption(lexer);
+    return { key: k.trimStart(), value: [arg] };
+  }
+
+  private determineOptionalArgumentType(tokens: LatexToken[]): OptionalArgument["content"] {
+    if (tokens.length === 1) {
+      const [token] = tokens;
+
+      // A singular command - we have one LatexToken
+      if (token.type === LatexTokenType.Command) {
+        return token;
+      }
+
+      if (token.type === LatexTokenType.Content) {
+        // We have all labeled arguments without commands
+        if (token.literal.includes("=")) {
+          const labeledArgs: LabeledArgContent[] = [];
+          for (const kvPair of token.literal.split(",")) {
+            const labeledArg = this.parseLabeledArgContent(kvPair);
+            if (!labeledArg) {
+              throw new Error("Optional arguments should be separated by an equals sign");
+            }
+
+            labeledArgs.push(labeledArg);
+          }
+
+          return labeledArgs;
+        }
+
+        return token;
+      }
+
+      throw new Error(`Unable optional argument singular token: ${token}`);
+    }
+
+    // We want to be able to parse any sort of complexity
+    // \\command3[a=b,b=\\arg1{%\nCool Th_in^g: #1}[a=^7,b=c,d=e],c=d]
+    const labeledArgs: LabeledArgContent[] = [];
+    let key: string = "";
+    let value: LatexToken[] = [];
+    for (const token of tokens) {
+      // If we get a lone comma, that means it has come after a command
+      if (token.type === LatexTokenType.Content && token.literal === LatexCharType.Comma) {
+        const arg: LabeledArgContent = { key, value };
+        labeledArgs.push(arg);
+
+        key = "";
+        value = [];
+      }
+
+      if (key === "") {
+        if (token.type !== LatexTokenType.Content) {
+          throw new Error(`Expected to receive an alphanumeric key name, instead got ${token}`);
+        }
+        const literal = token.literal;
+
+        const sections = literal.split(",");
+        for (const section of sections) {
+          const labeledArg = this.parseLabeledArgContent(section);
+          if (labeledArg === null) {
+            if (!section.endsWith("=")) {
+              throw new Error("Key-value pairs must be separated by an equals sign");
+            }
+            key = section.slice(0, -1);
+          } else {
+            labeledArgs.push(labeledArg);
+          }
+        }
+      } else {
+        value.push(token);
+      }
     }
 
     return labeledArgs;
   }
 
   private buildOptionalArg(content: string): OptionalArgument {
-    let args: OptionalArgument["content"];
-
-    // We're not splitting on commas since we could have a comma in the content
-    // Or, in the case of the xparse package and a custom macro, we could
-    // have multiple arguments, but that comes from a possible package
-    // that would have to be evaluated later.
-    const items = content.split("=");
-
-    // One unlabelled argument
-    if (items.length == 1) {
-      const lexer = new LatexLexer(items[0]);
-      args = this.assertOneToken(lexer);
-    } else {
-      const pairs = content.split(",");
-      args = this.parseOptionalLabeledArgs(pairs);
-    }
+    const tokens = new LatexLexer(content).readToEnd();
+    const args = this.determineOptionalArgumentType(tokens);
 
     return {
       type: LatexCommandArgumentType.Optional,
@@ -405,7 +494,7 @@ export class LatexLexer {
   }
 
   private buildBlock(startPosition: number): BlockToken {
-    const content = this.getArgumentToClose(startPosition, LatexCharType.CloseBrace);
+    const content = this.getSectionWithPossibleNesting(startPosition, LatexCharType.CloseBrace);
     if (!content.endsWith(LatexCharType.CloseBrace)) {
       throw new Error("Block never closed");
     }

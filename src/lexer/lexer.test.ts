@@ -180,20 +180,24 @@ describe("LatexLexer", () => {
       const [token] = got;
       const labeledArg1: LabeledArgContent = {
         key: "a",
-        value: {
-          type: LatexTokenType.Content,
-          literal: "b",
-          originalLength: 1,
-        },
+        value: [
+          {
+            type: LatexTokenType.Content,
+            literal: "b",
+            originalLength: 1,
+          },
+        ],
       };
 
       const labeledArg2: LabeledArgContent = {
         key: "c",
-        value: {
-          type: LatexTokenType.Command,
-          literal: "\\command2",
-          arguments: [],
-        },
+        value: [
+          {
+            type: LatexTokenType.Command,
+            literal: "\\command2",
+            arguments: [],
+          },
+        ],
       };
       const optionalArgs: LabeledArgContent[] = [labeledArg1, labeledArg2];
 
@@ -279,11 +283,15 @@ describe("LatexLexer", () => {
         arguments: [firstArg, secondArg, thirdArg],
       };
 
-      expect(got[0]).toEqual(want);
+      expect(token).toEqual(want);
     });
 
     it("should be able to lex a command of arbitrary complexity", () => {
-      // TODO
+      const command = `\\newcommand{\\mycommand}[\\mycommand2[2]{\\command3[a=b,b=\\arg1{%\nCool Th_in^g: #1}[a=^7,b=c,d=e],c=d]}]`;
+      const got = new LatexLexer(command).readToEnd();
+      expect(got).toHaveLength(1);
+
+      const [token] = got;
     });
   });
   // it("should correctly lex a latex document", () => {

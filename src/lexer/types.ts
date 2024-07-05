@@ -13,8 +13,9 @@ export type LatexToken =
 
 export type AccentToken = {
   type: LatexTokenType.Accent;
-  literal: "\\^" | "\\~";
+  literal: `\\${"^" | "~"}${string}`;
   accent: LatexAccentType;
+  content: string;
 };
 
 export type RequiredArgument = {
@@ -24,7 +25,7 @@ export type RequiredArgument = {
 
 export type OptionalArgument = {
   type: LatexCommandArgumentType.Optional;
-  content: LatexToken | LabeledArgContent[];
+  content: CommandToken | ContentToken | LabeledArgContent[];
 };
 
 export type LatexArguments = (RequiredArgument | OptionalArgument)[];
@@ -55,7 +56,7 @@ export type BlockToken = {
   content: LatexToken[];
 };
 
-export type LabeledArgContent = { key: string; value: LatexToken };
+export type LabeledArgContent = { key: string; value: LatexToken[] };
 
 export type CommentToken = {
   type: LatexTokenType.Comment;
@@ -135,6 +136,7 @@ export enum LatexCharType {
   Newline = "\n",
   Space = " ",
   Tilde = "~",
+  Comma = ",",
 }
 
 export enum LatexAccentType {
