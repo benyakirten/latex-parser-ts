@@ -48,11 +48,19 @@ export class LatexLexer {
     input: string,
     private cache: LexerCache = new NoCache(),
   ) {
-    this.input = this.escapeInput(input);
+    // Enforce unescaping if it has already been escaped.
+    // This is useful for recursive LatexLexer instantiations because
+    // when creating a macro, it might have the end of line like this:
+    // \\\n, which will be escaped as \\n, which will should be removed.
+    input = this.unescapeContent(input);
+    input = this.escapeInput(input);
+    this.input = input;
   }
 
   private escapeInput(input: string): string {
-    input = input.replaceAll(/\\\n\s*/g, "");
+    // TODO: Replace this with a function.
+    // Replace `\\\n` but not `\\\\\n`.
+    input = input.replaceAll(/(?<!\\)\\\n\s*/g, "");
     for (const [escapedSequence, escapeSequence] of Object.entries(
       LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
     )) {
@@ -135,7 +143,7 @@ export class LatexLexer {
     const content =
       firstChar +
       this.readUntil(startPosition, (c) => {
-        if (
+        return (
           c === LatexCharType.Backslash ||
           c === LatexCharType.OpenBracket ||
           c === LatexCharType.CloseBracket ||
@@ -149,10 +157,7 @@ export class LatexLexer {
           c === LatexCharType.Hash ||
           c === LatexCharType.Underscore ||
           c === LatexCharType.Caret
-        ) {
-          return true;
-        }
-        return false;
+        );
       });
 
     return {
@@ -331,10 +336,8 @@ export class LatexLexer {
     return this.createCommandToken(startPosition);
   }
 
-  private readChar(startPosition: number): string | undefined {
-    const finalPosition = this.position + startPosition;
-
-    return this.input.at(finalPosition);
+  private readChar(position: number): string | undefined {
+    return this.input.at(position);
   }
 
   private assertOneToken(lexer: LatexLexer): LatexToken {
@@ -350,11 +353,10 @@ export class LatexLexer {
 
   private buildRequiredArg(content: string): RequiredArgument {
     const lexer = new LatexLexer(content);
-    const arg = this.assertOneToken(lexer);
 
     return {
       type: LatexCommandArgumentType.Required,
-      content: arg,
+      content: lexer.readToEnd(),
     };
   }
 
@@ -426,8 +428,8 @@ export class LatexLexer {
 
   private buildPlaceholder(startPosition: number): PlaceholderToken {
     const content = this.readUntil(startPosition, (c) => {
-      const isInt = isNaN(parseInt(c));
-      return !isInt;
+      const isNotNumber = isNaN(parseInt(c));
+      return isNotNumber;
     });
 
     const parsedContent = parseInt(content);
@@ -477,10 +479,7 @@ export class LatexLexer {
         token = this.buildCommand(position + 1);
         break;
       case LatexCharType.Caret:
-        token = {
-          type: LatexTokenType.Superscript,
-          literal: char,
-        };
+        token = { type: LatexTokenType.Superscript, literal: char };
         break;
       case LatexCharType.Underscore:
         token = {

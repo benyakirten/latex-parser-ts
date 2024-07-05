@@ -51,7 +51,7 @@ describe("LatexLexer", () => {
       };
       const wantArg: RequiredArgument = {
         type: LatexCommandArgumentType.Required,
-        content: contentArg,
+        content: [contentArg],
       };
 
       expect(token).toEqual({
@@ -73,7 +73,7 @@ describe("LatexLexer", () => {
       };
       const wantArg: RequiredArgument = {
         type: LatexCommandArgumentType.Required,
-        content: commandArg,
+        content: [commandArg],
       };
 
       expect(token).toEqual({
@@ -96,7 +96,7 @@ describe("LatexLexer", () => {
       };
       const nestedRequiredArg1: RequiredArgument = {
         type: LatexCommandArgumentType.Required,
-        content: nestedArg1,
+        content: [nestedArg1],
       };
 
       const nestedArg2: CommandToken = {
@@ -106,7 +106,7 @@ describe("LatexLexer", () => {
       };
       const nestedRequiredArg2: RequiredArgument = {
         type: LatexCommandArgumentType.Required,
-        content: nestedArg2,
+        content: [nestedArg2],
       };
 
       const topCommandArg: CommandToken = {
@@ -117,7 +117,7 @@ describe("LatexLexer", () => {
 
       const wantArg: RequiredArgument = {
         type: LatexCommandArgumentType.Required,
-        content: topCommandArg,
+        content: [topCommandArg],
       };
 
       expect(token).toEqual({

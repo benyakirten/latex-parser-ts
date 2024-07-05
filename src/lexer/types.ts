@@ -19,7 +19,7 @@ export type AccentToken = {
 
 export type RequiredArgument = {
   type: LatexCommandArgumentType.Required;
-  content: LatexToken;
+  content: LatexToken[];
 };
 
 export type OptionalArgument = {
