@@ -32,8 +32,7 @@ describe("LatexLexer", () => {
 
   describe("command", () => {
     it("should lex a command with no arguments", () => {
-      const lexer = new LatexLexer("\\command");
-      const got = [...lexer];
+      const got = new LatexLexer("\\command").readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -41,8 +40,7 @@ describe("LatexLexer", () => {
     });
 
     it("should be able to lex a command with a simple required argument", () => {
-      const lexer = new LatexLexer("\\command{arg}");
-      const got = [...lexer];
+      const got = new LatexLexer("\\command{arg}").readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -64,8 +62,7 @@ describe("LatexLexer", () => {
     });
 
     it("should be able to lex a command with a required argument that's a nested command", () => {
-      const lexer = new LatexLexer("\\command{\\command2}");
-      const got = [...lexer];
+      const got = new LatexLexer("\\command{\\command2}").readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -87,8 +84,7 @@ describe("LatexLexer", () => {
     });
 
     it("should be able to lex a command with a required argument with nested arguments", () => {
-      const lexer = new LatexLexer("\\command{\\command2{arg1}{\\command3}}");
-      const got = [...lexer];
+      const got = new LatexLexer("\\command{\\command2{arg1}{\\command3}}").readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -132,8 +128,7 @@ describe("LatexLexer", () => {
     });
 
     it("should be able to lex a command with a simple optional argument", () => {
-      const lexer = new LatexLexer("\\command[arg]");
-      const got = [...lexer];
+      const got = new LatexLexer("\\command[arg]").readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -154,9 +149,30 @@ describe("LatexLexer", () => {
       });
     });
 
+    it("should be lex an optional argument with commas as one content token", () => {
+      const got = new LatexLexer("\\command[a,b,c]").readToEnd();
+      expect(got).toHaveLength(1);
+
+      const [token] = got;
+      const contentArg: ContentToken = {
+        type: LatexTokenType.Content,
+        literal: "a,b,c",
+        originalLength: 5,
+      };
+      const optionalArg: OptionalArgument = {
+        type: LatexCommandArgumentType.Optional,
+        content: contentArg,
+      };
+
+      expect(token).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command[a,b,c]",
+        arguments: [optionalArg],
+      });
+    });
+
     it("should be able to lex commands with multiple labeled optional arguments", () => {
-      const lexer = new LatexLexer("\\command[a=b,c=\\command2]");
-      const got = [...lexer];
+      const got = new LatexLexer("\\command[a=b,c=\\command2]").readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -189,6 +205,16 @@ describe("LatexLexer", () => {
         literal: "\\command[a=b,c=\\command2]",
         arguments: [optionalArg],
       });
+    });
+
+    it("should be able to lex a new macro command that's split over multiple lines", () => {
+      const command = `\\newcommand{\\mycommand}[2]{%\n  First argument: #1 \\\\\n  Second argument: #2}`;
+      const got = new LatexLexer(command).readToEnd();
+      expect(got).toHaveLength(1);
+    });
+
+    it("should be able to lex a command of arbitrary complexity", () => {
+      // TODO
     });
   });
   // it("should correctly lex a latex document", () => {

@@ -19,12 +19,12 @@ export type AccentToken = {
 
 export type RequiredArgument = {
   type: LatexCommandArgumentType.Required;
-  content: LatexArgument;
+  content: LatexToken;
 };
 
 export type OptionalArgument = {
   type: LatexCommandArgumentType.Optional;
-  content: LatexArgument | LabeledArgContent[];
+  content: LatexToken | LabeledArgContent[];
 };
 
 export type LatexArguments = (RequiredArgument | OptionalArgument)[];
@@ -55,8 +55,7 @@ export type BlockToken = {
   content: LatexToken[];
 };
 
-export type LatexArgument = ContentToken | CommandToken;
-export type LabeledArgContent = { key: string; value: LatexArgument };
+export type LabeledArgContent = { key: string; value: LatexToken };
 
 export type CommentToken = {
   type: LatexTokenType.Comment;

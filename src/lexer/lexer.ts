@@ -18,7 +18,6 @@ import {
   type LatexArguments,
   type RequiredArgument,
   type OptionalArgument,
-  type LatexArgument,
   type BlockToken,
 } from "./types";
 /**
@@ -29,7 +28,7 @@ import {
  * If no cache is provided, it defaults to no caching.
  */
 export class LatexLexer {
-  static readonly REPLACE_ESCAPE_CHARACTERS_MAP = {
+  static readonly REPLACE_ESCAPE_CHARACTER_MAP = {
     // \ followed by a newline means continue as if the line didn't break
     "\\#": "@@<!HASH!>",
     "\\%": "@@<!PERCENT!>",
@@ -55,7 +54,7 @@ export class LatexLexer {
   private escapeInput(input: string): string {
     input = input.replaceAll(/\\\n\s*/g, "");
     for (const [escapedSequence, escapeSequence] of Object.entries(
-      LatexLexer.REPLACE_ESCAPE_CHARACTERS_MAP,
+      LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
     )) {
       input = input.replaceAll(escapedSequence, escapeSequence);
     }
@@ -65,7 +64,7 @@ export class LatexLexer {
 
   private unescapeContent(input: string): string {
     for (const [escapedSequence, escapeSequence] of Object.entries(
-      LatexLexer.REPLACE_ESCAPE_CHARACTERS_MAP,
+      LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
     )) {
       input = input.replaceAll(escapeSequence, escapedSequence[1]);
     }
@@ -120,7 +119,7 @@ export class LatexLexer {
     return this;
   }
 
-  public readUntil(position: number, stopFn: (char: string) => boolean): string {
+  private readUntil(position: number, stopFn: (char: string) => boolean): string {
     let char = this.readChar(position);
     let word: string = "";
     while (char && !stopFn(char)) {
@@ -149,9 +148,7 @@ export class LatexLexer {
           c === LatexCharType.Ampersand ||
           c === LatexCharType.Hash ||
           c === LatexCharType.Underscore ||
-          c === LatexCharType.Caret ||
-          c === LatexCharType.Newline ||
-          c === LatexCharType.Space
+          c === LatexCharType.Caret
         ) {
           return true;
         }
@@ -209,7 +206,7 @@ export class LatexLexer {
     return {
       type: LatexTokenType.Math,
       literal: `\\${startMathCharacter}${content}\\${endMathCharacter}`,
-      content: [...lexer],
+      content: lexer.readToEnd(),
       position: mathPosition,
     };
   }
@@ -285,14 +282,18 @@ export class LatexLexer {
       }
 
       if (char === LatexCharType.OpenBrace) {
-        const content = this.getArgumentToClose(position + 1, LatexCharType.CloseBrace);
-        args.push(this.buildRequiredArg(content));
         // getArgumentToClose won't include the opening or closing braces
+        const content = this.getArgumentToClose(position + 1, LatexCharType.CloseBrace);
+        const requiredArg = this.buildRequiredArg(content);
+
+        args.push(requiredArg);
         position += content.length + 2;
         continue;
       } else if (char === LatexCharType.OpenBracket) {
         const content = this.getArgumentToClose(position + 1, LatexCharType.CloseBracket);
-        args.push(this.buildOptionalArg(content));
+        const optionalArg = this.buildOptionalArg(content);
+
+        args.push(optionalArg);
         position += content.length + 2;
         continue;
       }
@@ -336,27 +337,20 @@ export class LatexLexer {
     return this.input.at(finalPosition);
   }
 
-  private isLatexArgument(token: LatexToken): token is LatexArgument {
-    return token.type === LatexTokenType.Command || token.type === LatexTokenType.Content;
-  }
-
-  private buildSingleArgument(lexer: LatexLexer): LatexArgument {
-    const tokens = [...lexer];
+  private assertOneToken(lexer: LatexLexer): LatexToken {
+    const tokens = lexer.readToEnd();
     if (tokens.length !== 1) {
       throw new Error("Required arguments must be a single token");
     }
 
     const [token] = tokens;
-    if (!this.isLatexArgument(token)) {
-      throw new Error("Required arguments must be  coommand or content token");
-    }
 
     return token;
   }
 
   private buildRequiredArg(content: string): RequiredArgument {
     const lexer = new LatexLexer(content);
-    const arg = this.buildSingleArgument(lexer);
+    const arg = this.assertOneToken(lexer);
 
     return {
       type: LatexCommandArgumentType.Required,
@@ -376,7 +370,7 @@ export class LatexLexer {
       const [k, v] = kv;
 
       const lexer = new LatexLexer(v);
-      const arg = this.buildSingleArgument(lexer);
+      const arg = this.assertOneToken(lexer);
       const labeledArg = { key: k.trimStart(), value: arg };
       labeledArgs.push(labeledArg);
     }
@@ -396,7 +390,7 @@ export class LatexLexer {
     // One unlabelled argument
     if (items.length == 1) {
       const lexer = new LatexLexer(items[0]);
-      args = this.buildSingleArgument(lexer);
+      args = this.assertOneToken(lexer);
     } else {
       const pairs = content.split(",");
       args = this.parseOptionalLabeledArgs(pairs);
@@ -418,7 +412,7 @@ export class LatexLexer {
     return {
       type: LatexTokenType.Block,
       literal: `{${content}}`,
-      content: [...lexer],
+      content: lexer.readToEnd(),
     };
   }
 
@@ -426,7 +420,7 @@ export class LatexLexer {
     const content = this.readUntil(startPosition, (c) => c === LatexCharType.Newline);
     return {
       type: LatexTokenType.Comment,
-      literal: `%${content}`,
+      literal: `%${content}\n`,
     };
   }
 
@@ -454,7 +448,7 @@ export class LatexLexer {
     return {
       type: LatexTokenType.Math,
       literal: `$${content}$`,
-      content: [...lexer],
+      content: lexer.readToEnd(),
       position: MathPosition.Inline,
     };
   }
@@ -544,5 +538,13 @@ export class LatexLexer {
 
   [Symbol.iterator]() {
     return this;
+  }
+
+  /**
+   * Reads through the whole iterator from the beginning.
+   */
+  public readToEnd(): LatexToken[] {
+    this.seek(0);
+    return [...this];
   }
 }
