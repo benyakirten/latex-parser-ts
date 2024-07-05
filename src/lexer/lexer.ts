@@ -123,14 +123,11 @@ export class LatexLexer {
   public readUntil(position: number, stopFn: (char: string) => boolean): string {
     let char = this.readChar(position);
     let word: string = "";
-
     while (char && !stopFn(char)) {
       word += char;
       position++;
       char = this.readChar(position);
     }
-
-    word = word.replaceAll("\\\n", "");
 
     return word;
   }
@@ -451,6 +448,17 @@ export class LatexLexer {
     };
   }
 
+  private buildInlineMath(startPosition: number): MathToken {
+    const content = this.readUntil(startPosition, (c) => c === "$");
+    const lexer = new LatexLexer(content);
+    return {
+      type: LatexTokenType.Math,
+      literal: `$${content}$`,
+      content: [...lexer],
+      position: MathPosition.Inline,
+    };
+  }
+
   public peek(advance: number = 0): LatexToken | null {
     const position = this.position + advance;
     const char = this.input.at(position);
@@ -497,6 +505,9 @@ export class LatexLexer {
         break;
       case LatexCharType.Hash:
         token = this.buildPlaceholder(position + 1);
+        break;
+      case LatexCharType.Dollar:
+        token = this.buildInlineMath(position + 1);
         break;
       default:
         token = this.buildContent(position);

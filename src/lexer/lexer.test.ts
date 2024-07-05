@@ -10,6 +10,7 @@ import {
   type ContentToken,
   type RequiredArgument,
   LatexCommandArgumentType,
+  type OptionalArgument,
 } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
@@ -49,7 +50,7 @@ describe("LatexLexer", () => {
         literal: "arg",
         originalLength: 3,
       };
-      const requiredArg: RequiredArgument = {
+      const wantArg: RequiredArgument = {
         type: LatexCommandArgumentType.Required,
         content: contentArg,
       };
@@ -57,7 +58,98 @@ describe("LatexLexer", () => {
       expect(token).toEqual({
         type: LatexTokenType.Command,
         literal: "\\command{arg}",
-        arguments: [requiredArg],
+        arguments: [wantArg],
+      });
+    });
+
+    it("should be able to lex a command with a required argument that's a nested command", () => {
+      const lexer = new LatexLexer("\\command{\\command2}");
+      const got = [...lexer];
+      expect(got).toHaveLength(1);
+
+      const [token] = got;
+      const commandArg: CommandToken = {
+        type: LatexTokenType.Command,
+        literal: "\\command2",
+        arguments: [],
+      };
+      const wantArg: RequiredArgument = {
+        type: LatexCommandArgumentType.Required,
+        content: commandArg,
+      };
+
+      expect(token).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command{\\command2}",
+        arguments: [wantArg],
+      });
+    });
+
+    it("should be able to lex a command with a required argument with nested arguments", () => {
+      const lexer = new LatexLexer("\\command{\\command2{arg1}{\\command3}}");
+      const got = [...lexer];
+      expect(got).toHaveLength(1);
+
+      const [token] = got;
+
+      const nestedArg1: ContentToken = {
+        type: LatexTokenType.Content,
+        literal: "arg1",
+        originalLength: 4,
+      };
+      const nestedRequiredArg1: RequiredArgument = {
+        type: LatexCommandArgumentType.Required,
+        content: nestedArg1,
+      };
+
+      const nestedArg2: CommandToken = {
+        type: LatexTokenType.Command,
+        literal: "\\command3",
+        arguments: [],
+      };
+      const nestedRequiredArg2: RequiredArgument = {
+        type: LatexCommandArgumentType.Required,
+        content: nestedArg2,
+      };
+
+      const topCommandArg: CommandToken = {
+        type: LatexTokenType.Command,
+        literal: "\\command2{arg1}{\\command3}",
+        arguments: [nestedRequiredArg1, nestedRequiredArg2],
+      };
+
+      const wantArg: RequiredArgument = {
+        type: LatexCommandArgumentType.Required,
+        content: topCommandArg,
+      };
+
+      expect(token).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command{\\command2{arg1}{\\command3}}",
+        arguments: [wantArg],
+      });
+    });
+
+    it("should be able to lex a command with a simple optional argument", () => {
+      const lexer = new LatexLexer("\\command[arg]");
+      const got = [...lexer];
+      expect(got).toHaveLength(1);
+
+      const [token] = got;
+      const contentArg: ContentToken = {
+        type: LatexTokenType.Content,
+        literal: "arg",
+        originalLength: 3,
+      };
+      const optionalArg: OptionalArgument = {
+        type: LatexCommandArgumentType.Optional,
+        content: contentArg,
+      };
+
+      expect(token).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command[arg]",
+        arguments: [optionalArg],
       });
     });
   });
