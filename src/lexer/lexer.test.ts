@@ -11,6 +11,7 @@ import {
   type RequiredArgument,
   LatexCommandArgumentType,
   type OptionalArgument,
+  type LabeledArgContent,
 } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
@@ -149,6 +150,43 @@ describe("LatexLexer", () => {
       expect(token).toEqual({
         type: LatexTokenType.Command,
         literal: "\\command[arg]",
+        arguments: [optionalArg],
+      });
+    });
+
+    it("should be able to lex commands with multiple labeled optional arguments", () => {
+      const lexer = new LatexLexer("\\command[a=b,c=\\command2]");
+      const got = [...lexer];
+      expect(got).toHaveLength(1);
+
+      const [token] = got;
+      const labeledArg1: LabeledArgContent = {
+        key: "a",
+        value: {
+          type: LatexTokenType.Content,
+          literal: "b",
+          originalLength: 1,
+        },
+      };
+
+      const labeledArg2: LabeledArgContent = {
+        key: "c",
+        value: {
+          type: LatexTokenType.Command,
+          literal: "\\command2",
+          arguments: [],
+        },
+      };
+      const optionalArgs: LabeledArgContent[] = [labeledArg1, labeledArg2];
+
+      const optionalArg: OptionalArgument = {
+        type: LatexCommandArgumentType.Optional,
+        content: optionalArgs,
+      };
+
+      expect(token).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command[a=b,c=\\command2]",
         arguments: [optionalArg],
       });
     });
