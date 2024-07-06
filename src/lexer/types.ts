@@ -103,20 +103,18 @@ export enum LatexCommandArgumentType {
 }
 
 export enum LatexTokenType {
-  Command,
-  Math,
-  Block,
-  ColumnAlign,
-  Comment,
-  Superscript,
-  Subscript,
-  Placeholder,
-  NonBreakingSpace,
-  Space,
-  Tab,
-  Content,
-  EndOfLine,
-  Accent,
+  Command = "command",
+  Math = "math",
+  Block = "block",
+  ColumnAlign = "columnalign",
+  Comment = "comment",
+  Superscript = "superscript",
+  Subscript = "subscript",
+  Placeholder = "placeholder",
+  NonBreakingSpace = "nonbreakingspace",
+  Content = "content",
+  EndOfLine = "endofline",
+  Accent = "accent",
 }
 
 export enum LatexCharType {

@@ -246,7 +246,6 @@ export class LatexLexer {
   private getSectionWithPossibleNesting(
     startPosition: number,
     endCharacter: LatexCharType,
-    breakOnEnd?: boolean,
   ): string {
     let position = startPosition;
     let char = this.readChar(position);
@@ -255,10 +254,6 @@ export class LatexLexer {
     let arg = "";
     while (true) {
       if (!char) {
-        if (!breakOnEnd) {
-          throw new Error("Command never closed");
-        }
-
         break;
       }
 
@@ -303,12 +298,16 @@ export class LatexLexer {
     }
 
     const args: LatexArguments = [];
-    // Since readUntil won't include the last character, we need to add + 1 to the position
     let position = startPosition + name.length;
 
     while (true) {
       const char = this.readChar(position);
-      if (!char) {
+      if (!char || char === LatexCharType.Space || char === LatexCharType.Newline) {
+        break;
+      }
+
+      if (char === LatexCharType.Comma) {
+        position--;
         break;
       }
 
@@ -330,10 +329,6 @@ export class LatexLexer {
         args.push(optionalArg);
         position += content.length + 2;
         continue;
-      }
-
-      if (char === LatexCharType.Space || char === LatexCharType.Newline) {
-        break;
       }
       throw new Error(`Character ${char} not expected while parsing command argument`);
     }
@@ -411,7 +406,13 @@ export class LatexLexer {
     return { key: k.trimStart(), value: [arg] };
   }
 
-  private determineOptionalArgumentType(tokens: LatexToken[]): OptionalArgument["content"] {
+  private getOptionalArguments(tokens: LatexToken[]): OptionalArgument["content"] {
+    console.log("tokens");
+    for (const t of tokens) {
+      console.log(t);
+    }
+
+    // TODO: Refactor this to be more beautiful
     if (tokens.length === 1) {
       const [token] = tokens;
 
@@ -442,19 +443,37 @@ export class LatexLexer {
       throw new Error(`Unable optional argument singular token: ${token}`);
     }
 
-    // We want to be able to parse any sort of complexity
+    // We want to be able to parse any sort of complexity, such as:
     // \\command3[a=b,b=\\arg1{%\nCool Th_in^g: #1}[a=^7,b=c,d=e],c=d]
     const labeledArgs: LabeledArgContent[] = [];
     let key: string = "";
     let value: LatexToken[] = [];
     for (const token of tokens) {
-      // If we get a lone comma, that means it has come after a command
-      if (token.type === LatexTokenType.Content && token.literal === LatexCharType.Comma) {
+      // If we get a content section that starts with a comma
+      // then we have
+      if (token.type === LatexTokenType.Content && token.literal.startsWith(LatexCharType.Comma)) {
         const arg: LabeledArgContent = { key, value };
         labeledArgs.push(arg);
 
         key = "";
         value = [];
+
+        const sections = token.literal.slice(1).split(",");
+        for (const section of sections) {
+          if (section.endsWith("=")) {
+            // Last section - assign a key, empty values and move onto next section
+            key = section.slice(0, -1);
+            value = [];
+            continue;
+          }
+
+          const arg = this.parseLabeledArgContent(section);
+          if (!arg) {
+            throw new Error("Optional arguments should be separated by an equals sign");
+          }
+
+          labeledArgs.push(arg);
+        }
       }
 
       if (key === "") {
@@ -480,12 +499,17 @@ export class LatexLexer {
       }
     }
 
+    if (key && value.length > 0) {
+      const arg: LabeledArgContent = { key, value };
+      labeledArgs.push(arg);
+    }
+
     return labeledArgs;
   }
 
   private buildOptionalArg(content: string): OptionalArgument {
     const tokens = new LatexLexer(content).readToEnd();
-    const args = this.determineOptionalArgumentType(tokens);
+    const args = this.getOptionalArguments(tokens);
 
     return {
       type: LatexCommandArgumentType.Optional,
