@@ -338,6 +338,7 @@ export class LatexLexer {
       type: LatexTokenType.Command,
       literal: `\\${literal}`,
       arguments: args,
+      name,
     };
   }
 

@@ -32,6 +32,7 @@ export type LatexArguments = (RequiredArgument | OptionalArgument)[];
 export type CommandToken = {
   type: LatexTokenType.Command;
   literal: `\\${string}`;
+  name: string;
   arguments: LatexArguments;
 };
 
