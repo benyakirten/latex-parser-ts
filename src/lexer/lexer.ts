@@ -407,12 +407,7 @@ export class LatexLexer {
   }
 
   private getOptionalArguments(tokens: LatexToken[]): OptionalArgument["content"] {
-    console.log("tokens");
-    for (const t of tokens) {
-      console.log(t);
-    }
-
-    // TODO: Refactor this to be more beautiful
+    // TODO: Refactor this - it's a mess right now
     if (tokens.length === 1) {
       const [token] = tokens;
 
@@ -461,19 +456,18 @@ export class LatexLexer {
         const sections = token.literal.slice(1).split(",");
         for (const section of sections) {
           if (section.endsWith("=")) {
-            // Last section - assign a key, empty values and move onto next section
             key = section.slice(0, -1);
             value = [];
-            continue;
+          } else {
+            const arg = this.parseLabeledArgContent(section);
+            if (!arg) {
+              throw new Error("Optional arguments should be separated by an equals sign");
+            }
+            labeledArgs.push(arg);
           }
-
-          const arg = this.parseLabeledArgContent(section);
-          if (!arg) {
-            throw new Error("Optional arguments should be separated by an equals sign");
-          }
-
-          labeledArgs.push(arg);
         }
+
+        continue;
       }
 
       if (key === "") {
@@ -484,6 +478,10 @@ export class LatexLexer {
 
         const sections = literal.split(",");
         for (const section of sections) {
+          if (!section) {
+            continue;
+          }
+
           const labeledArg = this.parseLabeledArgContent(section);
           if (labeledArg === null) {
             if (!section.endsWith("=")) {
