@@ -353,7 +353,7 @@ describe("LatexLexer", () => {
 
     it("should be able to lex a command of arbitrary complexity", () => {
       const command =
-        "\\newcommand{\\mycommand}[\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=f,g=h],i=j]}]";
+        "\\newcommand{\\mycommand}[\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]}]";
       const got = new LatexLexer(command).readToEnd();
       expect(got).toHaveLength(1);
 
@@ -417,7 +417,26 @@ describe("LatexLexer", () => {
         },
         {
           key: "e",
-          value: [{ type: LatexTokenType.Content, literal: "f", originalLength: 1 }],
+          value: [
+            {
+              type: LatexTokenType.Superscript,
+              literal: "^",
+            },
+            {
+              type: LatexTokenType.Content,
+              literal: "f",
+              originalLength: 1,
+            },
+            {
+              type: LatexTokenType.Subscript,
+              literal: "_",
+            },
+            {
+              literal: "f",
+              originalLength: 1,
+              type: LatexTokenType.Content,
+            },
+          ],
         },
         {
           key: "g",
@@ -427,7 +446,7 @@ describe("LatexLexer", () => {
 
       const nestedCommand4: CommandToken = {
         type: LatexTokenType.Command,
-        literal: "\\command4{%\nCool Th_in^g: #1}[d=^7,e=f,g=h]",
+        literal: "\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h]",
         name: "command4",
         arguments: [
           {
@@ -482,7 +501,7 @@ describe("LatexLexer", () => {
 
       const arg2RequiredArgOptionalArgumentCommand: CommandToken = {
         type: LatexTokenType.Command,
-        literal: "\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=f,g=h],i=j]",
+        literal: "\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]",
         name: "command3",
         arguments: [arg2RequiredArgOptionalArgument],
       };
@@ -497,7 +516,7 @@ describe("LatexLexer", () => {
         content: {
           type: LatexTokenType.Command,
           literal:
-            "\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=f,g=h],i=j]}",
+            "\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]}",
           arguments: [arg2OptionalArg, arg2RequiredArg],
           name: "mycommand2",
         },
@@ -506,7 +525,7 @@ describe("LatexLexer", () => {
       const want: CommandToken = {
         type: LatexTokenType.Command,
         literal:
-          "\\newcommand{\\mycommand}[\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=f,g=h],i=j]}]",
+          "\\newcommand{\\mycommand}[\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]}]",
         name: "newcommand",
         arguments: [arg1, arg2],
       };
