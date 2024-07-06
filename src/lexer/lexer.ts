@@ -471,6 +471,29 @@ export class LatexLexer {
         continue;
       }
 
+      if (
+        token.type === LatexTokenType.Content &&
+        token.literal.includes(LatexCharType.Comma) &&
+        key !== ""
+      ) {
+        const [v] = token.literal.split(",");
+        const vToken: ContentToken = {
+          type: LatexTokenType.Content,
+          literal: v,
+          originalLength: v.length,
+        };
+
+        value.push(vToken);
+
+        const arg: LabeledArgContent = { key, value };
+        labeledArgs.push(arg);
+
+        key = "";
+        value = [];
+
+        token.literal = token.literal.slice(v.length);
+      }
+
       if (key === "") {
         if (token.type !== LatexTokenType.Content) {
           throw new Error(`Expected to receive an alphanumeric key name, instead got ${token}`);
