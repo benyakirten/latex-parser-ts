@@ -235,6 +235,7 @@ export class LatexLexer {
   private getSectionWithPossibleNesting(
     startPosition: number,
     endCharacter: LatexCharType,
+    mustClose: boolean = false,
   ): string {
     let position = startPosition;
     let char = this.readChar(position);
@@ -243,7 +244,7 @@ export class LatexLexer {
     let arg = "";
     while (true) {
       if (!char) {
-        if (stack.length === 0) {
+        if (!mustClose && stack.length === 0) {
           break;
         }
 
@@ -546,7 +547,11 @@ export class LatexLexer {
   }
 
   private buildBlock(startPosition: number): BlockToken {
-    const content = this.getSectionWithPossibleNesting(startPosition, LatexCharType.CloseBrace);
+    const content = this.getSectionWithPossibleNesting(
+      startPosition,
+      LatexCharType.CloseBrace,
+      true,
+    );
     const lexer = new LatexLexer(content);
     return {
       type: LatexTokenType.Block,

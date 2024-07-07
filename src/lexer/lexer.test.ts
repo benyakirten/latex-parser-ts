@@ -667,7 +667,7 @@ describe("LatexLexer", () => {
     });
 
     it("should throw if the block is never closed", () => {
-      // TODO
+      expect(() => new LatexLexer("{\\mycommand this is my block").readToEnd()).toThrow();
     });
   });
   // it("should correctly lex a latex document", () => {
