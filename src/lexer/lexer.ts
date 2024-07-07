@@ -272,9 +272,6 @@ export class LatexLexer {
 
     while (true) {
       const char = this.readChar(position);
-      if (!char) {
-        break;
-      }
 
       if (char === LatexCharType.OpenBrace) {
         // getSectionWithPossibleNesting won't include the opening or closing braces
@@ -303,12 +300,10 @@ export class LatexLexer {
         continue;
       }
 
-      // All other characters cause us to break and move the cursor back.
-      position--;
       break;
     }
 
-    const literal = this.input.slice(startPosition, position + 1);
+    const literal = this.input.slice(startPosition, position);
 
     return {
       type: LatexTokenType.Command,
