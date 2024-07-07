@@ -272,12 +272,7 @@ export class LatexLexer {
 
     while (true) {
       const char = this.readChar(position);
-      if (!char || char === LatexCharType.Space || char === LatexCharType.Newline) {
-        break;
-      }
-
-      if (char === LatexCharType.Comma) {
-        position--;
+      if (!char) {
         break;
       }
 
@@ -308,13 +303,12 @@ export class LatexLexer {
         continue;
       }
 
-      throw new Error(`Character ${char} not expected while parsing command argument`);
+      // All other characters cause us to break and move the cursor back.
+      position--;
+      break;
     }
 
-    let literal = this.input.slice(startPosition, position + 1);
-    if (literal.endsWith(" ")) {
-      literal = literal.slice(0, -1);
-    }
+    const literal = this.input.slice(startPosition, position + 1);
 
     return {
       type: LatexTokenType.Command,

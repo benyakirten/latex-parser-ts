@@ -915,61 +915,7 @@ describe("LatexLexer", () => {
     });
   });
 
-  // TODO: Complete this test
-  // it("should properly lex a complete document", () => {
-  //   // Sourced from https://guides.nyu.edu/LaTeX/exercises, exercise #5
-  //   const FULL_LATEX_DOC = [
-  //     "\\documentclass{article} ",
-  //     "",
-  //     "\\usepackage{amsmath}",
-  //     "\\usepackage{hyperref}",
-  //     "\\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}",
-  //     "",
-  //     "\\title{Hello World!}",
-  //     "\\author{Your Name}",
-  //     "\\date{January 1, 1831}",
-  //     "",
-  //     "",
-  //     "\\begin{document}",
-  //     "    \\maketitle",
-  //     "    \\section{Getting Started}",
-  //     "    \\textbf{Hello World!} Today I am learning \\LaTeX. \\LaTeX{} is a great program for writing math. I can write in line math such as $a^2+b^2=c^2$. I can also give equations their own space: ",
-  //     "    \\begin{equation} ",
-  //     "    \\gamma^2+\\theta^2=\\omega^2",
-  //     "    \\end{equation}",
-  //     "    ``Maxwell's equations'' are named for James Clark Maxwell and are as follow:",
-  //     "    \\begin{align}             ",
-  //     "    \\vec{\\nabla} \\cdot \\vec{E} \\quad &=\\quad\\frac{\\rho}{\\epsilon_0} &&\\text{Gauss's Law} \\label{eq:GL}\\\\      ",
-  //     "    \\vec{\\nabla} \\cdot \\vec{B} \\quad &=\\quad 0 &&\\text{Gauss's Law for Magnetism} \\label{eq:GLM}\\\\",
-  //     "    \\vec{\\nabla} \\times \\vec{E} \\quad &=\\hspace{10pt}-\\frac{\\partial{\\vec{B}}}{\\partial{t}} &&\\text{Faraday's Law of Induction} \\label{eq:FL}\\\\ ",
-  //     "    \\vec{\\nabla} \\times \\vec{B} \\quad &=\\quad \\mu_0\\left( \\epsilon_0\\frac{\\partial{\\vec{E}}}{\\partial{t}}+\\vec{J}\\right) &&\\text{Ampere's Circuital Law} \\label{eq:ACL}",
-  //     "    \\end{align}",
-  //     "Equations \\ref{eq:GL}, \\ref{eq:GLM}, \\ref{eq:FL}, and \\ref{eq:ACL} are some of the most important in Physics.",
-  //     "\\section{What about Matrix Equations?}",
-  //     "\\begin{equation*}",
-  //     "\\begin{pmatrix}",
-  //     "a_{11}&a_{12}&\\dots&a_{1n}\\\\",
-  //     "a_{21}&a_{22}&\\dots&a_{2n}\\\\",
-  //     "\\vdots&\\vdots&\\ddots&\\vdots\\\\",
-  //     "a_{n1}&a_{n2}&\\dots&a_{nn}",
-  //     "\\end{pmatrix}",
-  //     "\\begin{bmatrix}",
-  //     "v_{1}\\\\",
-  //     "v_{2}\\\\",
-  //     "\\vdots\\\\",
-  //     "v_{n}",
-  //     "\\end{bmatrix}",
-  //     "=",
-  //     "\\begin{matrix}",
-  //     "w_{1}\\\\",
-  //     "w_{2}\\\\",
-  //     "\\vdots\\\\",
-  //     "w_{n}",
-  //     "\\end{matrix}",
-  //     "\\end{equation*}",
-  //     "\\end{document}",
-  //   ].join("\n");
-  // });
+  // TODO: Add a test to test all features working together in unison
 
   describe("insert", () => {
     it("should insert items into the lexer's input", () => {
