@@ -591,7 +591,11 @@ export class LatexLexer {
     }
 
     if (/\w/.test(char)) {
-      return this.buildContent(startPosition);
+      return {
+        type: LatexTokenType.Content,
+        literal: char,
+        originalLength: 1,
+      };
     }
 
     if (char === LatexCharType.OpenBrace) {

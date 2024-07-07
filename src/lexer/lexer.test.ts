@@ -386,7 +386,7 @@ describe("LatexLexer", () => {
         {
           type: LatexTokenType.Script,
           literal: "_i",
-          position: ScriptTokenType.Super,
+          position: ScriptTokenType.Sub,
           content: {
             type: LatexTokenType.Content,
             literal: "i",
