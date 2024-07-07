@@ -6,6 +6,7 @@ import {
   LatexTokenType,
   LatexCommandArgumentType,
   ScriptTokenType,
+  LatexAccentType,
   type LexerCache,
   type LatexToken,
   type CommandToken,
@@ -16,6 +17,8 @@ import {
   type CommentToken,
   type PlaceholderToken,
   type BlockToken,
+  type AccentToken,
+  type ScriptToken,
 } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
@@ -389,7 +392,7 @@ describe("LatexLexer", () => {
         {
           type: LatexTokenType.Script,
           literal: "_i",
-          position: ScriptTokenType.Sub,
+          detail: ScriptTokenType.Sub,
           content: {
             type: LatexTokenType.Content,
             literal: "i",
@@ -403,7 +406,7 @@ describe("LatexLexer", () => {
         },
         {
           type: LatexTokenType.Script,
-          position: ScriptTokenType.Super,
+          detail: ScriptTokenType.Super,
           literal: "^g",
           content: {
             type: LatexTokenType.Content,
@@ -430,7 +433,7 @@ describe("LatexLexer", () => {
             {
               type: LatexTokenType.Script,
               literal: "^7",
-              position: ScriptTokenType.Super,
+              detail: ScriptTokenType.Super,
               content: { type: LatexTokenType.Content, literal: "7", originalLength: 1 },
             },
           ],
@@ -441,7 +444,7 @@ describe("LatexLexer", () => {
             {
               type: LatexTokenType.Script,
               literal: "^f",
-              position: ScriptTokenType.Super,
+              detail: ScriptTokenType.Super,
               content: {
                 type: LatexTokenType.Content,
                 literal: "f",
@@ -451,7 +454,7 @@ describe("LatexLexer", () => {
             {
               type: LatexTokenType.Script,
               literal: "_f",
-              position: ScriptTokenType.Sub,
+              detail: ScriptTokenType.Sub,
               content: {
                 literal: "f",
                 originalLength: 1,
@@ -670,6 +673,120 @@ describe("LatexLexer", () => {
       expect(() => new LatexLexer("{\\mycommand this is my block").readToEnd()).toThrow();
     });
   });
+
+  describe("superscripts, subscripts and accents", () => {
+    const tokenTypes = [
+      {
+        start: "\\~",
+        wantType: LatexTokenType.Accent as LatexTokenType.Accent,
+        wantDetail: LatexAccentType.Tilde,
+      },
+      {
+        start: "\\^",
+        wantType: LatexTokenType.Accent as LatexTokenType.Accent,
+        wantDetail: LatexAccentType.Circumflex,
+      },
+      {
+        start: "^",
+        wantType: LatexTokenType.Script as LatexTokenType.Script,
+        wantDetail: ScriptTokenType.Super,
+      },
+      {
+        start: "_",
+        wantType: LatexTokenType.Script as LatexTokenType.Script,
+        wantDetail: ScriptTokenType.Sub,
+      },
+    ];
+
+    it("should include a block token if the text is wrapped in braces", () => {
+      for (const { start, wantType, wantDetail } of tokenTypes) {
+        const got = new LatexLexer(`${start}{hello}`).readToEnd();
+        expect(got).toHaveLength(1);
+        const [token] = got as [AccentToken | ScriptToken];
+
+        const { content, literal, type, detail } = token;
+        expect(type).toEqual(wantType);
+        expect(detail).toEqual(wantDetail);
+        expect(literal.startsWith(start));
+
+        expect(content).toEqual({
+          type: LatexTokenType.Block,
+          literal: "{hello}",
+          content: [{ type: LatexTokenType.Content, literal: "hello", originalLength: 5 }],
+        });
+      }
+    });
+
+    it("should include a content token of the next character if the text is not wrapped", () => {
+      for (const { start, wantType, wantDetail } of tokenTypes) {
+        const got = new LatexLexer(`${start}nothing here`).readToEnd();
+        expect(got).toHaveLength(2);
+        const [token, otherContent] = got as [AccentToken | ScriptToken, ContentToken];
+
+        const { content, literal, type, detail } = token;
+        expect(type).toEqual(wantType);
+        expect(detail).toEqual(wantDetail);
+        expect(literal.startsWith(start));
+
+        expect(content).toEqual({
+          type: LatexTokenType.Content,
+          literal: "n",
+          originalLength: 1,
+        });
+
+        expect(otherContent).toEqual({
+          type: LatexTokenType.Content,
+          literal: "othing here",
+          originalLength: 11,
+        });
+      }
+    });
+
+    it("should correctly parse a following command token if a backslash follows", () => {
+      for (const { start, wantType, wantDetail } of tokenTypes) {
+        const got = new LatexLexer(`${start}\\command1{arg1}`).readToEnd();
+        expect(got).toHaveLength(1);
+        const [token] = got as [AccentToken | ScriptToken];
+
+        const { content, literal, type, detail } = token;
+        expect(type).toEqual(wantType);
+        expect(detail).toEqual(wantDetail);
+        expect(literal.startsWith(start));
+
+        expect(content).toEqual({
+          type: LatexTokenType.Command,
+          literal: "\\command1{arg1}",
+          name: "command1",
+          arguments: [
+            {
+              type: LatexCommandArgumentType.Required,
+              content: [
+                {
+                  type: LatexTokenType.Content,
+                  literal: "arg1",
+                  originalLength: 4,
+                },
+              ],
+            },
+          ],
+        });
+      }
+    });
+
+    // TODO: Add more tests for failure conditions
+    it("should throw if any other token type immediately follows", () => {
+      for (const end of ["[hello]", "#1", "^"]) {
+        for (const { start } of tokenTypes) {
+          expect(() => new LatexLexer(`${start}${end}`).readToEnd()).toThrow();
+        }
+      }
+    });
+  });
+
+  describe.todo("math", () => {
+    // TODO
+  });
+
   // it("should correctly lex a latex document", () => {
   //   const lexer = new LatexLexer(FULL_LATEX_DOC);
   //   const want: LatexToken[] = [

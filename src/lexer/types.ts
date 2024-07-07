@@ -13,7 +13,7 @@ export type LatexToken =
 export type AccentToken = {
   type: LatexTokenType.Accent;
   literal: `\\${"^" | "~"}${string}`;
-  accent: LatexAccentType;
+  detail: LatexAccentType;
   content: LatexToken;
 };
 
@@ -81,7 +81,7 @@ export enum ScriptTokenType {
 }
 export type ScriptToken = {
   type: LatexTokenType.Script;
-  position: ScriptTokenType;
+  detail: ScriptTokenType;
   literal: `${ScriptTokenType}${string}`;
   content: LatexToken;
 };
