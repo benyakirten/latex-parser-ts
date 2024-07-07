@@ -1256,154 +1256,144 @@ describe("LatexLexer", () => {
     });
   });
 
-  // describe("remove", () => {
-  //   it("should remove the segment from the lexer's input", () => {
-  //     const got = lexer.remove(1, 9).readToEnd();
-  //     const want: LatexToken[] = [
+  describe("remove", () => {
+    it("should remove the segment from the lexer's input", () => {
+      const got = lexer.remove(1, 9).readToEnd();
+      const want: LatexToken[] = [
+        {
+          arguments: [
+            {
+              content: {
+                literal: "12pt",
+                originalLength: 4,
+                type: LatexTokenType.Content,
+              },
+              type: LatexCommandArgumentType.Optional,
+            },
+            {
+              content: [
+                {
+                  literal: "article",
+                  originalLength: 7,
+                  type: LatexTokenType.Content,
+                },
+              ],
+              type: LatexCommandArgumentType.Required,
+            },
+          ],
+          literal: "\\class[12pt]{article}",
+          name: "class",
+          type: LatexTokenType.Command,
+        },
+      ];
 
-  //     ];
-  //     expect(got).toEqual(want);
-  //   });
-  //   it("should remove the segment from the lexer's input when the start value is negative", () => {
-  //     lexer.remove(-100, 9);
-  //     const got = [...lexer];
-  //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.Content, literal: "class" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "article" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
-  //     ];
-  //     expect(got).toEqual(want);
-  //   });
-  //   it("should reverse the start and end values if the start value is greater than the end value", () => {
-  //     lexer.remove(9, -100);
-  //     const got = [...lexer];
-  //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.Content, literal: "class" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "article" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
-  //     ];
-  //     expect(got).toEqual(want);
-  //   });
-  //   it("should be able to handle a negative start and end value", () => {
-  //     lexer.remove(-100, -50);
-  //     const got = [...lexer];
-  //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "documentclass" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "article" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
-  //     ];
-  //     expect(got).toEqual(want);
-  //   });
-  //   it("should remove to the end of the document if the end value is very large", () => {
-  //     lexer.remove(9, 10000);
-  //     const got = [...lexer];
-  //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "document" },
-  //     ];
-  //     expect(got).toEqual(want);
-  //   });
-  //   it("should not alter the doc if the start and end values are the same", () => {
-  //     lexer.remove(9, 9);
-  //     const got = [...lexer];
-  //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "documentclass" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "article" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
-  //     ];
+      expect(got).toEqual(want);
+    });
 
-  //     expect(got).toEqual(want);
-  //   });
-  // });
+    it("should remove the segment from the lexer's input when the start value is negative", () => {
+      const got = lexer.remove(-100, 9).readToEnd();
+      const want: LatexToken[] = [
+        {
+          literal: "class[12pt]",
+          originalLength: 11,
+          type: LatexTokenType.Content,
+        },
+        {
+          content: [
+            {
+              literal: "article",
+              originalLength: 7,
+              type: LatexTokenType.Content,
+            },
+          ],
+          literal: "{article}",
+          type: LatexTokenType.Block,
+        },
+      ];
+      expect(got).toEqual(want);
+    });
 
-  // describe("caching", () => {
-  //   const insertSpy = jest.fn();
-  //   const removeSpy = jest.fn();
-  //   const addSpy = jest.fn();
-  //   const getSpy = jest.fn();
-  //   const evictSpy = jest.fn();
-  //   class MockCache implements LexerCache {
-  //     public remove(start: number, end: number): LexerCache {
-  //       removeSpy(start, end);
-  //       return this;
-  //     }
-  //     public add(start: number, token: LatexToken): LexerCache {
-  //       addSpy(start, token);
-  //       return this;
-  //     }
-  //     public get(position: number): LatexToken | null {
-  //       return getSpy(position);
-  //     }
-  //     insert(position: number, token: LatexToken[]): LexerCache {
-  //       insertSpy(position, token);
-  //       return this;
-  //     }
-  //     evict(start: number, end: number): LexerCache {
-  //       evictSpy(start, end);
-  //       return this;
-  //     }
-  //   }
-  //   let lexer: LatexLexer;
-  //   beforeEach(() => {
-  //     insertSpy.mockClear();
-  //     removeSpy.mockClear();
-  //     addSpy.mockClear();
-  //     getSpy.mockClear();
-  //     evictSpy.mockClear();
-  //     getSpy.mockReturnValue(null);
-  //     lexer = new LatexLexer(SHORT_LATEX_DOC, new MockCache());
-  //   });
-  //   it("should call insert with the lexed items when insert is called", () => {
-  //     lexer.insert(1, "somecommand\\");
-  //     expect(insertSpy).toHaveBeenCalledTimes(1);
-  //     expect(insertSpy).toHaveBeenCalledWith(1, [
-  //       { type: LatexTokenType.Content, literal: "somecommand" },
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //     ]);
-  //   });
-  //   it("should call remove on the cache with the same start and end values when remove is called", () => {
-  //     lexer.remove(1, 9);
-  //     expect(removeSpy).toHaveBeenCalledTimes(1);
-  //     expect(removeSpy).toHaveBeenCalledWith(1, 9);
-  //   });
-  //   it("should call remove with the adjusted values when remove is called with irregular values", () => {
-  //     lexer.remove(9, -100);
-  //     expect(removeSpy).toHaveBeenCalledTimes(1);
-  //     expect(removeSpy).toHaveBeenCalledWith(0, 9);
-  //   });
-  //   it("should attempt to get the token from the cache when nextToken is called", () => {
-  //     lexer.nextToken();
-  //     expect(getSpy).toHaveBeenCalledTimes(1);
-  //     expect(getSpy).toHaveBeenCalledWith(0);
-  //   });
-  //   it("should add the token to the cache when nextToken is called and the value does not exist in the cache", () => {
-  //     getSpy.mockReturnValue(null);
-  //     lexer.nextToken();
-  //     expect(addSpy).toHaveBeenCalledTimes(1);
-  //     expect(addSpy).toHaveBeenCalledWith(0, { type: LatexTokenType.BackSlash, literal: "\\" });
-  //   });
-  //   it("should not add the token to the cache when nextToken is called and the value exists in the cache", () => {
-  //     getSpy.mockReturnValue({ type: LatexTokenType.BackSlash, literal: "\\" });
-  //     lexer.nextToken();
-  //     expect(addSpy).not.toHaveBeenCalled();
-  //   });
-  // });
+    it("should reverse the start and end values if the start value is greater than the end value", () => {
+      lexer.remove(9, -100);
+      const got = [...lexer];
+      const want: LatexToken[] = [
+        {
+          content: [
+            {
+              literal: "article",
+              originalLength: 7,
+              type: LatexTokenType.Content,
+            },
+          ],
+          literal: "{article}",
+          type: LatexTokenType.Block,
+        },
+        {
+          literal: "class[12pt]",
+          originalLength: 11,
+          type: LatexTokenType.Content,
+        },
+        {
+          content: [
+            {
+              literal: "article",
+              originalLength: 7,
+              type: LatexTokenType.Content,
+            },
+          ],
+          literal: "{article}",
+          type: LatexTokenType.Block,
+        },
+      ];
+      expect(got).toEqual(want);
+    });
+
+    it("should remove to the end of the document if the end value is very large", () => {
+      lexer.remove(9, 10000);
+      const got = [...lexer];
+      const want: LatexToken[] = [
+        {
+          arguments: [],
+          literal: "\\document",
+          name: "document",
+          type: LatexTokenType.Command,
+        },
+      ];
+      expect(got).toEqual(want);
+    });
+
+    it("should not alter the doc if the start and end values are the same", () => {
+      lexer.remove(9, 9);
+      const got = [...lexer];
+      const want: LatexToken[] = [
+        {
+          arguments: [
+            {
+              content: {
+                literal: "12pt",
+                originalLength: 4,
+                type: LatexTokenType.Content,
+              },
+              type: 0,
+            },
+            {
+              content: [
+                {
+                  literal: "article",
+                  originalLength: 7,
+                  type: LatexTokenType.Content,
+                },
+              ],
+              type: 1,
+            },
+          ],
+          literal: "\\documentclass[12pt]{article}",
+          name: "documentclass",
+          type: LatexTokenType.Command,
+        },
+      ];
+
+      expect(got).toEqual(want);
+    });
+  });
 });

@@ -124,7 +124,7 @@ export class LatexLexer {
     this.input = this.input.slice(0, start) + this.input.slice(end);
     this.cache.remove(start, end);
 
-    if (this.position > start) {
+    if (this.position >= start) {
       this.position -= end - start;
     }
 
