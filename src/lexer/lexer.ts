@@ -19,6 +19,8 @@ import {
   type RequiredArgument,
   type OptionalArgument,
   type BlockToken,
+  type ScriptToken,
+  ScriptTokenType,
 } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
@@ -217,29 +219,16 @@ export class LatexLexer {
   }
 
   private buildAccent(
-    position: number,
+    startPosition: number,
     accentChar: LatexCharType.Tilde | LatexCharType.Caret,
   ): AccentToken {
-    let content: string;
-    let literalItem: string;
-    const char = this.readChar(position);
-    if (!char) {
-      throw new Error("Expected at least one letter to follow accent");
-    }
-
-    if (char === LatexCharType.OpenBrace) {
-      content = this.getSectionWithPossibleNesting(position + 1, LatexCharType.CloseBrace);
-      literalItem = `{${content}}`;
-    } else {
-      content = char;
-      literalItem = char;
-    }
+    const token = this.buildModifiableToken(startPosition);
     return {
       type: LatexTokenType.Accent,
-      literal: `\\${accentChar}${literalItem}`,
+      literal: `\\${accentChar}${token.literal}`,
       accent:
         accentChar === LatexCharType.Tilde ? LatexAccentType.Tilde : LatexAccentType.Circumflex,
-      content,
+      content: token,
     };
   }
 
@@ -591,6 +580,48 @@ export class LatexLexer {
     };
   }
 
+  private buildModifiableToken(startPosition: number): ContentToken | BlockToken | CommandToken {
+    const err = new Error(
+      "Expected either open brace, backslash or alphanumeric character to follow character modifier",
+    );
+    const char = this.readChar(startPosition);
+
+    if (!char) {
+      throw err;
+    }
+
+    if (/\w/.test(char)) {
+      return this.buildContent(startPosition);
+    }
+
+    if (char === LatexCharType.OpenBrace) {
+      return this.buildBlock(startPosition);
+    }
+
+    if (char === LatexCharType.Backslash) {
+      const command = this.buildCommand(startPosition);
+      if (command.type !== LatexTokenType.Command) {
+        throw err;
+      }
+      return command;
+    }
+
+    throw err;
+  }
+
+  private buildScript(
+    startPosition: number,
+    char: LatexCharType.Caret | LatexCharType.Underscore,
+  ): ScriptToken {
+    const token = this.buildModifiableToken(startPosition);
+    return {
+      type: LatexTokenType.Script,
+      position: char === LatexCharType.Caret ? ScriptTokenType.Super : ScriptTokenType.Sub,
+      literal: `${char}${token.literal}`,
+      content: token,
+    };
+  }
+
   public peek(advance: number = 0): LatexToken | null {
     const position = this.position + advance;
     const char = this.input.at(position);
@@ -615,13 +646,10 @@ export class LatexLexer {
         token = this.buildCommand(position + 1);
         break;
       case LatexCharType.Caret:
-        token = { type: LatexTokenType.Superscript, literal: char };
+        token = this.buildScript(position + 1, char);
         break;
       case LatexCharType.Underscore:
-        token = {
-          type: LatexTokenType.Subscript,
-          literal: char,
-        };
+        token = this.buildScript(position + 1, char);
         break;
       case LatexCharType.Ampersand:
         token = {

@@ -14,6 +14,7 @@ import {
   type LabeledArgContent,
   type CommentToken,
   type PlaceholderToken,
+  ScriptTokenType,
 } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
@@ -27,7 +28,7 @@ const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
 const SHORT_LATEX_DOC = `\\documentclass[12pt]{article}`;
 
 describe("LatexLexer", () => {
-  describe("command", () => {
+  describe("command tokens", () => {
     it("should lex a command with no arguments", () => {
       const got = new LatexLexer("\\command").readToEnd();
       expect(got).toHaveLength(1);
@@ -383,22 +384,34 @@ describe("LatexLexer", () => {
           originalLength: 7,
         },
         {
-          type: LatexTokenType.Subscript,
-          literal: "_",
+          type: LatexTokenType.Script,
+          literal: "_i",
+          position: ScriptTokenType.Super,
+          content: {
+            type: LatexTokenType.Content,
+            literal: "i",
+            originalLength: 1,
+          },
         },
         {
           type: LatexTokenType.Content,
-          literal: "in",
+          literal: "n",
+          originalLength: 1,
+        },
+        {
+          type: LatexTokenType.Script,
+          position: ScriptTokenType.Super,
+          literal: "^g",
+          content: {
+            type: LatexTokenType.Content,
+            literal: "g",
+            originalLength: 1,
+          },
+        },
+        {
+          type: LatexTokenType.Content,
+          literal: ": ",
           originalLength: 2,
-        },
-        {
-          type: LatexTokenType.Superscript,
-          literal: "^",
-        },
-        {
-          type: LatexTokenType.Content,
-          literal: "g: ",
-          originalLength: 3,
         },
         {
           type: LatexTokenType.Placeholder,
@@ -411,30 +424,36 @@ describe("LatexLexer", () => {
         {
           key: "d",
           value: [
-            { type: LatexTokenType.Superscript, literal: "^" },
-            { type: LatexTokenType.Content, literal: "7", originalLength: 1 },
+            {
+              type: LatexTokenType.Script,
+              literal: "^7",
+              position: ScriptTokenType.Super,
+              content: { type: LatexTokenType.Content, literal: "7", originalLength: 1 },
+            },
           ],
         },
         {
           key: "e",
           value: [
             {
-              type: LatexTokenType.Superscript,
-              literal: "^",
+              type: LatexTokenType.Script,
+              literal: "^f",
+              position: ScriptTokenType.Super,
+              content: {
+                type: LatexTokenType.Content,
+                literal: "f",
+                originalLength: 1,
+              },
             },
             {
-              type: LatexTokenType.Content,
-              literal: "f",
-              originalLength: 1,
-            },
-            {
-              type: LatexTokenType.Subscript,
-              literal: "_",
-            },
-            {
-              literal: "f",
-              originalLength: 1,
-              type: LatexTokenType.Content,
+              type: LatexTokenType.Script,
+              literal: "_f",
+              position: ScriptTokenType.Sub,
+              content: {
+                literal: "f",
+                originalLength: 1,
+                type: LatexTokenType.Content,
+              },
             },
           ],
         },
@@ -531,6 +550,35 @@ describe("LatexLexer", () => {
       };
 
       expect(token).toEqual(want);
+    });
+
+    // TODO: Add negative tests
+  });
+
+  // TODO: Make accents, superscript and subscript blocks have token children
+  // If they have {} then that will be inside the braces, if not it's just next the next character
+
+  describe("placeholder tokens", () => {
+    it("should decode # followed by a number as a placeholder", () => {
+      // TODO
+    });
+
+    it("should throw if something other than a number follows the #", () => {
+      // TODO
+    });
+  });
+
+  it("should throw on lexing an unescaped closing brace and bracket", () => {
+    // TODO
+  });
+
+  describe("block", () => {
+    it("should build a block on an open brace encapsulating all content until the close brace", () => {
+      // TODO
+    });
+
+    it("should throw if the block is never closed", () => {
+      // TODO
     });
   });
   // it("should correctly lex a latex document", () => {

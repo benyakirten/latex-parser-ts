@@ -6,8 +6,7 @@ export type LatexToken =
   | CommentToken
   | ColumnAlignToken
   | PlaceholderToken
-  | SuperscriptToken
-  | SubscriptToken
+  | ScriptToken
   | ContentToken
   | EndOfLineToken;
 
@@ -15,7 +14,7 @@ export type AccentToken = {
   type: LatexTokenType.Accent;
   literal: `\\${"^" | "~"}${string}`;
   accent: LatexAccentType;
-  content: string;
+  content: LatexToken;
 };
 
 export type RequiredArgument = {
@@ -76,14 +75,15 @@ export type PlaceholderToken = {
   content: number;
 };
 
-export type SuperscriptToken = {
-  type: LatexTokenType.Superscript;
-  literal: "^";
-};
-
-export type SubscriptToken = {
-  type: LatexTokenType.Subscript;
-  literal: "_";
+export enum ScriptTokenType {
+  Super = "^",
+  Sub = "_",
+}
+export type ScriptToken = {
+  type: LatexTokenType.Script;
+  position: ScriptTokenType;
+  literal: `${ScriptTokenType}${string}`;
+  content: LatexToken;
 };
 
 export type EndOfLineToken = {
@@ -109,8 +109,7 @@ export enum LatexTokenType {
   Block = "block",
   ColumnAlign = "columnalign",
   Comment = "comment",
-  Superscript = "superscript",
-  Subscript = "subscript",
+  Script = "script",
   Placeholder = "placeholder",
   NonBreakingSpace = "nonbreakingspace",
   Content = "content",
