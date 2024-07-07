@@ -7,6 +7,7 @@ import {
   LatexCommandArgumentType,
   ScriptTokenType,
   LatexAccentType,
+  MathPosition,
   type LexerCache,
   type LatexToken,
   type CommandToken,
@@ -19,7 +20,6 @@ import {
   type BlockToken,
   type AccentToken,
   type ScriptToken,
-  MathPosition,
 } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
@@ -329,8 +329,8 @@ describe("LatexLexer", () => {
       };
       const secondContentToken: ContentToken = {
         type: LatexTokenType.Content,
-        literal: " Second argument: ",
-        originalLength: 18,
+        literal: " \\\n  Second argument: ",
+        originalLength: 36,
       };
       const secondPlaceholderToken: PlaceholderToken = {
         type: LatexTokenType.Placeholder,
@@ -784,57 +784,115 @@ describe("LatexLexer", () => {
     });
   });
 
-  describe.todo("escaped characters", () => {
+  describe("escaped characters", () => {
     it("should properly escape characters that are escaped, no matter how nested", () => {
-      // TODO
+      const got = new LatexLexer(
+        "100\\% \\command{\\$\\^{}\\~{}} \\_T {\\{Nested{\\{Double\\_ Nested}}",
+      ).readToEnd();
+
+      expect(got.length).toEqual(4);
+
+      const [content1, command, content2, block] = got;
+      expect(content1).toEqual({
+        type: LatexTokenType.Content,
+        literal: "100% ",
+        originalLength: 17,
+      });
+
+      expect(command).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command{@@<!DOLLAR!>@@<!CARET!>@@<!TILDE!>}",
+        name: "command",
+        arguments: [
+          {
+            type: LatexCommandArgumentType.Required,
+            content: [
+              {
+                type: LatexTokenType.Content,
+                literal: "$^~",
+                originalLength: 34,
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(content2).toEqual({
+        type: LatexTokenType.Content,
+        literal: " _T ",
+        originalLength: 19,
+      });
+
+      expect(block).toEqual({
+        content: [
+          {
+            literal: "{Nested",
+            originalLength: 18,
+            type: LatexTokenType.Content,
+          },
+          {
+            content: [
+              {
+                literal: "{Double_ Nested",
+                originalLength: 41,
+                type: LatexTokenType.Content,
+              },
+            ],
+            literal: "{@@<!LCURLY!>Double@@<!UNDERSCORE!> Nested}",
+            type: LatexTokenType.Block,
+          },
+        ],
+        literal: "{@@<!LCURLY!>Nested{@@<!LCURLY!>Double@@<!UNDERSCORE!> Nested}}",
+        type: LatexTokenType.Block,
+      });
     });
   });
 
-  describe.todo("comments", () => {
-    it("should encapsulat everything after the % until the end of line in a comment", () => {
-      // TODO
-    });
+  // describe.todo("comments", () => {
+  //   it("should encapsulat everything after the % until the end of line in a comment", () => {
+  //     // TODO
+  //   });
 
-    it("should throw an error if the comment prevents a block from being closed", () => {
-      // TODO
-    });
-  });
+  //   it("should throw an error if the comment prevents a block from being closed", () => {
+  //     // TODO
+  //   });
+  // });
 
-  describe.todo("math", () => {
-    const tokenTypes = [
-      {
-        start: "\\(",
-        end: "\\)",
-        wantPosition: MathPosition.Block,
-      },
-      {
-        start: "\\[",
-        end: "\\]",
-        wantPosition: MathPosition.Centered,
-      },
-      {
-        start: "$",
-        end: "$",
-        wantPosition: MathPosition.Inline,
-      },
-    ];
+  // describe.todo("math", () => {
+  //   const tokenTypes = [
+  //     {
+  //       start: "\\(",
+  //       end: "\\)",
+  //       wantPosition: MathPosition.Block,
+  //     },
+  //     {
+  //       start: "\\[",
+  //       end: "\\]",
+  //       wantPosition: MathPosition.Centered,
+  //     },
+  //     {
+  //       start: "$",
+  //       end: "$",
+  //       wantPosition: MathPosition.Inline,
+  //     },
+  //   ];
 
-    it("should encapsulate everything that occurs between the start and end sequences", () => {
-      // TODO
-    });
+  //   it("should encapsulate everything that occurs between the start and end sequences", () => {
+  //     // TODO
+  //   });
 
-    it("should throw if a math block of the same type is opened within it", () => {
-      // TODO
-    });
+  //   it("should throw if a math block of the same type is opened within it", () => {
+  //     // TODO
+  //   });
 
-    it("should throw if the block is not closed correctly", () => {
-      // TODO
-    });
-  });
+  //   it("should throw if the block is not closed correctly", () => {
+  //     // TODO
+  //   });
+  // });
 
-  it("should properly lex a complete document", () => {
-    // TODO
-  });
+  // it("should properly lex a complete document", () => {
+  //   // TODO
+  // });
 
   // describe("insert", () => {
   //   it("should insert items into the lexer's input", () => {

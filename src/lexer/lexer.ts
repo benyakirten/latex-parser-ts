@@ -6,6 +6,7 @@ import {
   MathPosition,
   LatexAccentType,
   LatexCommandArgumentType,
+  ScriptTokenType,
   type LatexToken,
   type LexerCache,
   type CommandToken,
@@ -20,7 +21,6 @@ import {
   type OptionalArgument,
   type BlockToken,
   type ScriptToken,
-  ScriptTokenType,
 } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
@@ -50,11 +50,6 @@ export class LatexLexer {
     input: string,
     private cache: LexerCache = new NoCache(),
   ) {
-    // Enforce unescaping if it has already been escaped.
-    // This is useful for recursive LatexLexer instantiations because
-    // when creating a macro, it might have the end of line like this:
-    // \\\n, which will be escaped as \\n, which will should be removed.
-    input = this.unescapeContent(input);
     input = this.escapeInput(input);
     this.input = input;
   }
@@ -568,10 +563,7 @@ export class LatexLexer {
   }
 
   private buildPlaceholder(startPosition: number): PlaceholderToken {
-    const content = this.readUntil(startPosition, (c) => {
-      const isNotNumber = isNaN(parseInt(c));
-      return isNotNumber;
-    });
+    const content = this.readUntil(startPosition, (c) => isNaN(parseInt(c)));
 
     const parsedContent = parseInt(content);
     if (isNaN(parsedContent)) {
