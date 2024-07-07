@@ -20,6 +20,7 @@ import {
   type BlockToken,
   type AccentToken,
   type ScriptToken,
+  type MathToken,
 } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
@@ -862,37 +863,60 @@ describe("LatexLexer", () => {
     });
   });
 
-  // describe.todo("math", () => {
-  //   const tokenTypes = [
-  //     {
-  //       start: "\\(",
-  //       end: "\\)",
-  //       wantPosition: MathPosition.Block,
-  //     },
-  //     {
-  //       start: "\\[",
-  //       end: "\\]",
-  //       wantPosition: MathPosition.Centered,
-  //     },
-  //     {
-  //       start: "$",
-  //       end: "$",
-  //       wantPosition: MathPosition.Inline,
-  //     },
-  //   ];
+  describe("math", () => {
+    const tokenTypes = [
+      {
+        start: "\\(",
+        end: "\\)",
+        wantPosition: MathPosition.Block,
+      },
+      {
+        start: "\\[",
+        end: "\\]",
+        wantPosition: MathPosition.Centered,
+      },
+      {
+        start: "$",
+        end: "$",
+        wantPosition: MathPosition.Inline,
+      },
+    ];
 
-  //   it("should encapsulate everything that occurs between the start and end sequences", () => {
-  //     // TODO
-  //   });
+    it("should encapsulate everything that occurs between the start and end sequences", () => {
+      for (const { start, end, wantPosition } of tokenTypes) {
+        const got = new LatexLexer(`${start}e = mc^2${end}`).readToEnd();
+        expect(got).toHaveLength(1);
+        const [token] = got as [MathToken];
+        expect(token.type).toEqual(LatexTokenType.Math);
+        expect(token.position).toEqual(wantPosition);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect(token.literal).toEqual(`${start}e = mc^2${end}` as any);
+        expect(token.content).toEqual([
+          {
+            type: LatexTokenType.Content,
+            literal: "e = mc",
+            originalLength: 6,
+          },
+          {
+            type: LatexTokenType.Script,
+            detail: ScriptTokenType.Super,
+            literal: "^2",
+            content: {
+              type: LatexTokenType.Content,
+              literal: "2",
+              originalLength: 1,
+            },
+          },
+        ]);
+      }
+    });
 
-  //   it("should throw if a math block of the same type is opened within it", () => {
-  //     // TODO
-  //   });
-
-  //   it("should throw if the block is not closed correctly", () => {
-  //     // TODO
-  //   });
-  // });
+    it("should throw if the block is not closed correctly", () => {
+      for (const { start } of tokenTypes) {
+        expect(() => new LatexLexer(`${start}e = mc^2`).readToEnd()).toThrow();
+      }
+    });
+  });
 
   // it("should properly lex a complete document", () => {
   //   // TODO

@@ -50,19 +50,18 @@ export class LatexLexer {
     input: string,
     private cache: LexerCache = new NoCache(),
   ) {
-    input = this.escapeInput(input);
-    this.input = input;
+    this.input = this.escapeInput(input);
   }
 
   private escapeInput(input: string): string {
     // TODO: Replace this with a function.
-    // Replace `\\\n` but not `\\\\\n`.
-    input = input.replaceAll(/(?<!\\)\\\n\s*/g, "");
+    // Replace `\\n` but not `\\\n`.
     for (const [escapedSequence, escapeSequence] of Object.entries(
       LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
     )) {
       input = input.replaceAll(escapedSequence, escapeSequence);
     }
+    input = input.replaceAll(/\\\n\s*/g, "");
 
     return input;
   }
@@ -181,38 +180,17 @@ export class LatexLexer {
         ? LatexCharType.CloseBracket
         : LatexCharType.CloseParen;
 
-    let char = this.readChar(startPosition);
-    let hasSeenBackslash = false;
-    let content = "";
-
-    while (true) {
-      if (!char) {
-        throw new Error("Expected math block to close");
-      }
-
-      if (hasSeenBackslash) {
-        // If we've seen a backslash and are now seeing a closing bracket, we can break
-        if (char === endMathCharacter) {
-          break;
-        }
-
-        hasSeenBackslash = false;
-        content += LatexCharType.Backslash;
-      } else if (char === LatexCharType.Backslash) {
-        hasSeenBackslash = true;
-        continue;
-      }
-
-      content += char;
-
-      startPosition++;
-      char = this.readChar(startPosition);
+    const endIndex = this.input.indexOf(`\\${endMathCharacter}`);
+    if (endIndex === -1) {
+      throw new Error("Expected math block to close");
     }
 
+    const content = this.input.slice(startPosition, endIndex);
     const mathPosition =
       endMathCharacter === LatexCharType.CloseBracket ? MathPosition.Centered : MathPosition.Block;
 
     const lexer = new LatexLexer(content);
+
     return {
       type: LatexTokenType.Math,
       literal: `\\${startMathCharacter}${content}\\${endMathCharacter}`,
@@ -593,6 +571,9 @@ export class LatexLexer {
 
   private buildInlineMath(startPosition: number): MathToken {
     const content = this.readUntil(startPosition, (c) => c === "$");
+    if (this.readChar(startPosition + content.length) !== "$") {
+      throw new Error("Inline math block not closed");
+    }
     const lexer = new LatexLexer(content);
     return {
       type: LatexTokenType.Math,
