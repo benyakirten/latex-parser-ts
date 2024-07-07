@@ -23,17 +23,14 @@ import {
   type MathToken,
 } from "./types";
 
-const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
-\\( E = mc^2 \\). And here is a displayed equation:
-\\[
-\\int_a^b f(x)\\,dx
-\\]
-\\\tbegin{figure:sample}[h]
-\\includegraphics[width=0.5\\textwidth]{example.jpg}`;
-
 const SHORT_LATEX_DOC = `\\documentclass[12pt]{article}`;
 
 describe("LatexLexer", () => {
+  let lexer: LatexLexer;
+  beforeEach(() => {
+    lexer = new LatexLexer(SHORT_LATEX_DOC);
+  });
+
   describe("command tokens", () => {
     it("should lex a command with no arguments", () => {
       const got = new LatexLexer("\\command").readToEnd();
@@ -918,85 +915,220 @@ describe("LatexLexer", () => {
     });
   });
 
+  // TODO: Complete this test
   // it("should properly lex a complete document", () => {
-  //   // TODO
+  //   // Sourced from https://guides.nyu.edu/LaTeX/exercises, exercise #5
+  //   const FULL_LATEX_DOC = [
+  //     "\\documentclass{article} ",
+  //     "",
+  //     "\\usepackage{amsmath}",
+  //     "\\usepackage{hyperref}",
+  //     "\\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}",
+  //     "",
+  //     "\\title{Hello World!}",
+  //     "\\author{Your Name}",
+  //     "\\date{January 1, 1831}",
+  //     "",
+  //     "",
+  //     "\\begin{document}",
+  //     "    \\maketitle",
+  //     "    \\section{Getting Started}",
+  //     "    \\textbf{Hello World!} Today I am learning \\LaTeX. \\LaTeX{} is a great program for writing math. I can write in line math such as $a^2+b^2=c^2$. I can also give equations their own space: ",
+  //     "    \\begin{equation} ",
+  //     "    \\gamma^2+\\theta^2=\\omega^2",
+  //     "    \\end{equation}",
+  //     "    ``Maxwell's equations'' are named for James Clark Maxwell and are as follow:",
+  //     "    \\begin{align}             ",
+  //     "    \\vec{\\nabla} \\cdot \\vec{E} \\quad &=\\quad\\frac{\\rho}{\\epsilon_0} &&\\text{Gauss's Law} \\label{eq:GL}\\\\      ",
+  //     "    \\vec{\\nabla} \\cdot \\vec{B} \\quad &=\\quad 0 &&\\text{Gauss's Law for Magnetism} \\label{eq:GLM}\\\\",
+  //     "    \\vec{\\nabla} \\times \\vec{E} \\quad &=\\hspace{10pt}-\\frac{\\partial{\\vec{B}}}{\\partial{t}} &&\\text{Faraday's Law of Induction} \\label{eq:FL}\\\\ ",
+  //     "    \\vec{\\nabla} \\times \\vec{B} \\quad &=\\quad \\mu_0\\left( \\epsilon_0\\frac{\\partial{\\vec{E}}}{\\partial{t}}+\\vec{J}\\right) &&\\text{Ampere's Circuital Law} \\label{eq:ACL}",
+  //     "    \\end{align}",
+  //     "Equations \\ref{eq:GL}, \\ref{eq:GLM}, \\ref{eq:FL}, and \\ref{eq:ACL} are some of the most important in Physics.",
+  //     "\\section{What about Matrix Equations?}",
+  //     "\\begin{equation*}",
+  //     "\\begin{pmatrix}",
+  //     "a_{11}&a_{12}&\\dots&a_{1n}\\\\",
+  //     "a_{21}&a_{22}&\\dots&a_{2n}\\\\",
+  //     "\\vdots&\\vdots&\\ddots&\\vdots\\\\",
+  //     "a_{n1}&a_{n2}&\\dots&a_{nn}",
+  //     "\\end{pmatrix}",
+  //     "\\begin{bmatrix}",
+  //     "v_{1}\\\\",
+  //     "v_{2}\\\\",
+  //     "\\vdots\\\\",
+  //     "v_{n}",
+  //     "\\end{bmatrix}",
+  //     "=",
+  //     "\\begin{matrix}",
+  //     "w_{1}\\\\",
+  //     "w_{2}\\\\",
+  //     "\\vdots\\\\",
+  //     "w_{n}",
+  //     "\\end{matrix}",
+  //     "\\end{equation*}",
+  //     "\\end{document}",
+  //   ].join("\n");
   // });
 
-  // describe("insert", () => {
-  //   it("should insert items into the lexer's input", () => {
-  //     const gotIter = lexer.insert(1, "somecommand\\");
-  //     const wantIter = (function* () {
-  //       yield { type: LatexTokenType.Content, literal: "somecommand" };
-  //       yield { type: LatexTokenType.BackSlash, literal: "\\" };
-  //     })();
-  //     for (const gotToken of gotIter) {
-  //       const wantToken = wantIter.next().value;
-  //       expect(wantToken).toEqual(gotToken);
-  //     }
-  //     const gotLexedItems = [...lexer];
-  //     const wantLexedItems: LatexToken[] = [
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "somecommand" },
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "documentclass" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "article" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
-  //     ];
-  //     expect(gotLexedItems).toEqual(wantLexedItems);
-  //   });
-  //   it("should insert by distance from the end if the position is negative", () => {
-  //     lexer.insert(-1, "fast:introduction");
-  //     const got = [...lexer];
-  //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "documentclass" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "articlefast:introduction" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
-  //     ];
-  //     expect(got).toEqual(want);
-  //   });
-  //   it("should insert at the beginning for a sufficiently large negative value", () => {
-  //     lexer.insert(-10000, "\\somecommand");
-  //     const got = [...lexer];
-  //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "somecommand" },
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "documentclass" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "article" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
-  //     ];
-  //     expect(got).toEqual(want);
-  //   });
-  //   it("should insert at the end for a sufficiently large positive value", () => {
-  //     lexer.insert(1000, "$");
-  //     const got = [...lexer];
-  //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "documentclass" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "article" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
-  //       { type: LatexTokenType.Dollar, literal: "$" },
-  //     ];
-  //     expect(got).toEqual(want);
-  //   });
-  // });
+  describe("insert", () => {
+    it("should insert items into the lexer's input", () => {
+      const got = lexer.insert(1, "somecommand \\somecommand2 ");
+
+      const tokens = got.readToEnd();
+
+      const want: LatexToken[] = [
+        {
+          arguments: [],
+          literal: "\\somecommand",
+          name: "somecommand",
+          type: LatexTokenType.Command,
+        },
+        {
+          literal: " ",
+          originalLength: 1,
+          type: LatexTokenType.Content,
+        },
+        {
+          arguments: [],
+          literal: "\\somecommand2",
+          name: "somecommand2",
+          type: LatexTokenType.Command,
+        },
+        {
+          literal: " documentclass[12pt]",
+          originalLength: 20,
+          type: LatexTokenType.Content,
+        },
+        {
+          content: [
+            {
+              literal: "article",
+              originalLength: 7,
+              type: LatexTokenType.Content,
+            },
+          ],
+          literal: "{article}",
+          type: LatexTokenType.Block,
+        },
+      ];
+      expect(tokens).toEqual(want);
+    });
+
+    it("should insert by distance from the end if the position is negative", () => {
+      const got = lexer.insert(-1, "fast:introduction").readToEnd();
+      const want: LatexToken[] = [
+        {
+          arguments: [
+            {
+              content: {
+                literal: "12pt",
+                originalLength: 4,
+                type: LatexTokenType.Content,
+              },
+              type: 0,
+            },
+            {
+              content: [
+                {
+                  literal: "articlefast:introduction",
+                  originalLength: 24,
+                  type: LatexTokenType.Content,
+                },
+              ],
+              type: 1,
+            },
+          ],
+          literal: "\\documentclass[12pt]{articlefast:introduction}",
+          name: "documentclass",
+          type: LatexTokenType.Command,
+        },
+      ];
+      expect(got).toEqual(want);
+    });
+
+    it("should insert at the beginning for a sufficiently large negative value", () => {
+      const got = lexer.insert(-10000, "\\somecommand ").readToEnd();
+      const want: LatexToken[] = [
+        {
+          literal: "\\somecommand",
+          name: "somecommand",
+          type: LatexTokenType.Command,
+          arguments: [],
+        },
+        {
+          literal: " ",
+          type: LatexTokenType.Content,
+          originalLength: 1,
+        },
+        {
+          arguments: [
+            {
+              content: {
+                literal: "12pt",
+                originalLength: 4,
+                type: LatexTokenType.Content,
+              },
+              type: 0,
+            },
+            {
+              content: [
+                {
+                  literal: "article",
+                  originalLength: 7,
+                  type: LatexTokenType.Content,
+                },
+              ],
+              type: 1,
+            },
+          ],
+          literal: "\\documentclass[12pt]{article}",
+          name: "documentclass",
+          type: LatexTokenType.Command,
+        },
+      ];
+      expect(got).toEqual(want);
+    });
+
+    it("should insert at the end for a sufficiently large positive value", () => {
+      const got = lexer.insert(1000, " \\$").readToEnd();
+
+      const want: LatexToken[] = [
+        {
+          arguments: [
+            {
+              content: {
+                literal: "12pt",
+                originalLength: 4,
+                type: LatexTokenType.Content,
+              },
+              type: 0,
+            },
+            {
+              content: [
+                {
+                  literal: "article",
+                  originalLength: 7,
+                  type: LatexTokenType.Content,
+                },
+              ],
+              type: 1,
+            },
+          ],
+          literal: "\\documentclass[12pt]{article}",
+          name: "documentclass",
+          type: LatexTokenType.Command,
+        },
+        {
+          type: LatexTokenType.Content,
+          literal: " $",
+          originalLength: 13,
+        },
+      ];
+      expect(got).toEqual(want);
+    });
+  });
+
   // describe("remove", () => {
   //   it("should remove the segment from the lexer's input", () => {
   //     lexer.remove(1, 9);

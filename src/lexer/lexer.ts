@@ -94,22 +94,20 @@ export class LatexLexer {
     this.position = clamp(position, 0, this.input.length);
   }
 
-  public insert(position: number, value: string): IterableIterator<LatexToken> {
+  public insert(position: number, value: string): LatexLexer {
     if (position < 0) {
       position = this.input.length + position;
     }
 
     position = clamp(position, 0, this.input.length);
-    this.input = this.input.slice(0, position) + value + this.input.slice(position);
 
-    const iter = new LatexLexer(value);
-    this.cache.insert(position, [...iter]);
-
-    if (this.position >= position) {
+    this.input =
+      this.input.slice(0, position) + this.escapeInput(value) + this.input.slice(position);
+    if (this.position > position) {
       this.position += value.length;
     }
 
-    return iter;
+    return this;
   }
 
   public remove(start: number, end: number): LatexLexer {
@@ -126,7 +124,7 @@ export class LatexLexer {
     this.input = this.input.slice(0, start) + this.input.slice(end);
     this.cache.remove(start, end);
 
-    if (this.position >= start) {
+    if (this.position > start) {
       this.position -= end - start;
     }
 
@@ -149,10 +147,6 @@ export class LatexLexer {
     const content = this.readUntil(startPosition, (c) => {
       return (
         c === LatexCharType.Backslash ||
-        c === LatexCharType.OpenBracket ||
-        c === LatexCharType.CloseBracket ||
-        c === LatexCharType.OpenParen ||
-        c === LatexCharType.CloseParen ||
         c === LatexCharType.OpenBrace ||
         c === LatexCharType.CloseBrace ||
         c === LatexCharType.Percent ||
