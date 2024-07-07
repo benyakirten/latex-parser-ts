@@ -1127,21 +1127,140 @@ describe("LatexLexer", () => {
       ];
       expect(got).toEqual(want);
     });
+
+    describe("cursor positioning", () => {
+      let lexer: LatexLexer;
+      beforeEach(() => {
+        lexer = new LatexLexer("a&b&c&d&e");
+      });
+
+      it("should move the cursor position forward by the moved amount if the position was at leat at the start of the inserted items", () => {
+        lexer.seek(2);
+        const want = lexer.peek();
+
+        lexer.insert(1, "&f&g");
+        const got = lexer.peek();
+
+        expect(want).toEqual(got);
+        expect(want).toEqual({
+          type: LatexTokenType.Content,
+          literal: "b",
+          originalLength: 1,
+        });
+
+        const remainingTokens = [...lexer];
+        expect(remainingTokens).toEqual([
+          {
+            literal: "b",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+          {
+            literal: "&",
+            type: LatexTokenType.ColumnAlign,
+          },
+          {
+            literal: "c",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+          {
+            literal: "&",
+            type: LatexTokenType.ColumnAlign,
+          },
+          {
+            literal: "d",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+          {
+            literal: "&",
+            type: LatexTokenType.ColumnAlign,
+          },
+          {
+            literal: "e",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+        ]);
+      });
+
+      it("should keep the cursor at the same position if it was not at that position yet", () => {
+        lexer.seek(2);
+        const want = lexer.peek();
+
+        lexer.insert(1000, "&f&g");
+        const got = lexer.peek();
+
+        expect(want).toEqual(got);
+        expect(want).toEqual({
+          type: LatexTokenType.Content,
+          literal: "b",
+          originalLength: 1,
+        });
+
+        const restOfTokens = [...lexer];
+        expect(restOfTokens).toEqual([
+          {
+            literal: "b",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+          {
+            literal: "&",
+            type: LatexTokenType.ColumnAlign,
+          },
+          {
+            literal: "c",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+          {
+            literal: "&",
+            type: LatexTokenType.ColumnAlign,
+          },
+          {
+            literal: "d",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+          {
+            literal: "&",
+            type: LatexTokenType.ColumnAlign,
+          },
+          {
+            literal: "e",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+          {
+            literal: "&",
+            type: LatexTokenType.ColumnAlign,
+          },
+          {
+            literal: "f",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+          {
+            literal: "&",
+            type: LatexTokenType.ColumnAlign,
+          },
+          {
+            literal: "g",
+            originalLength: 1,
+            type: LatexTokenType.Content,
+          },
+        ]);
+      });
+    });
   });
 
   // describe("remove", () => {
   //   it("should remove the segment from the lexer's input", () => {
-  //     lexer.remove(1, 9);
-  //     const got = [...lexer];
+  //     const got = lexer.remove(1, 9).readToEnd();
   //     const want: LatexToken[] = [
-  //       { type: LatexTokenType.BackSlash, literal: "\\" },
-  //       { type: LatexTokenType.Content, literal: "class" },
-  //       { type: LatexTokenType.LBracket, literal: "[" },
-  //       { type: LatexTokenType.Content, literal: "12pt" },
-  //       { type: LatexTokenType.RBracket, literal: "]" },
-  //       { type: LatexTokenType.LBrace, literal: "{" },
-  //       { type: LatexTokenType.Content, literal: "article" },
-  //       { type: LatexTokenType.RBrace, literal: "}" },
+
   //     ];
   //     expect(got).toEqual(want);
   //   });
@@ -1210,9 +1329,11 @@ describe("LatexLexer", () => {
   //       { type: LatexTokenType.Content, literal: "article" },
   //       { type: LatexTokenType.RBrace, literal: "}" },
   //     ];
+
   //     expect(got).toEqual(want);
   //   });
   // });
+
   // describe("caching", () => {
   //   const insertSpy = jest.fn();
   //   const removeSpy = jest.fn();

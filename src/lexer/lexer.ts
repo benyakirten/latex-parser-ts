@@ -103,7 +103,7 @@ export class LatexLexer {
 
     this.input =
       this.input.slice(0, position) + this.escapeInput(value) + this.input.slice(position);
-    if (this.position > position) {
+    if (this.position > 0 && this.position >= position) {
       this.position += value.length;
     }
 
