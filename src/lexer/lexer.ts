@@ -77,6 +77,16 @@ export class LatexLexer {
     return input;
   }
 
+  private deescapeContent(input: string): string {
+    for (const [escapedSequence, escapeSequence] of Object.entries(
+      LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
+    )) {
+      input = input.replaceAll(escapeSequence, escapedSequence);
+    }
+
+    return input;
+  }
+
   public seek(position: number) {
     if (position < 0) {
       position = this.input.length + position;
@@ -555,10 +565,14 @@ export class LatexLexer {
 
   private buildComment(startPosition: number): CommentToken {
     const content = this.readUntil(startPosition, (c) => c === LatexCharType.Newline);
+    let literal = content;
+    if (this.readChar(startPosition + content.length)) {
+      literal += "\n";
+    }
     return {
       type: LatexTokenType.Comment,
-      literal: `%${content}\n`,
-      content,
+      literal: `%${literal}`,
+      content: this.deescapeContent(content),
     };
   }
 

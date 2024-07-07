@@ -848,15 +848,19 @@ describe("LatexLexer", () => {
     });
   });
 
-  // describe.todo("comments", () => {
-  //   it("should encapsulat everything after the % until the end of line in a comment", () => {
-  //     // TODO
-  //   });
+  describe("comments", () => {
+    it("should encapsulate everything after the % until the end of line in a comment", () => {
+      const got = new LatexLexer("% this is a comment \\\\").readToEnd();
+      expect(got.length).toEqual(1);
 
-  //   it("should throw an error if the comment prevents a block from being closed", () => {
-  //     // TODO
-  //   });
-  // });
+      const [token] = got;
+      expect(token).toEqual({
+        type: LatexTokenType.Comment,
+        content: " this is a comment \\\\",
+        literal: "% this is a comment @@<!BACKSLASH!>",
+      });
+    });
+  });
 
   // describe.todo("math", () => {
   //   const tokenTypes = [
