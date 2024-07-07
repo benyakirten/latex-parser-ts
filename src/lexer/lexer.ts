@@ -243,7 +243,13 @@ export class LatexLexer {
     let arg = "";
     while (true) {
       if (!char) {
-        break;
+        if (stack.length === 0) {
+          break;
+        }
+
+        throw new Error(
+          `Section with possible nesting never terminated correctly. ${stack} braces still remain.`,
+        );
       }
 
       if (char === endCharacter && stack.length === 0) {
@@ -281,7 +287,6 @@ export class LatexLexer {
   private createCommandToken(startPosition: number): CommandToken {
     // Command names can only be made of alphanumeric characters.
     const name = this.readUntil(startPosition, (c) => !/\w/.test(c));
-
     if (!name) {
       throw new Error("Command never closed");
     }
@@ -330,7 +335,11 @@ export class LatexLexer {
       throw new Error(`Character ${char} not expected while parsing command argument`);
     }
 
-    const literal = this.input.slice(startPosition, position + 1);
+    let literal = this.input.slice(startPosition, position + 1);
+    if (literal.endsWith(" ")) {
+      literal = literal.slice(0, -1);
+    }
+
     return {
       type: LatexTokenType.Command,
       literal: `\\${literal}`,
@@ -538,10 +547,6 @@ export class LatexLexer {
 
   private buildBlock(startPosition: number): BlockToken {
     const content = this.getSectionWithPossibleNesting(startPosition, LatexCharType.CloseBrace);
-    if (!content.endsWith(LatexCharType.CloseBrace)) {
-      throw new Error("Block never closed");
-    }
-
     const lexer = new LatexLexer(content);
     return {
       type: LatexTokenType.Block,

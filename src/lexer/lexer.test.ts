@@ -5,6 +5,7 @@ import { LatexLexer } from "./lexer";
 import {
   LatexTokenType,
   LatexCommandArgumentType,
+  ScriptTokenType,
   type LexerCache,
   type LatexToken,
   type CommandToken,
@@ -14,7 +15,7 @@ import {
   type LabeledArgContent,
   type CommentToken,
   type PlaceholderToken,
-  ScriptTokenType,
+  type BlockToken,
 } from "./types";
 
 const FULL_LATEX_DOC = `\\documentclass[12pt]{article}
@@ -554,39 +555,115 @@ describe("LatexLexer", () => {
       expect(token).toEqual(want);
     });
 
-    // TODO: finish these tests
-    test.each(["\\newcommand[\\mycommand2=3]", "\\newcommand{\\mycommand2"])(
-      "should throw an error for an input of %s",
-      (input) => {
-        expect(() => {
-          const lexer = new LatexLexer(input);
-          const tokens = lexer.readToEnd();
-          console.log(tokens);
-        }).toThrow();
-      },
-    );
-  });
+    it("should correctly parse a command that isn't at the end of a block", () => {
+      let got = new LatexLexer("\\command hello").readToEnd();
+      expect(got).toHaveLength(2);
 
-  // TODO: Make accents, superscript and subscript blocks have token children
-  // If they have {} then that will be inside the braces, if not it's just next the next character
+      let [command, content] = got as [CommandToken, ContentToken];
+      expect(command).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command",
+        name: "command",
+        arguments: [],
+      });
+      expect(content).toEqual({
+        type: LatexTokenType.Content,
+        literal: " hello",
+        originalLength: 6,
+      });
+
+      got = new LatexLexer("hello \\command").readToEnd();
+      expect(got).toHaveLength(2);
+
+      [content, command] = got as [ContentToken, CommandToken];
+      expect(command).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command",
+        name: "command",
+        arguments: [],
+      });
+      expect(content).toEqual({
+        type: LatexTokenType.Content,
+        literal: "hello ",
+        originalLength: 6,
+      });
+
+      got = new LatexLexer("hello \\command bye").readToEnd();
+      expect(got).toHaveLength(3);
+
+      const [content1, command1, content2] = got as [ContentToken, CommandToken, ContentToken];
+      expect(content1).toEqual({
+        type: LatexTokenType.Content,
+        literal: "hello ",
+        originalLength: 6,
+      });
+      expect(command1).toEqual({
+        type: LatexTokenType.Command,
+        literal: "\\command",
+        name: "command",
+        arguments: [],
+      });
+      expect(content2).toEqual({
+        type: LatexTokenType.Content,
+        literal: " bye",
+        originalLength: 4,
+      });
+    });
+
+    // TODO: Add more throwing test casers
+    test.each([
+      "\\newcommand[\\mycommand2=3]",
+      "\\newcommand{\\mycommand2",
+      "\\newcommand[\\mycommand2",
+    ])("should throw an error for an input of %s", (input) => {
+      expect(() => new LatexLexer(input).readToEnd()).toThrow();
+    });
+  });
 
   describe("placeholder tokens", () => {
     it("should decode # followed by a number as a placeholder", () => {
-      // TODO
+      const got = new LatexLexer("#1").readToEnd();
+      expect(got).toHaveLength(1);
+      expect(got).toEqual([
+        {
+          type: LatexTokenType.Placeholder,
+          literal: "#1",
+          content: 1,
+        },
+      ]);
     });
 
     it("should throw if something other than a number follows the #", () => {
-      // TODO
+      expect(() => new LatexLexer("##").readToEnd()).toThrow();
     });
   });
 
   it("should throw on lexing an unescaped closing brace and bracket", () => {
-    // TODO
+    expect(() => new LatexLexer("{\\command3}}").readToEnd()).toThrow();
+    expect(() => new LatexLexer("]").readToEnd()).toThrow();
   });
 
   describe("block", () => {
     it("should build a block on an open brace encapsulating all content until the close brace", () => {
-      // TODO
+      const got = new LatexLexer("{\\mycommand this is my block {this is a subblock}}").readToEnd();
+      expect(got).toHaveLength(1);
+
+      const [token] = got;
+      expect(token.type).toEqual(LatexTokenType.Block);
+
+      const { content } = token as BlockToken;
+      expect(content).toHaveLength(3);
+      expect(content).toEqual([
+        { type: LatexTokenType.Command, name: "mycommand", literal: "\\mycommand", arguments: [] },
+        { type: LatexTokenType.Content, literal: " this is my block ", originalLength: 18 },
+        {
+          type: LatexTokenType.Block,
+          literal: "{this is a subblock}",
+          content: [
+            { type: LatexTokenType.Content, literal: "this is a subblock", originalLength: 18 },
+          ],
+        },
+      ]);
     });
 
     it("should throw if the block is never closed", () => {
