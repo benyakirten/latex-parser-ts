@@ -307,6 +307,9 @@ export class LatexLexer {
 
         args.push(requiredArg);
         position += content.length + 2;
+        if (this.readChar(position - 1) !== LatexCharType.CloseBrace) {
+          throw new Error("Required argument never closed");
+        }
         continue;
       } else if (char === LatexCharType.OpenBracket) {
         const content = this.getSectionWithPossibleNesting(
@@ -317,8 +320,13 @@ export class LatexLexer {
 
         args.push(optionalArg);
         position += content.length + 2;
+
+        if (this.readChar(position - 1) !== LatexCharType.CloseBracket) {
+          throw new Error("Optional argument never closed");
+        }
         continue;
       }
+
       throw new Error(`Character ${char} not expected while parsing command argument`);
     }
 

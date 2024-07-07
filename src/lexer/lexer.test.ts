@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { it, expect, describe, beforeEach, jest } from "bun:test";
+import { it, expect, describe, beforeEach, jest, test } from "bun:test";
 
 import { LatexLexer } from "./lexer";
 import {
@@ -183,7 +183,9 @@ describe("LatexLexer", () => {
     });
 
     it("should be able to lex commands with multiple labeled optional arguments", () => {
-      const got = new LatexLexer("\\command[a=b,c=d,e=\\command2,f=g,h=\\command3,i=j").readToEnd();
+      const got = new LatexLexer(
+        "\\command[a=b,c=d,e=\\command2,f=g,h=\\command3,i=j]",
+      ).readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -271,7 +273,7 @@ describe("LatexLexer", () => {
 
       expect(token).toEqual({
         type: LatexTokenType.Command,
-        literal: "\\command[a=b,c=d,e=\\command2,f=g,h=\\command3,i=j",
+        literal: "\\command[a=b,c=d,e=\\command2,f=g,h=\\command3,i=j]",
         arguments: [optionalArg],
         name: "command",
       });
@@ -552,7 +554,17 @@ describe("LatexLexer", () => {
       expect(token).toEqual(want);
     });
 
-    // TODO: Add negative tests
+    // TODO: finish these tests
+    test.each(["\\newcommand[\\mycommand2=3]", "\\newcommand{\\mycommand2"])(
+      "should throw an error for an input of %s",
+      (input) => {
+        expect(() => {
+          const lexer = new LatexLexer(input);
+          const tokens = lexer.readToEnd();
+          console.log(tokens);
+        }).toThrow();
+      },
+    );
   });
 
   // TODO: Make accents, superscript and subscript blocks have token children
