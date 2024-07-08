@@ -174,17 +174,28 @@ export function parseSelectionCommandSection(token: CommandToken): SelectionComm
     case "linespread":
       return parseFontLinespreadCommand(token);
     default:
-      throw new Error("Unrecognized command");
+      throw new Error(`Unrecognized command: ${token.name}`);
   }
 }
 
 /** Expects the lexer to be at the backslash before the command name (e.g.. \fontsize) */
 export function parseSelectionCommandSections(tokens: LatexToken[]): LatexFont {
   const selectionCommands: SelectionCommand[] = [];
-  for (const token of tokens) {
+
+  const selectFontToken = tokens.at(-1);
+  if (
+    !selectFontToken ||
+    selectFontToken.type !== LatexTokenType.Command ||
+    selectFontToken.name !== "selectfont"
+  ) {
+    throw new Error("Command selectfont must end a font selection sequence");
+  }
+
+  for (const token of tokens.slice(0, -1)) {
     if (token.type !== LatexTokenType.Command) {
       continue;
     }
+
     const command = parseSelectionCommandSection(token);
     selectionCommands.push(command);
   }

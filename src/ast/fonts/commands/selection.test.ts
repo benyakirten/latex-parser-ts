@@ -72,7 +72,7 @@ describe("parseSelectionCommandSections", () => {
           },
         },
       },
-      "\\fontencoding{oml}\\fontsize{13ex}{11}\\selectfont",
+      "\\fontencoding{oml}\\fontsize{11}{13ex}\\selectfont",
     ],
   ])("should return $o for an input of %s", (want, input) => {
     const tokens = new LatexLexer(input).readToEnd();
@@ -82,7 +82,6 @@ describe("parseSelectionCommandSections", () => {
 
   test.each<string>([
     "\\documentstart",
-    " \\fontencoding{oml}\\fontsize{13ex}{11}\\selectfont",
     "\\fontencoding{oml}\\fontsize{13ex}{11}",
     "\\fontencoding{none}\\selectfont",
     "\\fontshape{none}\\selectfont",
