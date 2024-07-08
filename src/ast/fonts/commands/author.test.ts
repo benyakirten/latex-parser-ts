@@ -1,7 +1,14 @@
-import { expect, describe, test } from "bun:test";
+import { expect, describe, test, it } from "bun:test";
 
-import { parseAuthorCommand } from "./author";
-import { AuthorCommandType, FontValueType, LatexFontSizeUnit, type AuthorCommand } from "../types";
+import { parseAuthorCommand, setFontDefaults } from "./author";
+import {
+  AuthorCommandType,
+  FontValueType,
+  LatexFontSizeUnit,
+  type AuthorCommand,
+  type LatexAuthorDefaults,
+} from "../types";
+import { LatexCommandArgumentType, LatexTokenType, type CommandToken } from "../../../lexer/types";
 
 describe("parseAuthorCommand", () => {
   test.each<[AuthorCommand | null, string]>([
@@ -261,4 +268,162 @@ describe("parseAuthorCommand", () => {
     const got = parseAuthorCommand(input);
     expect(got).toEqual(want);
   });
+});
+
+describe("setFontDefaults", () => {
+  it("should throw an error if the command is not renewcommand", () => {
+    const renewCommand: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\notrenewcommand",
+      name: "notrenewcommand",
+      arguments: [
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Command,
+              literal: "\\defaultrm",
+              name: "defaultrm",
+              arguments: [],
+            },
+          ],
+        },
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Content,
+              literal: "bx",
+              originalLength: 2,
+            },
+          ],
+        },
+      ],
+    };
+    expect(() => setFontDefaults(renewCommand)).toThrow();
+  });
+
+  it("should throw an error if the number of arguments is not 2", () => {
+    const renewCommand: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\renewcommand",
+      name: "renewcommand",
+      arguments: [],
+    };
+    expect(() => setFontDefaults(renewCommand)).toThrow();
+  });
+
+  it("should throw an error if the first argument is not a command", () => {
+    const renewCommand: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\renewcommand",
+      name: "renewcommand",
+      arguments: [
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Content,
+              literal: "bx",
+              originalLength: 2,
+            },
+          ],
+        },
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Command,
+              literal: "\\defaultrm",
+              name: "defaultrm",
+              arguments: [],
+            },
+          ],
+        },
+      ],
+    };
+    expect(() => setFontDefaults(renewCommand)).toThrowError(
+      "First required argument must be a command",
+    );
+  });
+
+  it("should throw an error if the second argument is not a command or argument", () => {
+    const renewCommand: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\renewcommand",
+      name: "renewcommand",
+      arguments: [
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Command,
+              literal: "\\rmdefault",
+              name: "rmdefault",
+              arguments: [],
+            },
+          ],
+        },
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Placeholder,
+              literal: "#1",
+              content: 1,
+            },
+          ],
+        },
+      ],
+    };
+    expect(() => setFontDefaults(renewCommand)).toThrow();
+  });
+
+  test.each<[LatexAuthorDefaults, string, string]>([
+    [
+      {
+        serif: {
+          type: FontValueType.FontValue,
+          value: "myserif",
+        },
+      },
+      "rmdefault",
+      "myserif",
+    ],
+  ])(
+    "should return $o given a command name of %s and a value of %s",
+    (want, commandName, value) => {
+      const renewCommand: CommandToken = {
+        type: LatexTokenType.Command,
+        literal: "\\renewcommand",
+        name: "renewcommand",
+        arguments: [
+          {
+            type: LatexCommandArgumentType.Required,
+            content: [
+              {
+                type: LatexTokenType.Command,
+                literal: `\\${commandName}`,
+                name: `${commandName}`,
+                arguments: [],
+              },
+            ],
+          },
+          {
+            type: LatexCommandArgumentType.Required,
+            content: [
+              {
+                type: LatexTokenType.Content,
+                literal: value,
+                originalLength: value.length,
+              },
+            ],
+          },
+        ],
+      };
+
+      const got = setFontDefaults(renewCommand);
+      expect(got).toEqual(want);
+    },
+  );
 });

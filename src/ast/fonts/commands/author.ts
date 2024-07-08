@@ -153,14 +153,13 @@ export function setFontDefaults(renewCommand: CommandToken): Partial<LatexAuthor
   }
   const [command] = arg1;
 
+  if (command.name === "textnormal" || command.name === "normalfont") {
+    throw new Error("Unimplemented");
+  }
+
   const key = determineAuthorCommandKey(command.name);
   if (!key) {
     return null;
-  }
-
-  if (key === "normal") {
-    // TODO: Figure out how to change the text normal settings
-    throw new Error("Unimplemented");
   }
 
   if (
