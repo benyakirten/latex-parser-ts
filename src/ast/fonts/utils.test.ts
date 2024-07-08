@@ -11,9 +11,11 @@ import {
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
   LatexFontSizeUnit,
-  type LatexFontShape,
-  type LatexFontMeasurement,
-  type LatexFontSeries,
+  LatexFontWeight,
+  LatexFontWidth,
+  LatexFontShapeValue,
+  type LatexFontSeriesValue,
+  type LatexFontMeasurementValue,
 } from "./types";
 
 describe("parseFontEncoding", () => {
@@ -42,7 +44,7 @@ describe("parseFontEncoding", () => {
 });
 
 describe("parseFontSeries", () => {
-  test.each<[LatexFontSeries, string]>([
+  test.each<[LatexFontSeriesValue, string]>([
     [{ weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium }, "m"],
     [{ weight: LatexFontWeight.Medium, width: LatexFontWidth.ExtraCondensed }, "ec"],
     [{ weight: LatexFontWeight.SemiBold, width: LatexFontWidth.UltraExpanded }, "sbux"],
@@ -59,16 +61,16 @@ describe("parseFontSeries", () => {
 });
 
 describe("parseFontShape", () => {
-  test.each<[LatexFontShape, string]>([
-    [LatexFontShape.CapsAndSmallCaps, "sc"],
-    [LatexFontShape.CapsAndSmallCapsItalics, "scit"],
-    [LatexFontShape.CapsAndSmallCapsOblique, "scsl"],
-    [LatexFontShape.Italic, "it"],
-    [LatexFontShape.Normal, "n"],
-    [LatexFontShape.Oblique, "sl"],
-    [LatexFontShape.SpacedCapsAndSmallCaps, "ssc"],
-    [LatexFontShape.Swash, "sw"],
-    [LatexFontShape.UprightItalic, "ui"],
+  test.each<[LatexFontShapeValue, string]>([
+    [LatexFontShapeValue.CapsAndSmallCaps, "sc"],
+    [LatexFontShapeValue.CapsAndSmallCapsItalics, "scit"],
+    [LatexFontShapeValue.CapsAndSmallCapsOblique, "scsl"],
+    [LatexFontShapeValue.Italic, "it"],
+    [LatexFontShapeValue.Normal, "n"],
+    [LatexFontShapeValue.Oblique, "sl"],
+    [LatexFontShapeValue.SpacedCapsAndSmallCaps, "ssc"],
+    [LatexFontShapeValue.Swash, "sw"],
+    [LatexFontShapeValue.UprightItalic, "ui"],
   ])("should return a shape of %o for an input of %s", (want, input) => {
     const got = parseFontShape(input);
     expect(got).toEqual(want);
@@ -80,7 +82,7 @@ describe("parseFontShape", () => {
 });
 
 describe("parseFontMeasurement;", () => {
-  test.each<[LatexFontMeasurement, string]>([
+  test.each<[LatexFontMeasurementValue, string]>([
     [{ value: 1, unit: LatexFontSizeUnit.Point }, "1"],
     [{ value: 10, unit: LatexFontSizeUnit.Point }, "10pt"],
     [{ value: 11.2, unit: LatexFontSizeUnit.Cicero }, "11.2cc"],

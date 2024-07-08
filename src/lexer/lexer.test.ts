@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { it, expect, describe, beforeEach, jest, test } from "bun:test";
+import { it, expect, describe, beforeEach, test } from "bun:test";
 
 import { LatexLexer } from "./lexer";
 import {
@@ -8,7 +7,6 @@ import {
   ScriptTokenType,
   LatexAccentType,
   MathPosition,
-  type LexerCache,
   type LatexToken,
   type CommandToken,
   type ContentToken,
