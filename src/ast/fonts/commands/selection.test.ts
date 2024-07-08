@@ -4,11 +4,11 @@ import { parseSelectionCommandSections, parseUseFont } from "./selection";
 import {
   LatexFontWeight,
   LatexFontWidth,
-  LatexFontShape,
   LatexFontSizeUnit,
   LatexFontEncodingType,
-  type LatexFont,
   LatexFontEncodingNormalValue,
+  LatexFontShapeValue,
+  type LatexFont,
 } from "../types";
 import { LatexLexer } from "../../../lexer/lexer";
 
@@ -31,7 +31,7 @@ describe("parseSelectionCommandSections", () => {
         },
         weight: LatexFontWeight.SemiLight,
         width: LatexFontWidth.UltraCondensed,
-        shape: LatexFontShape.Italic,
+        shape: LatexFontShapeValue.Italic,
         lineSpread: 1.5,
       },
       "\\fontfamily{ptm}\\fontseries{sluc}\\fontencoding{lt1}\\fontshape{it}\\fontsize{10in}{12}\\linespread{1.5}\\selectfont",
