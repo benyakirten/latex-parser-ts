@@ -1,152 +1,206 @@
 import { expect, describe, test } from "bun:test";
 
 import { parseAuthorCommand } from "./author";
-import {
-  FontValueType,
-  LatexFontFamilyPreference,
-  LatexFontShapeValue,
-  LatexFontSizeUnit,
-  LatexFontWeight,
-  LatexFontWidth,
-  type LatexFont,
-} from "../types";
+import { AuthorCommandType, FontValueType, LatexFontSizeUnit, type AuthorCommand } from "../types";
 
 describe("parseAuthorCommand", () => {
-  test.each<[LatexFont | null, string]>([
+  test.each<[AuthorCommand | null, string]>([
     [null, "unknown"],
     [
       {
-        shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Normal },
-        series: {
-          type: FontValueType.FontValue,
-          value: { width: LatexFontWidth.Medium, weight: LatexFontWeight.Medium },
-        },
-        family: { type: FontValueType.FontValue, value: LatexFontFamilyPreference.PrefersSerif },
+        type: AuthorCommandType.AuthorDefault,
+        value: "normal",
       },
       "textnormal",
     ],
     [
       {
-        shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Normal },
-        series: {
-          type: FontValueType.FontValue,
-          value: { width: LatexFontWidth.Medium, weight: LatexFontWeight.Medium },
-        },
-        family: { type: FontValueType.FontValue, value: LatexFontFamilyPreference.PrefersSerif },
+        type: AuthorCommandType.AuthorDefault,
+        value: "normal",
+      },
+      "textnormal",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "normal",
       },
       "normalfont",
     ],
     [
-      { family: { type: FontValueType.FontValue, value: LatexFontFamilyPreference.PrefersSerif } },
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "serif",
+      },
       "textrm",
     ],
     [
-      { family: { type: FontValueType.FontValue, value: LatexFontFamilyPreference.PrefersSerif } },
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "serif",
+      },
       "rmfamily",
     ],
     [
       {
-        family: {
-          type: FontValueType.FontValue,
-          value: LatexFontFamilyPreference.PrefersSansSerif,
-        },
+        type: AuthorCommandType.AuthorDefault,
+        value: "sans",
       },
       "textsf",
     ],
     [
       {
-        family: {
-          type: FontValueType.FontValue,
-          value: LatexFontFamilyPreference.PrefersSansSerif,
-        },
+        type: AuthorCommandType.AuthorDefault,
+        value: "sans",
       },
       "sffamily",
     ],
     [
       {
-        family: {
-          type: FontValueType.FontValue,
-          value: LatexFontFamilyPreference.PrefersMonospace,
-        },
+        type: AuthorCommandType.AuthorDefault,
+        value: "monospace",
       },
       "texttt",
     ],
     [
       {
-        family: {
-          type: FontValueType.FontValue,
-          value: LatexFontFamilyPreference.PrefersMonospace,
-        },
+        type: AuthorCommandType.AuthorDefault,
+        value: "monospace",
       },
       "ttfamily",
     ],
     [
       {
-        series: {
-          type: FontValueType.FontValue,
-          value: { weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium },
-        },
+        type: AuthorCommandType.AuthorDefault,
+        value: "medium",
       },
       "textmd",
     ],
     [
       {
-        series: {
-          type: FontValueType.FontValue,
-          value: { weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium },
-        },
+        type: AuthorCommandType.AuthorDefault,
+        value: "medium",
       },
       "mdseries",
     ],
     [
       {
-        series: {
-          type: FontValueType.FontValue,
-          value: { weight: LatexFontWeight.Bold, width: LatexFontWidth.Expanded },
-        },
+        type: AuthorCommandType.AuthorDefault,
+        value: "bold",
       },
       "textbf",
     ],
     [
       {
-        series: {
-          type: FontValueType.FontValue,
-          value: { weight: LatexFontWeight.Bold, width: LatexFontWidth.Expanded },
-        },
+        type: AuthorCommandType.AuthorDefault,
+        value: "bold",
       },
       "bfseries",
     ],
-    [{ shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Italic } }, "textit"],
-    [{ shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Italic } }, "itshape"],
-    [{ shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Oblique } }, "textsl"],
-    [{ shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Oblique } }, "slshape"],
-    [{ shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Swash } }, "textsw"],
-    [{ shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Swash } }, "swshape"],
-    [null, "textulc"],
-    [null, "ulcshape"],
-    [null, "textup"],
-    [null, "upshape"],
     [
       {
-        size: { type: FontValueType.FontValue, value: { value: 5, unit: LatexFontSizeUnit.Point } },
+        type: AuthorCommandType.AuthorDefault,
+        value: "italics",
+      },
+      "textit",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "italics",
+      },
+      "itshape",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "oblique",
+      },
+      "textsl",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "oblique",
+      },
+      "slshape",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "swash",
+      },
+      "textsw",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "swash",
+      },
+      "swshape",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "lowercase",
+      },
+      "textulc",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "lowercase",
+      },
+      "ulcshape",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "upcase",
+      },
+      "textup",
+    ],
+    [
+      {
+        type: AuthorCommandType.AuthorDefault,
+        value: "upcase",
+      },
+      "upshape",
+    ],
+    [
+      {
+        type: AuthorCommandType.FontSize,
+        value: {
+          type: FontValueType.FontValue,
+          value: { value: 5, unit: LatexFontSizeUnit.Point },
+        },
       },
       "tiny",
     ],
     [
       {
-        size: { type: FontValueType.FontValue, value: { value: 7, unit: LatexFontSizeUnit.Point } },
+        type: AuthorCommandType.FontSize,
+        value: {
+          type: FontValueType.FontValue,
+          value: { value: 7, unit: LatexFontSizeUnit.Point },
+        },
       },
       "scriptsize",
     ],
     [
       {
-        size: { type: FontValueType.FontValue, value: { value: 8, unit: LatexFontSizeUnit.Point } },
+        type: AuthorCommandType.FontSize,
+        value: {
+          type: FontValueType.FontValue,
+          value: { value: 8, unit: LatexFontSizeUnit.Point },
+        },
       },
       "footnotesize",
     ],
     [
       {
-        size: {
+        type: AuthorCommandType.FontSize,
+        value: {
           type: FontValueType.FontValue,
           value: { value: 10, unit: LatexFontSizeUnit.Point },
         },
@@ -155,7 +209,8 @@ describe("parseAuthorCommand", () => {
     ],
     [
       {
-        size: {
+        type: AuthorCommandType.FontSize,
+        value: {
           type: FontValueType.FontValue,
           value: { value: 12, unit: LatexFontSizeUnit.Point },
         },
@@ -164,7 +219,8 @@ describe("parseAuthorCommand", () => {
     ],
     [
       {
-        size: {
+        type: AuthorCommandType.FontSize,
+        value: {
           type: FontValueType.FontValue,
           value: { value: 14.4, unit: LatexFontSizeUnit.Point },
         },
@@ -173,7 +229,8 @@ describe("parseAuthorCommand", () => {
     ],
     [
       {
-        size: {
+        type: AuthorCommandType.FontSize,
+        value: {
           type: FontValueType.FontValue,
           value: { value: 17.28, unit: LatexFontSizeUnit.Point },
         },
@@ -182,7 +239,8 @@ describe("parseAuthorCommand", () => {
     ],
     [
       {
-        size: {
+        type: AuthorCommandType.FontSize,
+        value: {
           type: FontValueType.FontValue,
           value: { value: 20.74, unit: LatexFontSizeUnit.Point },
         },
@@ -191,7 +249,8 @@ describe("parseAuthorCommand", () => {
     ],
     [
       {
-        size: {
+        type: AuthorCommandType.FontSize,
+        value: {
           type: FontValueType.FontValue,
           value: { value: 24.88, unit: LatexFontSizeUnit.Point },
         },

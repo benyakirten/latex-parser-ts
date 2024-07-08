@@ -142,15 +142,15 @@ export enum LatexFontFamilyPreference {
 
 export type LatexFontLineSpread = FontValue<number>;
 
-export type LatexFont = {
-  encoding?: LatexFontEncoding;
-  family?: LatexFontFamily;
-  size?: LatexFontMeasurement;
-  baselineSkip?: LatexFontMeasurement;
-  series?: LatexFontSeries;
-  shape?: LatexFontShape;
-  lineSpread?: LatexFontLineSpread;
-};
+export type LatexFont = Partial<{
+  encoding: LatexFontEncoding;
+  family: LatexFontFamily;
+  size: LatexFontMeasurement;
+  baselineSkip: LatexFontMeasurement;
+  series: LatexFontSeries;
+  shape: LatexFontShape;
+  lineSpread: LatexFontLineSpread;
+}>;
 
 // I tried to source these but couldn't find a good singular source.
 // You may want to look at https://tug.org/FontCatalogue/
@@ -216,30 +216,48 @@ export type SelectionCommandFontLineSpread = {
   value: LatexFontLineSpread;
 };
 
-export type LatexFontCurrentValues = {
-  encoding?: LatexFontEncoding;
-  family?: LatexFontFamily;
-  series?: LatexFontSeries;
-  shape?: LatexFontShape;
-  size?: LatexFontMeasurement;
-  baselineSkip?: LatexFontMeasurement;
+export type LatexFontCurrentValues = Partial<{
+  encoding: LatexFontEncoding;
+  family: LatexFontFamily;
+  series: LatexFontSeries;
+  shape: LatexFontShape;
+  size: LatexFontMeasurement;
+  baselineSkip: LatexFontMeasurement;
   mathSize: LatexFontMeasurement;
   mathScriptSize: LatexFontMeasurement;
   mathScriptScriptSize: LatexFontMeasurement;
-};
+}>;
 
-export type LatexFontDefaults = {
+export type LatexAuthorDefaults = Partial<{
   serif: LatexFontFamily;
   sans: LatexFontFamily;
   monospace: LatexFontFamily;
-  family?: LatexFontFamily;
-  series?: LatexFontSeries;
-  shape?: LatexFontShape;
-  boldseries?: LatexFontSeries;
-  mediumseries?: LatexFontSeries;
-  italics?: LatexFontShape;
-  oblique?: LatexFontShape;
-  smallCaps?: LatexFontShape;
-  spacedSmallCaps?: LatexFontShape;
-  swash?: LatexFontShape;
-};
+  family: LatexFontFamily;
+  series: LatexFontSeries;
+  shape: LatexFontShape;
+  bold: LatexFontSeries;
+  medium: LatexFontSeries;
+  italics: LatexFontShape;
+  oblique: LatexFontShape;
+  smallCaps: LatexFontShape;
+  spacedSmallCaps: LatexFontShape;
+  swash: LatexFontShape;
+  upcase: LatexFontShape;
+  lowercase: LatexFontShape;
+  normal: LatexFont;
+}>;
+
+export enum AuthorCommandType {
+  AuthorDefault,
+  FontSize,
+}
+
+export type AuthorCommand =
+  | {
+      type: AuthorCommandType.AuthorDefault;
+      value: keyof LatexAuthorDefaults;
+    }
+  | {
+      type: AuthorCommandType.FontSize;
+      value: LatexFontMeasurement;
+    };
