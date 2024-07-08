@@ -215,3 +215,31 @@ export type SelectionCommandFontLineSpread = {
   type: SelectionCommandType.LineSpread;
   value: LatexFontLineSpread;
 };
+
+export type LatexFontCurrentValues = {
+  encoding?: LatexFontEncoding;
+  family?: LatexFontFamily;
+  series?: LatexFontSeries;
+  shape?: LatexFontShape;
+  size?: LatexFontMeasurement;
+  baselineSkip?: LatexFontMeasurement;
+  mathSize: LatexFontMeasurement;
+  mathScriptSize: LatexFontMeasurement;
+  mathScriptScriptSize: LatexFontMeasurement;
+};
+
+export type LatexFontDefaults = {
+  serif: LatexFontFamily;
+  sans: LatexFontFamily;
+  monospace: LatexFontFamily;
+  family?: LatexFontFamily;
+  series?: LatexFontSeries;
+  shape?: LatexFontShape;
+  boldseries?: LatexFontSeries;
+  mediumseries?: LatexFontSeries;
+  italics?: LatexFontShape;
+  oblique?: LatexFontShape;
+  smallCaps?: LatexFontShape;
+  spacedSmallCaps?: LatexFontShape;
+  swash?: LatexFontShape;
+};

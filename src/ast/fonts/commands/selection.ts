@@ -5,9 +5,7 @@ import {
   type LatexToken,
 } from "../../../lexer/types";
 import {
-  FontValueType,
   SelectionCommandType,
-  type FontValue,
   type LatexFont,
   type SelectionCommand,
   type SelectionCommandFontEncoding,
@@ -23,6 +21,7 @@ import {
   parseFontMeasurement,
   parseFontSeries,
   parseFontShape,
+  parseToFontValue,
 } from "../utils";
 
 function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFont {
@@ -51,24 +50,6 @@ function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFon
   }
 
   return latexFont;
-}
-
-function parseToFontValue<T>(token: LatexToken, callback: (value: string) => T): FontValue<T> {
-  if (token.type === LatexTokenType.Command) {
-    return {
-      type: FontValueType.CommandToken,
-      value: token,
-    };
-  }
-
-  if (token.type === LatexTokenType.Content) {
-    return {
-      type: FontValueType.FontValue,
-      value: callback(token.literal.trim()),
-    };
-  }
-
-  throw new Error("Token type must be either a command or content token");
 }
 
 function testForOneRequiredArgument(token: CommandToken, type: string): LatexToken {

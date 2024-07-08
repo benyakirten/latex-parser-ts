@@ -1,10 +1,13 @@
+import { type LatexToken, LatexTokenType } from "../../lexer/types";
 import {
+  FontValueType,
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
   LatexFontShapeValue,
   LatexFontSizeUnit,
   LatexFontWeight,
   LatexFontWidth,
+  type FontValue,
   type LatexFontEncodingLocal,
   type LatexFontEncodingValue,
   type LatexFontMeasurementValue,
@@ -229,4 +232,25 @@ function parseFontSizeUnit(rawUnit?: string): LatexFontSizeUnit {
     default:
       return LatexFontSizeUnit.Point;
   }
+}
+
+export function parseToFontValue<T>(
+  token: LatexToken,
+  callback: (value: string) => T,
+): FontValue<T> {
+  if (token.type === LatexTokenType.Command) {
+    return {
+      type: FontValueType.CommandToken,
+      value: token,
+    };
+  }
+
+  if (token.type === LatexTokenType.Content) {
+    return {
+      type: FontValueType.FontValue,
+      value: callback(token.literal.trim()),
+    };
+  }
+
+  throw new Error("Token type must be either a command or content token");
 }
