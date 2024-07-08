@@ -1,14 +1,14 @@
 import {
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
-  LatexFontShape,
+  LatexFontShapeValue,
   LatexFontSizeUnit,
-  LatexFontWeight,
-  LatexFontWidth,
+  LatexFontWeightValue,
+  LatexFontWidthValue,
   type LatexFontEncoding,
   type LatexFontEncodingLocal,
   type LatexFontMeasurement,
-  type LatexFontSeries,
+  type LatexFontSeriesValue,
 } from "./types";
 
 export function parseFontEncoding(rawCommand: string): LatexFontEncoding {
@@ -63,8 +63,8 @@ export function parseFontFamily(rawCommand: string): string {
 
 const FONT_SERIES_RE = /^([ues]?[lb])?([ues]?[cx])?$/;
 // TODO: Decide error handling and unknown values.
-export function parseFontSeries(rawCommand: string): LatexFontSeries {
-  const series = { weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium };
+export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
+  const series = { weight: LatexFontWeightValue.Medium, width: LatexFontWidthValue.Medium };
   if (rawCommand === "m") {
     return series;
   }
@@ -83,28 +83,28 @@ export function parseFontSeries(rawCommand: string): LatexFontSeries {
   if (rawWeight) {
     switch (rawWeight.toLocaleLowerCase()) {
       case "ul":
-        series.weight = LatexFontWeight.UltraLight;
+        series.weight = LatexFontWeightValue.UltraLight;
         break;
       case "el":
-        series.weight = LatexFontWeight.ExtraLight;
+        series.weight = LatexFontWeightValue.ExtraLight;
         break;
       case "l":
-        series.weight = LatexFontWeight.Light;
+        series.weight = LatexFontWeightValue.Light;
         break;
       case "sl":
-        series.weight = LatexFontWeight.SemiLight;
+        series.weight = LatexFontWeightValue.SemiLight;
         break;
       case "sb":
-        series.weight = LatexFontWeight.SemiBold;
+        series.weight = LatexFontWeightValue.SemiBold;
         break;
       case "b":
-        series.weight = LatexFontWeight.Bold;
+        series.weight = LatexFontWeightValue.Bold;
         break;
       case "eb":
-        series.weight = LatexFontWeight.ExtraBold;
+        series.weight = LatexFontWeightValue.ExtraBold;
         break;
       case "ub":
-        series.weight = LatexFontWeight.UltraBold;
+        series.weight = LatexFontWeightValue.UltraBold;
         break;
       default:
         throw new Error(`Unrecognized weight: ${rawWeight}`);
@@ -114,28 +114,28 @@ export function parseFontSeries(rawCommand: string): LatexFontSeries {
   if (rawWidth) {
     switch (rawWidth.toLocaleLowerCase()) {
       case "uc":
-        series.width = LatexFontWidth.UltraCondensed;
+        series.width = LatexFontWidthValue.UltraCondensed;
         break;
       case "ec":
-        series.width = LatexFontWidth.ExtraCondensed;
+        series.width = LatexFontWidthValue.ExtraCondensed;
         break;
       case "c":
-        series.width = LatexFontWidth.Condensed;
+        series.width = LatexFontWidthValue.Condensed;
         break;
       case "sc":
-        series.width = LatexFontWidth.SemiCondensed;
+        series.width = LatexFontWidthValue.SemiCondensed;
         break;
       case "sx":
-        series.width = LatexFontWidth.SemiExpanded;
+        series.width = LatexFontWidthValue.SemiExpanded;
         break;
       case "x":
-        series.width = LatexFontWidth.Expanded;
+        series.width = LatexFontWidthValue.Expanded;
         break;
       case "ex":
-        series.width = LatexFontWidth.ExtraExpanded;
+        series.width = LatexFontWidthValue.ExtraExpanded;
         break;
       case "ux":
-        series.width = LatexFontWidth.UltraExpanded;
+        series.width = LatexFontWidthValue.UltraExpanded;
         break;
       default:
         throw new Error(`Unrecognized width: ${rawWidth}`);
@@ -145,26 +145,26 @@ export function parseFontSeries(rawCommand: string): LatexFontSeries {
   return series;
 }
 
-export function parseFontShape(rawCommand: string): LatexFontShape {
+export function parseFontShape(rawCommand: string): LatexFontShapeValue {
   switch (rawCommand.toLocaleLowerCase()) {
     case "n":
-      return LatexFontShape.Normal;
+      return LatexFontShapeValue.Normal;
     case "it":
-      return LatexFontShape.Italic;
+      return LatexFontShapeValue.Italic;
     case "sl":
-      return LatexFontShape.Oblique;
+      return LatexFontShapeValue.Oblique;
     case "sc":
-      return LatexFontShape.CapsAndSmallCaps;
+      return LatexFontShapeValue.CapsAndSmallCaps;
     case "scit":
-      return LatexFontShape.CapsAndSmallCapsItalics;
+      return LatexFontShapeValue.CapsAndSmallCapsItalics;
     case "scsl":
-      return LatexFontShape.CapsAndSmallCapsOblique;
+      return LatexFontShapeValue.CapsAndSmallCapsOblique;
     case "sw":
-      return LatexFontShape.Swash;
+      return LatexFontShapeValue.Swash;
     case "ssc":
-      return LatexFontShape.SpacedCapsAndSmallCaps;
+      return LatexFontShapeValue.SpacedCapsAndSmallCaps;
     case "ui":
-      return LatexFontShape.UprightItalic;
+      return LatexFontShapeValue.UprightItalic;
     default:
       throw new Error(`Unrecognized font shape: ${rawCommand}`);
   }

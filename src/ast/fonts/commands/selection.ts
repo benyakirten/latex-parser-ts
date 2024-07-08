@@ -1,5 +1,5 @@
 import type { LatexLexer } from "../../../lexer/lexer";
-import { LatexTokenType } from "../../../lexer/types";
+import { LatexCommandArgumentType, LatexTokenType, type LatexToken } from "../../../lexer/types";
 import {
   SelectionCommandType,
   type LatexFont,
@@ -175,26 +175,19 @@ export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
 }
 
 /** Expects the lexer to be at the backslash before the command name (e.g.. \usefont) */
-export function parseUseFont(lexer: LatexLexer): LatexFont {
-  let token = lexer.nextToken();
-  if (token.type !== LatexTokenType.BackSlash) {
-    throw new Error("Expected font related command");
+export function parseUseFont(token: LatexToken): LatexFont {
+  if (
+    token.type !== LatexTokenType.Command ||
+    token.name !== "usefont" ||
+    token.arguments.length !== 4 ||
+    !token.arguments.every((a) => a.type === LatexCommandArgumentType.Required)
+  ) {
+    throw new Error("Command must be a valid usefont command to be parsed as usefont");
   }
 
-  token = lexer.nextToken();
-  if (token.type !== LatexTokenType.Content) {
-    throw new Error("Expected font related command");
-  }
-
-  const literal = token.literal.toLocaleLowerCase();
-  if (literal !== "usefont") {
-    throw new Error(`Expected usefont command name, received ${literal}`);
-  }
-
-  const encoding = parseFontEncodingCommand(lexer).encoding;
-  const family = parseFontFamilyCommand(lexer).family;
-  const { weight, width } = parseFontSeriesCommand(lexer);
-  const shape = parseFontShapeCommand(lexer).shape;
+  const [encArg, familyArg, seriesArg, shapeArg] = token.arguments;
+  const encoding = parseFontEncoding(encArg.content[0].literal);
+  // TODO: parse them
 
   return { encoding, family, weight, width, shape };
 }
