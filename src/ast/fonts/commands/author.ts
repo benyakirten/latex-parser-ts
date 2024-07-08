@@ -159,6 +159,7 @@ export function setFontDefaults(renewCommand: CommandToken): Partial<LatexAuthor
   }
 
   if (key === "normal") {
+    // TODO: Figure out how to change the text normal settings
     throw new Error("Unimplemented");
   }
 
