@@ -4,7 +4,10 @@ import { parseAuthorCommand, setFontDefaults } from "./author";
 import {
   AuthorCommandType,
   FontValueType,
+  LatexFontShapeValue,
   LatexFontSizeUnit,
+  LatexFontWeight,
+  LatexFontWidth,
   type AuthorCommand,
   type LatexAuthorDefaults,
 } from "../types";
@@ -389,6 +392,135 @@ describe("setFontDefaults", () => {
       },
       "rmdefault",
       "myserif",
+    ],
+    [
+      {
+        sans: {
+          type: FontValueType.FontValue,
+          value: "mysans",
+        },
+      },
+      "sfdefault",
+      "mysans",
+    ],
+    [
+      {
+        monospace: {
+          type: FontValueType.FontValue,
+          value: "mymonospace",
+        },
+      },
+      "ttdefault",
+      "mymonospace",
+    ],
+    [
+      {
+        family: {
+          type: FontValueType.FontValue,
+          value: "myfont",
+        },
+      },
+      "familydefault",
+      "myfont",
+    ],
+    [
+      {
+        bold: {
+          type: FontValueType.FontValue,
+          value: {
+            width: LatexFontWidth.Expanded,
+            weight: LatexFontWeight.Bold,
+          },
+        },
+      },
+      "bfdefault",
+      "bx",
+    ],
+    [
+      {
+        series: {
+          type: FontValueType.FontValue,
+          value: {
+            width: LatexFontWidth.Expanded,
+            weight: LatexFontWeight.Bold,
+          },
+        },
+      },
+      "seriesdefault",
+      "bx",
+    ],
+    [
+      {
+        medium: {
+          type: FontValueType.FontValue,
+          value: {
+            width: LatexFontWidth.Expanded,
+            weight: LatexFontWeight.Bold,
+          },
+        },
+      },
+      "mddefault",
+      "bx",
+    ],
+    [
+      {
+        shape: {
+          type: FontValueType.FontValue,
+          value: LatexFontShapeValue.Italic,
+        },
+      },
+      "shapedefault",
+      "it",
+    ],
+    [
+      {
+        italics: {
+          type: FontValueType.FontValue,
+          value: LatexFontShapeValue.Italic,
+        },
+      },
+      "itdefault",
+      "it",
+    ],
+    [
+      {
+        smallCaps: {
+          type: FontValueType.FontValue,
+          value: LatexFontShapeValue.Italic,
+        },
+      },
+      "scdefault",
+      "it",
+    ],
+    [
+      {
+        spacedSmallCaps: {
+          type: FontValueType.FontValue,
+          value: LatexFontShapeValue.Italic,
+        },
+      },
+      "sscdefault",
+      "it",
+    ],
+    [
+      {
+        swash: {
+          type: FontValueType.FontValue,
+          value: LatexFontShapeValue.Italic,
+        },
+      },
+      "swdefault",
+      "it",
+    ],
+    [
+      {
+        oblique: {
+          type: FontValueType.FontValue,
+          value: LatexFontShapeValue.Italic,
+        },
+      },
+      "sldefault",
+      "it",
     ],
   ])(
     "should return $o given a command name of %s and a value of %s",

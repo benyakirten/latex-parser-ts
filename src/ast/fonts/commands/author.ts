@@ -129,6 +129,8 @@ function determineAuthorCommandKey(commandName: string): keyof LatexAuthorDefaul
       return "smallCaps";
     case "ssc":
       return "spacedSmallCaps";
+    case "sw":
+      return "swash";
     default:
       return null;
   }
