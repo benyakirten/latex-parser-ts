@@ -3,7 +3,7 @@
 
 import type { CommandToken } from "../../lexer/types";
 
-type FontValue<T> =
+export type FontValue<T> =
   | {
       type: FontValueType.CommandToken;
       value: CommandToken;
@@ -133,6 +133,7 @@ export type LatexFontMeasurementValue = {
   unit: LatexFontSizeUnit;
 };
 
+export type LatexFontFamily = FontValue<LatexFontFamilyPreference | string>;
 export enum LatexFontFamilyPreference {
   PrefersSerif = "@@prefers-serif",
   PrefersSansSerif = "@@prefers-sans-serif",
@@ -143,11 +144,10 @@ export type LatexFontLineSpread = FontValue<number>;
 
 export type LatexFont = {
   encoding?: LatexFontEncoding;
-  family?: FontValue<LatexFontFamilyPreference | string>;
+  family?: LatexFontFamily;
   size?: LatexFontMeasurement;
   baselineSkip?: LatexFontMeasurement;
-  weight?: LatexFontWeight;
-  width?: LatexFontWidth;
+  series?: LatexFontSeries;
   shape?: LatexFontShape;
   lineSpread?: LatexFontLineSpread;
 };
@@ -192,13 +192,12 @@ export type SelectionCommandFontEncoding = {
 
 export type SelectionCommandFontFamily = {
   type: SelectionCommandType.Family;
-  family: string;
+  family: LatexFontFamily;
 };
 
 export type SelectionCommandFontSeries = {
   type: SelectionCommandType.Series;
-  weight: LatexFontWeight;
-  width: LatexFontWidth;
+  series: LatexFontSeries;
 };
 
 export type SelectionCommandFontShape = {
@@ -214,5 +213,5 @@ export type SelectionCommandFontSize = {
 
 export type SelectionCommandFontLineSpread = {
   type: SelectionCommandType.LineSpread;
-  value: number;
+  value: LatexFontLineSpread;
 };

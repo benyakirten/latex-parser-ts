@@ -1,7 +1,13 @@
-import type { LatexLexer } from "../../../lexer/lexer";
-import { LatexCommandArgumentType, LatexTokenType, type LatexToken } from "../../../lexer/types";
 import {
+  LatexCommandArgumentType,
+  LatexTokenType,
+  type CommandToken,
+  type LatexToken,
+} from "../../../lexer/types";
+import {
+  FontValueType,
   SelectionCommandType,
+  type FontValue,
   type LatexFont,
   type SelectionCommand,
   type SelectionCommandFontEncoding,
@@ -30,8 +36,7 @@ function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFon
         latexFont.family = command.family;
         break;
       case SelectionCommandType.Series:
-        latexFont.weight = command.weight;
-        latexFont.width = command.width;
+        latexFont.series = command.series;
         break;
       case SelectionCommandType.Shape:
         latexFont.shape = command.shape;
@@ -48,31 +53,39 @@ function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFon
   return latexFont;
 }
 
-// TODO: Decide on error shape
-function getContentWrappedByBraces(lexer: LatexLexer): string {
-  const openBrace = lexer.nextToken();
-  if (openBrace.type !== LatexTokenType.LBrace) {
-    throw new Error("Expected {content}");
+function parseToFontValue<T>(token: LatexToken, callback: (value: string) => T): FontValue<T> {
+  if (token.type === LatexTokenType.Command) {
+    return {
+      type: FontValueType.CommandToken,
+      value: token,
+    };
   }
 
-  const encoding = lexer.nextToken();
-
-  if (encoding.type !== LatexTokenType.Content) {
-    throw new Error("Expected {content}");
+  if (token.type === LatexTokenType.Content) {
+    return {
+      type: FontValueType.FontValue,
+      value: callback(token.literal.trim()),
+    };
   }
 
-  const closeBrace = lexer.nextToken();
-  if (closeBrace.type !== LatexTokenType.RBrace) {
-    throw new Error("Expected {content}");
-  }
-
-  return encoding.literal;
+  throw new Error("Token type must be either a command or content token");
 }
 
-function parseFontEncodingCommand(token: LatexToken): SelectionCommandFontEncoding {
-  const type = SelectionCommandType.Encoding;
-  const rawCommand = getContentWrappedByBraces(lexer);
-  const encoding = parseFontEncoding(rawCommand);
+function testForOneRequiredArgument(token: CommandToken, type: string): LatexToken {
+  if (
+    token.arguments.length !== 1 ||
+    token.arguments[0].type !== LatexCommandArgumentType.Required ||
+    token.arguments[0].content.length !== 1
+  ) {
+    throw new Error(`Font ${type} requires one required argument with one item inside`);
+  }
+
+  return token.arguments[0].content[0];
+}
+
+function parseFontEncodingCommand(token: CommandToken): SelectionCommandFontEncoding {
+  const encToken = testForOneRequiredArgument(token, "encoding");
+  const encoding = parseToFontValue(encToken, parseFontEncoding);
 
   return {
     type: SelectionCommandType.Encoding,
@@ -80,40 +93,45 @@ function parseFontEncodingCommand(token: LatexToken): SelectionCommandFontEncodi
   };
 }
 
-function parseFontFamilyCommand(lexer: LatexLexer): SelectionCommandFontFamily {
-  const rawFamily = getContentWrappedByBraces(lexer);
-  const family = parseFontFamily(rawFamily);
+function parseFontFamilyCommand(token: CommandToken): SelectionCommandFontFamily {
+  const familyToken = testForOneRequiredArgument(token, "family");
+  const family = parseToFontValue(familyToken, parseFontFamily);
   return {
     type: SelectionCommandType.Family,
     family,
   };
 }
 
-function parseFontSeriesCommand(lexer: LatexLexer): SelectionCommandFontSeries {
-  const rawSeries = getContentWrappedByBraces(lexer);
-  const { width, weight } = parseFontSeries(rawSeries);
+function parseFontSeriesCommand(token: CommandToken): SelectionCommandFontSeries {
+  const seriesToken = testForOneRequiredArgument(token, "series");
+  const series = parseToFontValue(seriesToken, parseFontSeries);
   return {
     type: SelectionCommandType.Series,
-    width,
-    weight,
+    series,
   };
 }
 
-function parseFontShapeCommand(lexer: LatexLexer): SelectionCommandFontShape {
-  const rawShape = getContentWrappedByBraces(lexer);
-  const shape = parseFontShape(rawShape);
+function parseFontShapeCommand(token: CommandToken): SelectionCommandFontShape {
+  const shapesToken = testForOneRequiredArgument(token, "shape");
+  const shape = parseToFontValue(shapesToken, parseFontShape);
   return {
     type: SelectionCommandType.Shape,
     shape,
   };
 }
 
-function parseFontSizeCommand(lexer: LatexLexer): SelectionCommandFontSize {
-  const rawFontSize = getContentWrappedByBraces(lexer);
-  const rawBaselineskip = getContentWrappedByBraces(lexer);
+function parseFontSizeCommand(token: CommandToken): SelectionCommandFontSize {
+  if (
+    token.arguments.length !== 1 ||
+    token.arguments[0].type !== LatexCommandArgumentType.Required ||
+    token.arguments[0].content.length !== 2
+  ) {
+    throw new Error("Font size requires one required argument with two items inside");
+  }
 
-  const fontSize = parseFontMeasurement(rawFontSize);
-  const baselineSkip = parseFontMeasurement(rawBaselineskip);
+  const [fontSizeToken, baselineSkipToken] = token.arguments[0].content;
+  const fontSize = parseToFontValue(fontSizeToken, parseFontMeasurement);
+  const baselineSkip = parseToFontValue(baselineSkipToken, parseFontMeasurement);
 
   return {
     type: SelectionCommandType.Size,
@@ -122,53 +140,43 @@ function parseFontSizeCommand(lexer: LatexLexer): SelectionCommandFontSize {
   };
 }
 
-function parseFontLinespreadCommand(lexer: LatexLexer): SelectionCommandFontLineSpread {
-  const rawLineSpread = getContentWrappedByBraces(lexer);
-  const lineSpread = parseFloat(rawLineSpread);
+function parseFontLinespreadCommand(token: CommandToken): SelectionCommandFontLineSpread {
+  const linespreadToken = testForOneRequiredArgument(token, "linespread");
+  const lineSpread = parseToFontValue(linespreadToken, parseFloat);
+
   return {
     type: SelectionCommandType.LineSpread,
     value: lineSpread,
   };
 }
 
-function parseSelectionCommandSection(rawCommand: string, lexer: LatexLexer): SelectionCommand {
-  switch (rawCommand.toLocaleLowerCase()) {
+export function parseSelectionCommandSection(token: CommandToken): SelectionCommand {
+  switch (token.name.toLocaleLowerCase()) {
     case "fontencoding":
-      return parseFontEncodingCommand(lexer);
+      return parseFontEncodingCommand(token);
     case "fontfamily":
-      return parseFontFamilyCommand(lexer);
+      return parseFontFamilyCommand(token);
     case "fontseries":
-      return parseFontSeriesCommand(lexer);
+      return parseFontSeriesCommand(token);
     case "fontshape":
-      return parseFontShapeCommand(lexer);
+      return parseFontShapeCommand(token);
     case "fontsize":
-      return parseFontSizeCommand(lexer);
+      return parseFontSizeCommand(token);
     case "linespread":
-      return parseFontLinespreadCommand(lexer);
+      return parseFontLinespreadCommand(token);
     default:
       throw new Error("Unrecognized command");
   }
 }
 
 /** Expects the lexer to be at the backslash before the command name (e.g.. \fontsize) */
-export function parseSelectionCommandSections(lexer: LatexLexer): LatexFont {
+export function parseSelectionCommandSections(tokens: LatexToken[]): LatexFont {
   const selectionCommands: SelectionCommand[] = [];
-  while (true) {
-    let token = lexer.nextToken();
-    if (token.type !== LatexTokenType.BackSlash) {
-      throw new Error("Expected font related command");
+  for (const token of tokens) {
+    if (token.type !== LatexTokenType.Command) {
+      continue;
     }
-
-    token = lexer.nextToken();
-    if (token.type !== LatexTokenType.Content) {
-      throw new Error("Expected font related command");
-    }
-
-    if (token.literal.toLocaleLowerCase() === "selectfont") {
-      break;
-    }
-
-    const command = parseSelectionCommandSection(token.literal, lexer);
+    const command = parseSelectionCommandSection(token);
     selectionCommands.push(command);
   }
 
@@ -187,8 +195,16 @@ export function parseUseFont(token: LatexToken): LatexFont {
   }
 
   const [encArg, familyArg, seriesArg, shapeArg] = token.arguments;
-  const encoding = parseFontEncoding(encArg.content[0].literal);
-  // TODO: parse them
+  for (const arg of [encArg, familyArg, seriesArg, shapeArg]) {
+    if (arg.content.length !== 1) {
+      throw new Error("Expected usefont arguments to only have one value");
+    }
+  }
 
-  return { encoding, family, weight, width, shape };
+  const encoding = parseToFontValue(encArg.content[0], parseFontEncoding);
+  const family = parseToFontValue(familyArg.content[0], parseFontFamily);
+  const series = parseToFontValue(seriesArg.content[0], parseFontSeries);
+  const shape = parseToFontValue(shapeArg.content[0], parseFontShape);
+
+  return { encoding, family, series, shape };
 }
