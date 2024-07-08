@@ -10,10 +10,8 @@ import {
 import {
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
-  LatexFontShape,
   LatexFontSizeUnit,
-  LatexFontWeight,
-  LatexFontWidth,
+  type LatexFontShape,
   type LatexFontMeasurement,
   type LatexFontSeries,
 } from "./types";

@@ -3,13 +3,28 @@
 
 import type { CommandToken } from "../../lexer/types";
 
+type FontValue<T> =
+  | {
+      type: FontValueType.CommandToken;
+      value: CommandToken;
+    }
+  | {
+      type: FontValueType.FontValue;
+      value: T;
+    };
+
+export enum FontValueType {
+  CommandToken,
+  FontValue,
+}
+
 export enum LatexFontEncodingType {
   Normal,
   Local,
 }
 
-export type LatexFontEncoding = LatexFontEncodingLocal | LatexFontEncodingNormal | CommandToken;
-
+export type LatexFontEncoding = FontValue<LatexFontEncodingValue>;
+export type LatexFontEncodingValue = LatexFontEncodingLocal | LatexFontEncodingNormal;
 export type LatexFontEncodingLocal = {
   type: LatexFontEncodingType.Local;
   encoding: string;
@@ -29,16 +44,14 @@ export enum LatexFontEncodingNormalValue {
   Unknown = "u",
 }
 
-export type LatexFontSeries = LatexFontSeriesValue | CommandToken;
+export type LatexFontSeries = FontValue<LatexFontSeriesValue>;
 export type LatexFontSeriesValue = {
   weight: LatexFontWeight;
   width: LatexFontWidth;
 };
 
-export type LatexFontWidth = CommandToken | LatexFontWidthValue;
-
 /** corresponds to font-stretch */
-export enum LatexFontWidthValue {
+export enum LatexFontWidth {
   UltraCondensed = "uc",
   ExtraCondensed = "ec",
   Condensed = "c",
@@ -50,7 +63,6 @@ export enum LatexFontWidthValue {
   UltraExpanded = "ux",
 }
 
-export type LatexFontWeight = CommandToken | LatexFontWeightValue;
 /**
  * Weight and width are concatenated to a single series value except
  * that m is dropped unless both weight and width are medium in which case
@@ -65,7 +77,7 @@ export type LatexFontWeight = CommandToken | LatexFontWeightValue;
  *
  * Corresponds to css font-weight
  */
-export enum LatexFontWeightValue {
+export enum LatexFontWeight {
   UltraLight = "ul",
   ExtraLight = "el",
   Light = "l",
@@ -77,7 +89,7 @@ export enum LatexFontWeightValue {
   UltraBold = "ub",
 }
 
-export type LatexFontShape = LatexFontShapeValue | CommandToken;
+export type LatexFontShape = FontValue<LatexFontShapeValue>;
 /**
  * Small caps comes from font variant
  * Italic and slanted (oblique) come from font style
@@ -115,7 +127,7 @@ export enum LatexFontSizeUnit {
   ViewportMax = "vmax",
 }
 
-export type LatexFontMeasurement = LatexFontMeasurementValue | CommandToken;
+export type LatexFontMeasurement = FontValue<LatexFontMeasurementValue>;
 export type LatexFontMeasurementValue = {
   value: number;
   unit: LatexFontSizeUnit;
@@ -127,15 +139,17 @@ export enum LatexFontFamilyPreference {
   PrefersMonospace = "@@prefers-monospace",
 }
 
+export type LatexFontLineSpread = FontValue<number>;
+
 export type LatexFont = {
   encoding?: LatexFontEncoding;
-  family?: LatexFontFamilyPreference | string | CommandToken;
+  family?: FontValue<LatexFontFamilyPreference | string>;
   size?: LatexFontMeasurement;
   baselineSkip?: LatexFontMeasurement;
   weight?: LatexFontWeight;
   width?: LatexFontWidth;
   shape?: LatexFontShape;
-  lineSpread?: number | CommandToken;
+  lineSpread?: LatexFontLineSpread;
 };
 
 // I tried to source these but couldn't find a good singular source.

@@ -3,15 +3,15 @@ import {
   LatexFontEncodingType,
   LatexFontShapeValue,
   LatexFontSizeUnit,
-  LatexFontWeightValue,
-  LatexFontWidthValue,
-  type LatexFontEncoding,
+  LatexFontWeight,
+  LatexFontWidth,
   type LatexFontEncodingLocal,
-  type LatexFontMeasurement,
+  type LatexFontEncodingValue,
+  type LatexFontMeasurementValue,
   type LatexFontSeriesValue,
 } from "./types";
 
-export function parseFontEncoding(rawCommand: string): LatexFontEncoding {
+export function parseFontEncoding(rawCommand: string): LatexFontEncodingValue {
   if (rawCommand.toLocaleUpperCase().startsWith("L")) {
     const fontEncoding: LatexFontEncodingLocal = {
       type: LatexFontEncodingType.Local,
@@ -64,7 +64,7 @@ export function parseFontFamily(rawCommand: string): string {
 const FONT_SERIES_RE = /^([ues]?[lb])?([ues]?[cx])?$/;
 // TODO: Decide error handling and unknown values.
 export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
-  const series = { weight: LatexFontWeightValue.Medium, width: LatexFontWidthValue.Medium };
+  const series = { weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium };
   if (rawCommand === "m") {
     return series;
   }
@@ -83,28 +83,28 @@ export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
   if (rawWeight) {
     switch (rawWeight.toLocaleLowerCase()) {
       case "ul":
-        series.weight = LatexFontWeightValue.UltraLight;
+        series.weight = LatexFontWeight.UltraLight;
         break;
       case "el":
-        series.weight = LatexFontWeightValue.ExtraLight;
+        series.weight = LatexFontWeight.ExtraLight;
         break;
       case "l":
-        series.weight = LatexFontWeightValue.Light;
+        series.weight = LatexFontWeight.Light;
         break;
       case "sl":
-        series.weight = LatexFontWeightValue.SemiLight;
+        series.weight = LatexFontWeight.SemiLight;
         break;
       case "sb":
-        series.weight = LatexFontWeightValue.SemiBold;
+        series.weight = LatexFontWeight.SemiBold;
         break;
       case "b":
-        series.weight = LatexFontWeightValue.Bold;
+        series.weight = LatexFontWeight.Bold;
         break;
       case "eb":
-        series.weight = LatexFontWeightValue.ExtraBold;
+        series.weight = LatexFontWeight.ExtraBold;
         break;
       case "ub":
-        series.weight = LatexFontWeightValue.UltraBold;
+        series.weight = LatexFontWeight.UltraBold;
         break;
       default:
         throw new Error(`Unrecognized weight: ${rawWeight}`);
@@ -114,28 +114,28 @@ export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
   if (rawWidth) {
     switch (rawWidth.toLocaleLowerCase()) {
       case "uc":
-        series.width = LatexFontWidthValue.UltraCondensed;
+        series.width = LatexFontWidth.UltraCondensed;
         break;
       case "ec":
-        series.width = LatexFontWidthValue.ExtraCondensed;
+        series.width = LatexFontWidth.ExtraCondensed;
         break;
       case "c":
-        series.width = LatexFontWidthValue.Condensed;
+        series.width = LatexFontWidth.Condensed;
         break;
       case "sc":
-        series.width = LatexFontWidthValue.SemiCondensed;
+        series.width = LatexFontWidth.SemiCondensed;
         break;
       case "sx":
-        series.width = LatexFontWidthValue.SemiExpanded;
+        series.width = LatexFontWidth.SemiExpanded;
         break;
       case "x":
-        series.width = LatexFontWidthValue.Expanded;
+        series.width = LatexFontWidth.Expanded;
         break;
       case "ex":
-        series.width = LatexFontWidthValue.ExtraExpanded;
+        series.width = LatexFontWidth.ExtraExpanded;
         break;
       case "ux":
-        series.width = LatexFontWidthValue.UltraExpanded;
+        series.width = LatexFontWidth.UltraExpanded;
         break;
       default:
         throw new Error(`Unrecognized width: ${rawWidth}`);
@@ -176,7 +176,7 @@ export function parseFontShape(rawCommand: string): LatexFontShapeValue {
  */
 const FONT_SIZE_RE =
   /^([0-9]+)(\.[0-9]+)?(pt|mm|cm|in|ex|em|mu|sp|vmin|vmax|vh|vw|cc|bp|dd|pc|px)?$/;
-export function parseFontMeasurement(rawMeasurement: string): LatexFontMeasurement {
+export function parseFontMeasurement(rawMeasurement: string): LatexFontMeasurementValue {
   const matches = rawMeasurement.match(FONT_SIZE_RE);
   if (!matches || matches.length !== 4) {
     throw new Error(`Unrecognized font measurement: ${rawMeasurement}`);

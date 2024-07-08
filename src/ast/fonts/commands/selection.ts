@@ -69,7 +69,8 @@ function getContentWrappedByBraces(lexer: LatexLexer): string {
   return encoding.literal;
 }
 
-function parseFontEncodingCommand(lexer: LatexLexer): SelectionCommandFontEncoding {
+function parseFontEncodingCommand(token: LatexToken): SelectionCommandFontEncoding {
+  const type = SelectionCommandType.Encoding;
   const rawCommand = getContentWrappedByBraces(lexer);
   const encoding = parseFontEncoding(rawCommand);
 
