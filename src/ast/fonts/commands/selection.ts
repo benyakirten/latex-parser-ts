@@ -122,14 +122,23 @@ function parseFontShapeCommand(token: CommandToken): SelectionCommandFontShape {
 
 function parseFontSizeCommand(token: CommandToken): SelectionCommandFontSize {
   if (
-    token.arguments.length !== 1 ||
-    token.arguments[0].type !== LatexCommandArgumentType.Required ||
-    token.arguments[0].content.length !== 2
+    token.arguments.length !== 2 ||
+    token.arguments.every((a) => a.type !== LatexCommandArgumentType.Required)
   ) {
     throw new Error("Font size requires one required argument with two items inside");
   }
 
-  const [fontSizeToken, baselineSkipToken] = token.arguments[0].content;
+  const [fontSizeArg, baselineSkipArg] = token.arguments;
+  if (
+    fontSizeArg.type !== LatexCommandArgumentType.Required ||
+    baselineSkipArg.type !== LatexCommandArgumentType.Required
+  ) {
+    throw new Error("");
+  }
+
+  const fontSizeToken = fontSizeArg.content[0];
+  const baselineSkipToken = baselineSkipArg.content[0];
+
   const fontSize = parseToFontValue(fontSizeToken, parseFontMeasurement);
   const baselineSkip = parseToFontValue(baselineSkipToken, parseFontMeasurement);
 
