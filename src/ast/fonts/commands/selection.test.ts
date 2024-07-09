@@ -1,17 +1,17 @@
-import { expect, describe, test, it } from "bun:test";
+import { describe, expect, it, test } from "bun:test";
 
-import { parseSelectionCommandSections, parseUseFont } from "./selection";
+import { LatexLexer } from "../../../lexer/lexer";
 import {
-  LatexFontWeight,
-  LatexFontWidth,
-  LatexFontSizeUnit,
-  LatexFontEncodingType,
-  LatexFontEncodingNormalValue,
-  LatexFontShapeValue,
   FontValueType,
   type LatexFont,
+  LatexFontEncodingNormalValue,
+  LatexFontEncodingType,
+  LatexFontShapeValue,
+  LatexFontSizeUnit,
+  LatexFontWeight,
+  LatexFontWidth,
 } from "../types";
-import { LatexLexer } from "../../../lexer/lexer";
+import { parseSelectionCommandSections, parseUseFont } from "./selection";
 
 describe("parseSelectionCommandSections", () => {
   test.each<[LatexFont, string]>([
@@ -41,9 +41,15 @@ describe("parseSelectionCommandSections", () => {
         },
         series: {
           type: FontValueType.FontValue,
-          value: { weight: LatexFontWeight.SemiLight, width: LatexFontWidth.UltraCondensed },
+          value: {
+            weight: LatexFontWeight.SemiLight,
+            width: LatexFontWidth.UltraCondensed,
+          },
         },
-        shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Italic },
+        shape: {
+          type: FontValueType.FontValue,
+          value: LatexFontShapeValue.Italic,
+        },
         lineSpread: { type: FontValueType.FontValue, value: 1.5 },
       },
       "\\fontfamily{ptm}\\fontseries{sluc}\\fontencoding{lt1}\\fontshape{it}\\fontsize{10in}{12}\\linespread{1.5}\\selectfont",
@@ -116,12 +122,17 @@ describe("parseUseFont", () => {
           width: LatexFontWidth.UltraCondensed,
         },
       },
-      shape: { type: FontValueType.FontValue, value: LatexFontShapeValue.Italic },
+      shape: {
+        type: FontValueType.FontValue,
+        value: LatexFontShapeValue.Italic,
+      },
     });
   });
 
   it("should throw if the command is not recognized", () => {
-    const token = new LatexLexer("\\fontstuff{oml}{ptm}{sluc}{it}").readToEnd()[0];
+    const token = new LatexLexer(
+      "\\fontstuff{oml}{ptm}{sluc}{it}",
+    ).readToEnd()[0];
     expect(() => parseUseFont(token)).toThrow();
   });
 

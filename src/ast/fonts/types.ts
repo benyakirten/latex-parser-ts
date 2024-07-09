@@ -14,17 +14,19 @@ export type FontValue<T> =
     };
 
 export enum FontValueType {
-  CommandToken,
-  FontValue,
+  CommandToken = 1,
+  FontValue = 2,
 }
 
 export enum LatexFontEncodingType {
-  Normal,
-  Local,
+  Normal = 1,
+  Local = 2,
 }
 
 export type LatexFontEncoding = FontValue<LatexFontEncodingValue>;
-export type LatexFontEncodingValue = LatexFontEncodingLocal | LatexFontEncodingNormal;
+export type LatexFontEncodingValue =
+  | LatexFontEncodingLocal
+  | LatexFontEncodingNormal;
 export type LatexFontEncodingLocal = {
   type: LatexFontEncodingType.Local;
   encoding: string;
@@ -177,12 +179,12 @@ export type SelectionCommand =
   | SelectionCommandFontLineSpread;
 
 export enum SelectionCommandType {
-  Encoding,
-  Family,
-  Series,
-  Shape,
-  Size,
-  LineSpread,
+  Encoding = 1,
+  Family = 2,
+  Series = 3,
+  Shape = 4,
+  Size = 5,
+  LineSpread = 6,
 }
 
 export type SelectionCommandFontEncoding = {
@@ -248,8 +250,8 @@ export type LatexAuthorDefaults = Partial<{
 }>;
 
 export enum AuthorCommandType {
-  AuthorDefault,
-  FontSize,
+  AuthorDefault = 1,
+  FontSize = 2,
 }
 
 export type AuthorCommand =

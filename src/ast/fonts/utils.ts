@@ -1,17 +1,17 @@
 import { type LatexToken, LatexTokenType } from "../../lexer/types";
 import {
+  type FontValue,
   FontValueType,
+  type LatexFontEncodingLocal,
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
+  type LatexFontEncodingValue,
+  type LatexFontMeasurementValue,
+  type LatexFontSeriesValue,
   LatexFontShapeValue,
   LatexFontSizeUnit,
   LatexFontWeight,
   LatexFontWidth,
-  type FontValue,
-  type LatexFontEncodingLocal,
-  type LatexFontEncodingValue,
-  type LatexFontMeasurementValue,
-  type LatexFontSeriesValue,
 } from "./types";
 
 export function parseFontEncoding(rawCommand: string): LatexFontEncodingValue {
@@ -67,7 +67,10 @@ export function parseFontFamily(rawCommand: string): string {
 const FONT_SERIES_RE = /^([ues]?[lb])?([ues]?[cx])?$/;
 // TODO: Decide error handling and unknown values.
 export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
-  const series = { weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium };
+  const series = {
+    weight: LatexFontWeight.Medium,
+    width: LatexFontWidth.Medium,
+  };
   if (rawCommand === "m") {
     return series;
   }
@@ -179,7 +182,9 @@ export function parseFontShape(rawCommand: string): LatexFontShapeValue {
  */
 const FONT_SIZE_RE =
   /^([0-9]+)(\.[0-9]+)?(pt|mm|cm|in|ex|em|mu|sp|vmin|vmax|vh|vw|cc|bp|dd|pc|px)?$/;
-export function parseFontMeasurement(rawMeasurement: string): LatexFontMeasurementValue {
+export function parseFontMeasurement(
+  rawMeasurement: string,
+): LatexFontMeasurementValue {
   const matches = rawMeasurement.match(FONT_SIZE_RE);
   if (!matches || matches.length !== 4) {
     throw new Error(`Unrecognized font measurement: ${rawMeasurement}`);
@@ -187,7 +192,7 @@ export function parseFontMeasurement(rawMeasurement: string): LatexFontMeasureme
 
   const [_, rawValue, rawFloatPoint, rawUnit] = matches;
   const floatingPoint = rawFloatPoint || ".0";
-  const value = parseFloat(`${rawValue}${floatingPoint}`);
+  const value = Number.parseFloat(`${rawValue}${floatingPoint}`);
 
   const unit = parseFontSizeUnit(rawUnit);
 
@@ -228,7 +233,6 @@ function parseFontSizeUnit(rawUnit?: string): LatexFontSizeUnit {
       return LatexFontSizeUnit.ViewportMin;
     case "vmax":
       return LatexFontSizeUnit.ViewportMax;
-    case "pt":
     default:
       return LatexFontSizeUnit.Point;
   }

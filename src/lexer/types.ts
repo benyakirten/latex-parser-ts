@@ -36,9 +36,9 @@ export type CommandToken = {
 };
 
 export enum MathPosition {
-  Inline,
-  Block,
-  Centered,
+  Inline = 1,
+  Block = 2,
+  Centered = 3,
 }
 
 type MathStartCharacter = "$" | "\\(" | "\\[";
@@ -99,8 +99,8 @@ export type ContentToken = {
 };
 
 export enum LatexCommandArgumentType {
-  Optional,
-  Required,
+  Optional = 1,
+  Required = 2,
 }
 
 export enum LatexTokenType {

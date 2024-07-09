@@ -1,27 +1,27 @@
-import { it, expect, describe, beforeEach, test } from "bun:test";
+import { beforeEach, describe, expect, it, test } from "bun:test";
 
 import { LatexLexer } from "./lexer";
 import {
-  LatexTokenType,
-  LatexCommandArgumentType,
-  ScriptTokenType,
-  LatexAccentType,
-  MathPosition,
-  type LatexToken,
-  type CommandToken,
-  type ContentToken,
-  type RequiredArgument,
-  type OptionalArgument,
-  type LabeledArgContent,
-  type CommentToken,
-  type PlaceholderToken,
-  type BlockToken,
   type AccentToken,
-  type ScriptToken,
+  type BlockToken,
+  type CommandToken,
+  type CommentToken,
+  type ContentToken,
+  type LabeledArgContent,
+  LatexAccentType,
+  LatexCommandArgumentType,
+  type LatexToken,
+  LatexTokenType,
+  MathPosition,
   type MathToken,
+  type OptionalArgument,
+  type PlaceholderToken,
+  type RequiredArgument,
+  type ScriptToken,
+  ScriptTokenType,
 } from "./types";
 
-const SHORT_LATEX_DOC = `\\documentclass[12pt]{article}`;
+const SHORT_LATEX_DOC = "\\documentclass[12pt]{article}";
 
 describe("LatexLexer", () => {
   let lexer: LatexLexer;
@@ -91,7 +91,9 @@ describe("LatexLexer", () => {
     });
 
     it("should be able to lex a command with a required argument with nested arguments", () => {
-      const got = new LatexLexer("\\command{\\command2{arg1}{\\command3}}").readToEnd();
+      const got = new LatexLexer(
+        "\\command{\\command2{arg1}{\\command3}}",
+      ).readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -281,7 +283,8 @@ describe("LatexLexer", () => {
     });
 
     it("should be able to lex a new macro command that's written over multiple lines", () => {
-      const command = `\\newcommand{\\mycommand}[2]{%\n  First argument: #1 \\\\\n  Second argument: #2}`;
+      const command =
+        "\\newcommand{\\mycommand}[2]{%\n  First argument: #1 \\\\\n  Second argument: #2}";
       const got = new LatexLexer(command).readToEnd();
       expect(got).toHaveLength(1);
 
@@ -431,7 +434,11 @@ describe("LatexLexer", () => {
               type: LatexTokenType.Script,
               literal: "^7",
               detail: ScriptTokenType.Super,
-              content: { type: LatexTokenType.Content, literal: "7", originalLength: 1 },
+              content: {
+                type: LatexTokenType.Content,
+                literal: "7",
+                originalLength: 1,
+              },
             },
           ],
         },
@@ -462,7 +469,9 @@ describe("LatexLexer", () => {
         },
         {
           key: "g",
-          value: [{ type: LatexTokenType.Content, literal: "h", originalLength: 1 }],
+          value: [
+            { type: LatexTokenType.Content, literal: "h", originalLength: 1 },
+          ],
         },
       ];
 
@@ -523,7 +532,8 @@ describe("LatexLexer", () => {
 
       const arg2RequiredArgOptionalArgumentCommand: CommandToken = {
         type: LatexTokenType.Command,
-        literal: "\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]",
+        literal:
+          "\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]",
         name: "command3",
         arguments: [arg2RequiredArgOptionalArgument],
       };
@@ -591,7 +601,11 @@ describe("LatexLexer", () => {
       got = new LatexLexer("hello \\command bye").readToEnd();
       expect(got).toHaveLength(3);
 
-      const [content1, command1, content2] = got as [ContentToken, CommandToken, ContentToken];
+      const [content1, command1, content2] = got as [
+        ContentToken,
+        CommandToken,
+        ContentToken,
+      ];
       expect(content1).toEqual({
         type: LatexTokenType.Content,
         literal: "hello ",
@@ -645,7 +659,9 @@ describe("LatexLexer", () => {
 
   describe("block", () => {
     it("should build a block on an open brace encapsulating all content until the close brace", () => {
-      const got = new LatexLexer("{\\mycommand this is my block {this is a subblock}}").readToEnd();
+      const got = new LatexLexer(
+        "{\\mycommand this is my block {this is a subblock}}",
+      ).readToEnd();
       expect(got).toHaveLength(1);
 
       const [token] = got;
@@ -654,20 +670,35 @@ describe("LatexLexer", () => {
       const { content } = token as BlockToken;
       expect(content).toHaveLength(3);
       expect(content).toEqual([
-        { type: LatexTokenType.Command, name: "mycommand", literal: "\\mycommand", arguments: [] },
-        { type: LatexTokenType.Content, literal: " this is my block ", originalLength: 18 },
+        {
+          type: LatexTokenType.Command,
+          name: "mycommand",
+          literal: "\\mycommand",
+          arguments: [],
+        },
+        {
+          type: LatexTokenType.Content,
+          literal: " this is my block ",
+          originalLength: 18,
+        },
         {
           type: LatexTokenType.Block,
           literal: "{this is a subblock}",
           content: [
-            { type: LatexTokenType.Content, literal: "this is a subblock", originalLength: 18 },
+            {
+              type: LatexTokenType.Content,
+              literal: "this is a subblock",
+              originalLength: 18,
+            },
           ],
         },
       ]);
     });
 
     it("should throw if the block is never closed", () => {
-      expect(() => new LatexLexer("{\\mycommand this is my block").readToEnd()).toThrow();
+      expect(() =>
+        new LatexLexer("{\\mycommand this is my block").readToEnd(),
+      ).toThrow();
     });
   });
 
@@ -709,7 +740,13 @@ describe("LatexLexer", () => {
         expect(content).toEqual({
           type: LatexTokenType.Block,
           literal: "{hello}",
-          content: [{ type: LatexTokenType.Content, literal: "hello", originalLength: 5 }],
+          content: [
+            {
+              type: LatexTokenType.Content,
+              literal: "hello",
+              originalLength: 5,
+            },
+          ],
         });
       }
     });
@@ -718,7 +755,10 @@ describe("LatexLexer", () => {
       for (const { start, wantType, wantDetail } of tokenTypes) {
         const got = new LatexLexer(`${start}nothing here`).readToEnd();
         expect(got).toHaveLength(2);
-        const [token, otherContent] = got as [AccentToken | ScriptToken, ContentToken];
+        const [token, otherContent] = got as [
+          AccentToken | ScriptToken,
+          ContentToken,
+        ];
 
         const { content, literal, type, detail } = token;
         expect(type).toEqual(wantType);
@@ -838,7 +878,8 @@ describe("LatexLexer", () => {
             type: LatexTokenType.Block,
           },
         ],
-        literal: "{@@<!LCURLY!>Nested{@@<!LCURLY!>Double@@<!UNDERSCORE!> Nested}}",
+        literal:
+          "{@@<!LCURLY!>Nested{@@<!LCURLY!>Double@@<!UNDERSCORE!> Nested}}",
         type: LatexTokenType.Block,
       });
     });
@@ -884,8 +925,10 @@ describe("LatexLexer", () => {
         const [token] = got as [MathToken];
         expect(token.type).toEqual(LatexTokenType.Math);
         expect(token.position).toEqual(wantPosition);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect(token.literal).toEqual(`${start}e = mc^2${end}` as any);
+
+        expect(token.literal).toEqual(
+          `${start}e = mc^2${end}` as `\\(${string}\\)`,
+        );
         expect(token.content).toEqual([
           {
             type: LatexTokenType.Content,
@@ -970,7 +1013,7 @@ describe("LatexLexer", () => {
                 originalLength: 4,
                 type: LatexTokenType.Content,
               },
-              type: 0,
+              type: LatexCommandArgumentType.Optional,
             },
             {
               content: [
@@ -980,7 +1023,7 @@ describe("LatexLexer", () => {
                   type: LatexTokenType.Content,
                 },
               ],
-              type: 1,
+              type: LatexCommandArgumentType.Required,
             },
           ],
           literal: "\\documentclass[12pt]{articlefast:introduction}",
@@ -1013,7 +1056,7 @@ describe("LatexLexer", () => {
                 originalLength: 4,
                 type: LatexTokenType.Content,
               },
-              type: 0,
+              type: LatexCommandArgumentType.Optional,
             },
             {
               content: [
@@ -1023,7 +1066,7 @@ describe("LatexLexer", () => {
                   type: LatexTokenType.Content,
                 },
               ],
-              type: 1,
+              type: LatexCommandArgumentType.Required,
             },
           ],
           literal: "\\documentclass[12pt]{article}",
@@ -1046,7 +1089,7 @@ describe("LatexLexer", () => {
                 originalLength: 4,
                 type: LatexTokenType.Content,
               },
-              type: 0,
+              type: LatexCommandArgumentType.Optional,
             },
             {
               content: [
@@ -1056,7 +1099,7 @@ describe("LatexLexer", () => {
                   type: LatexTokenType.Content,
                 },
               ],
-              type: 1,
+              type: LatexCommandArgumentType.Required,
             },
           ],
           literal: "\\documentclass[12pt]{article}",
@@ -1318,7 +1361,7 @@ describe("LatexLexer", () => {
                 originalLength: 4,
                 type: LatexTokenType.Content,
               },
-              type: 0,
+              type: LatexCommandArgumentType.Optional,
             },
             {
               content: [
@@ -1328,7 +1371,7 @@ describe("LatexLexer", () => {
                   type: LatexTokenType.Content,
                 },
               ],
-              type: 1,
+              type: LatexCommandArgumentType.Required,
             },
           ],
           literal: "\\documentclass[12pt]{article}",

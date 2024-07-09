@@ -1,26 +1,26 @@
-import { NoCache } from "./cache";
 import { clamp } from "../utils";
+import { NoCache } from "./cache";
 import {
-  LatexTokenType,
-  LatexCharType,
-  MathPosition,
-  LatexAccentType,
-  LatexCommandArgumentType,
-  ScriptTokenType,
-  type LatexToken,
-  type LexerCache,
+  type AccentToken,
+  type BlockToken,
   type CommandToken,
+  type CommentToken,
   type ContentToken,
   type LabeledArgContent,
-  type CommentToken,
-  type PlaceholderToken,
-  type MathToken,
-  type AccentToken,
+  LatexAccentType,
   type LatexArguments,
-  type RequiredArgument,
+  LatexCharType,
+  LatexCommandArgumentType,
+  type LatexToken,
+  LatexTokenType,
+  type LexerCache,
+  MathPosition,
+  type MathToken,
   type OptionalArgument,
-  type BlockToken,
+  type PlaceholderToken,
+  type RequiredArgument,
   type ScriptToken,
+  ScriptTokenType,
 } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
@@ -44,7 +44,7 @@ export class LatexLexer {
     "\\~{}": "@@<!TILDE!>",
   };
 
-  private position: number = 0;
+  private position = 0;
   private input: string;
   constructor(
     input: string,
@@ -54,56 +54,68 @@ export class LatexLexer {
   }
 
   private escapeInput(input: string): string {
-    // TODO: Replace this with a function.
-    // Replace `\\n` but not `\\\n`.
+    let escapedInput = input;
     for (const [escapedSequence, escapeSequence] of Object.entries(
       LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
     )) {
-      input = input.replaceAll(escapedSequence, escapeSequence);
+      escapedInput = escapedInput.replaceAll(escapedSequence, escapeSequence);
     }
-    input = input.replaceAll(/\\\n\s*/g, "");
+    escapedInput = escapedInput.replaceAll(/\\\n\s*/g, "");
 
-    return input;
+    return escapedInput;
   }
 
   private unescapeContent(input: string): string {
+    let unescapedInput = input;
     for (const [escapedSequence, escapeSequence] of Object.entries(
       LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
     )) {
-      input = input.replaceAll(escapeSequence, escapedSequence[1]);
+      unescapedInput = unescapedInput.replaceAll(
+        escapeSequence,
+        escapedSequence[1],
+      );
     }
 
-    return input;
+    return unescapedInput;
   }
 
   private deescapeContent(input: string): string {
+    let deescapedInput = input;
     for (const [escapedSequence, escapeSequence] of Object.entries(
       LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
     )) {
-      input = input.replaceAll(escapeSequence, escapedSequence);
+      deescapedInput = deescapedInput.replaceAll(
+        escapeSequence,
+        escapedSequence,
+      );
     }
 
-    return input;
+    return deescapedInput;
   }
 
   public seek(position: number) {
-    if (position < 0) {
-      position = this.input.length + position;
+    let pos = position;
+    if (pos < 0) {
+      pos = this.input.length + pos;
     }
 
-    this.position = clamp(position, 0, this.input.length);
+    this.position = clamp(pos, 0, this.input.length);
   }
 
   public insert(position: number, value: string): LatexLexer {
-    if (position < 0) {
-      position = this.input.length + position;
+    let pos = position;
+    if (pos < 0) {
+      pos = this.input.length + pos;
     }
 
-    position = clamp(position, 0, this.input.length);
+    pos = clamp(pos, 0, this.input.length);
 
     this.input =
-      this.input.slice(0, position) + this.escapeInput(value) + this.input.slice(position);
-    if (this.position > 0 && this.position >= position) {
+      this.input.slice(0, pos) +
+      this.escapeInput(value) +
+      this.input.slice(pos);
+
+    if (this.position > 0 && this.position >= pos) {
       this.position += value.length;
     }
 
@@ -111,33 +123,40 @@ export class LatexLexer {
   }
 
   public remove(start: number, end: number): LatexLexer {
-    start = clamp(start, 0, this.input.length);
-    end = clamp(end, 0, this.input.length);
-    if (start > end) {
-      [start, end] = [end, start];
+    let removeStart = start;
+    let removeEnd = end;
+
+    removeStart = clamp(removeStart, 0, this.input.length);
+    removeEnd = clamp(removeEnd, 0, this.input.length);
+    if (removeStart > removeEnd) {
+      [removeStart, removeEnd] = [removeEnd, removeStart];
     }
 
-    if (start === end) {
+    if (removeStart === removeEnd) {
       return this;
     }
 
-    this.input = this.input.slice(0, start) + this.input.slice(end);
-    this.cache.remove(start, end);
+    this.input = this.input.slice(0, removeStart) + this.input.slice(removeEnd);
+    this.cache.remove(removeStart, removeEnd);
 
-    if (this.position >= start) {
-      this.position -= end - start;
+    if (this.position >= removeStart) {
+      this.position -= removeEnd - removeStart;
     }
 
     return this;
   }
 
-  private readUntil(position: number, stopFn: (char: string) => boolean): string {
-    let char = this.readChar(position);
-    let word: string = "";
+  private readUntil(
+    position: number,
+    stopFn: (char: string) => boolean,
+  ): string {
+    let pos = position;
+    let char = this.readChar(pos);
+    let word = "";
     while (char && !stopFn(char)) {
       word += char;
-      position++;
-      char = this.readChar(position);
+      pos++;
+      char = this.readChar(pos);
     }
 
     return word;
@@ -181,7 +200,9 @@ export class LatexLexer {
 
     const content = this.input.slice(startPosition, endIndex);
     const mathPosition =
-      endMathCharacter === LatexCharType.CloseBracket ? MathPosition.Centered : MathPosition.Block;
+      endMathCharacter === LatexCharType.CloseBracket
+        ? MathPosition.Centered
+        : MathPosition.Block;
 
     const lexer = new LatexLexer(content);
 
@@ -202,7 +223,9 @@ export class LatexLexer {
       type: LatexTokenType.Accent,
       literal: `\\${accentChar}${token.literal}`,
       detail:
-        accentChar === LatexCharType.Tilde ? LatexAccentType.Tilde : LatexAccentType.Circumflex,
+        accentChar === LatexCharType.Tilde
+          ? LatexAccentType.Tilde
+          : LatexAccentType.Circumflex,
       content: token,
     };
   }
@@ -210,7 +233,7 @@ export class LatexLexer {
   private getSectionWithPossibleNesting(
     startPosition: number,
     endCharacter: LatexCharType,
-    mustClose: boolean = false,
+    mustClose = false,
   ): string {
     let position = startPosition;
     let char = this.readChar(position);
@@ -275,7 +298,10 @@ export class LatexLexer {
 
       if (char === LatexCharType.OpenBrace) {
         // getSectionWithPossibleNesting won't include the opening or closing braces
-        const content = this.getSectionWithPossibleNesting(position + 1, LatexCharType.CloseBrace);
+        const content = this.getSectionWithPossibleNesting(
+          position + 1,
+          LatexCharType.CloseBrace,
+        );
         const requiredArg = this.buildRequiredArg(content);
 
         args.push(requiredArg);
@@ -284,7 +310,9 @@ export class LatexLexer {
           throw new Error("Required argument never closed");
         }
         continue;
-      } else if (char === LatexCharType.OpenBracket) {
+      }
+
+      if (char === LatexCharType.OpenBracket) {
         const content = this.getSectionWithPossibleNesting(
           position + 1,
           LatexCharType.CloseBracket,
@@ -321,7 +349,10 @@ export class LatexLexer {
       throw new Error("Command never closed");
     }
 
-    if (nextChar === LatexCharType.OpenBracket || nextChar === LatexCharType.OpenParen) {
+    if (
+      nextChar === LatexCharType.OpenBracket ||
+      nextChar === LatexCharType.OpenParen
+    ) {
       return this.buildParagraphMath(startPosition + 1, nextChar);
     }
 
@@ -336,7 +367,9 @@ export class LatexLexer {
     return this.input.at(position);
   }
 
-  private assertOptionalArgTokenOption(lexer: LatexLexer): CommandToken | ContentToken {
+  private assertOptionalArgTokenOption(
+    lexer: LatexLexer,
+  ): CommandToken | ContentToken {
     const tokens = lexer.readToEnd();
     if (tokens.length !== 1) {
       throw new Error("Required arguments must be a single token");
@@ -344,11 +377,16 @@ export class LatexLexer {
 
     const [token] = tokens;
 
-    if (token.type === LatexTokenType.Command || token.type === LatexTokenType.Content) {
+    if (
+      token.type === LatexTokenType.Command ||
+      token.type === LatexTokenType.Content
+    ) {
       return token;
     }
 
-    throw new Error("An optional argument must either a singular command or content token");
+    throw new Error(
+      "An optional argument must either a singular command or content token",
+    );
   }
 
   private buildRequiredArg(content: string): RequiredArgument {
@@ -378,7 +416,9 @@ export class LatexLexer {
     return { key: k.trimStart(), value: [arg] };
   }
 
-  private getOptionalArguments(tokens: LatexToken[]): OptionalArgument["content"] {
+  private getOptionalArguments(
+    tokens: LatexToken[],
+  ): OptionalArgument["content"] {
     // TODO: Refactor this - it's a mess right now
     if (tokens.length === 1) {
       const [token] = tokens;
@@ -395,7 +435,9 @@ export class LatexLexer {
           for (const kvPair of token.literal.split(",")) {
             const labeledArg = this.parseLabeledArgContent(kvPair);
             if (!labeledArg) {
-              throw new Error("Optional arguments should be separated by an equals sign");
+              throw new Error(
+                "Optional arguments should be separated by an equals sign",
+              );
             }
 
             labeledArgs.push(labeledArg);
@@ -413,12 +455,15 @@ export class LatexLexer {
     // We want to be able to parse any sort of complexity, such as:
     // \\command3[a=b,b=\\arg1{%\nCool Th_in^g: #1}[a=^7,b=c,d=e],c=d]
     const labeledArgs: LabeledArgContent[] = [];
-    let key: string = "";
+    let key = "";
     let value: LatexToken[] = [];
     for (const token of tokens) {
       // If we get a content section that starts with a comma
       // then we have
-      if (token.type === LatexTokenType.Content && token.literal.startsWith(LatexCharType.Comma)) {
+      if (
+        token.type === LatexTokenType.Content &&
+        token.literal.startsWith(LatexCharType.Comma)
+      ) {
         const arg: LabeledArgContent = { key, value };
         labeledArgs.push(arg);
 
@@ -433,7 +478,9 @@ export class LatexLexer {
           } else {
             const arg = this.parseLabeledArgContent(section);
             if (!arg) {
-              throw new Error("Optional arguments should be separated by an equals sign");
+              throw new Error(
+                "Optional arguments should be separated by an equals sign",
+              );
             }
             labeledArgs.push(arg);
           }
@@ -467,7 +514,9 @@ export class LatexLexer {
 
       if (key === "") {
         if (token.type !== LatexTokenType.Content) {
-          throw new Error(`Expected to receive an alphanumeric key name, instead got ${token}`);
+          throw new Error(
+            `Expected to receive an alphanumeric key name, instead got ${token}`,
+          );
         }
         const literal = token.literal;
 
@@ -480,7 +529,9 @@ export class LatexLexer {
           const labeledArg = this.parseLabeledArgContent(section);
           if (labeledArg === null) {
             if (!section.endsWith("=")) {
-              throw new Error("Key-value pairs must be separated by an equals sign");
+              throw new Error(
+                "Key-value pairs must be separated by an equals sign",
+              );
             }
             key = section.slice(0, -1);
           } else {
@@ -525,7 +576,10 @@ export class LatexLexer {
   }
 
   private buildComment(startPosition: number): CommentToken {
-    const content = this.readUntil(startPosition, (c) => c === LatexCharType.Newline);
+    const content = this.readUntil(
+      startPosition,
+      (c) => c === LatexCharType.Newline,
+    );
     let literal = content;
     if (this.readChar(startPosition + content.length)) {
       literal += "\n";
@@ -538,10 +592,12 @@ export class LatexLexer {
   }
 
   private buildPlaceholder(startPosition: number): PlaceholderToken {
-    const content = this.readUntil(startPosition, (c) => isNaN(parseInt(c)));
+    const content = this.readUntil(startPosition, (c) =>
+      Number.isNaN(Number.parseInt(c)),
+    );
 
-    const parsedContent = parseInt(content);
-    if (isNaN(parsedContent)) {
+    const parsedContent = Number.parseInt(content);
+    if (Number.isNaN(parsedContent)) {
       throw new Error("Placeholder (#) expects an argument position");
     }
 
@@ -566,7 +622,9 @@ export class LatexLexer {
     };
   }
 
-  private buildModifiableToken(startPosition: number): ContentToken | BlockToken | CommandToken {
+  private buildModifiableToken(
+    startPosition: number,
+  ): ContentToken | BlockToken | CommandToken {
     const err = new Error(
       "Expected either open brace, backslash or alphanumeric character to follow character modifier",
     );
@@ -606,13 +664,16 @@ export class LatexLexer {
     const token = this.buildModifiableToken(startPosition);
     return {
       type: LatexTokenType.Script,
-      detail: char === LatexCharType.Caret ? ScriptTokenType.Super : ScriptTokenType.Sub,
+      detail:
+        char === LatexCharType.Caret
+          ? ScriptTokenType.Super
+          : ScriptTokenType.Sub,
       literal: `${char}${token.literal}`,
       content: token,
     };
   }
 
-  public peek(advance: number = 0): LatexToken | null {
+  public peek(advance = 0): LatexToken | null {
     const position = this.position + advance;
     const char = this.input.at(position);
     if (!char) {

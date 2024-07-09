@@ -1,15 +1,24 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 
-import { parseDeclareFixedFont, parseDeclareTextFontCommand } from "./declarations";
-import { LatexTokenType, LatexCommandArgumentType, type CommandToken } from "../../../lexer/types";
 import {
+  type CommandToken,
+  LatexCommandArgumentType,
+  LatexTokenType,
+} from "../../../lexer/types";
+import {
+  AuthorCommandType,
   FontValueType,
   LatexFontEncodingNormalValue,
+  LatexFontEncodingType,
   LatexFontShapeValue,
   LatexFontSizeUnit,
   LatexFontWeight,
   LatexFontWidth,
 } from "../types";
+import {
+  parseDeclareFixedFont,
+  parseDeclareTextFontCommand,
+} from "./declarations";
 
 describe("parseDeclareFixedFont", () => {
   it("should throw an error if the command is not named DeclareFixedFont", () => {
@@ -179,7 +188,7 @@ describe("parseDeclareFixedFont", () => {
         type: FontValueType.FontValue,
         value: {
           encoding: LatexFontEncodingNormalValue.KnuthTexText,
-          type: 0,
+          type: LatexFontEncodingType.Normal,
         },
       },
       family: {
@@ -336,11 +345,11 @@ describe("parseDeclareTextFontCommand", () => {
       name: "myswitch",
       switches: [
         {
-          type: 0,
+          type: AuthorCommandType.AuthorDefault,
           value: "normal",
         },
         {
-          type: 0,
+          type: AuthorCommandType.AuthorDefault,
           value: "italics",
         },
       ],

@@ -1,22 +1,22 @@
-import { expect, describe, test, it } from "bun:test";
+import { describe, expect, it, test } from "bun:test";
 
-import {
-  parseFontEncoding,
-  parseFontSeries,
-  parseFontShape,
-  parseFontMeasurement,
-  parseFontFamily,
-} from "./utils";
 import {
   LatexFontEncodingNormalValue,
   LatexFontEncodingType,
+  type LatexFontMeasurementValue,
+  type LatexFontSeriesValue,
+  LatexFontShapeValue,
   LatexFontSizeUnit,
   LatexFontWeight,
   LatexFontWidth,
-  LatexFontShapeValue,
-  type LatexFontSeriesValue,
-  type LatexFontMeasurementValue,
 } from "./types";
+import {
+  parseFontEncoding,
+  parseFontFamily,
+  parseFontMeasurement,
+  parseFontSeries,
+  parseFontShape,
+} from "./utils";
 
 describe("parseFontEncoding", () => {
   test.each<[LatexFontEncodingNormalValue, string]>([
@@ -26,11 +26,14 @@ describe("parseFontEncoding", () => {
     [LatexFontEncodingNormalValue.MathLargeSymbols, "OMX"],
     [LatexFontEncodingNormalValue.MathSymbols, "OMS"],
     [LatexFontEncodingNormalValue.Unknown, "U"],
-  ])("should return a normal encoding of %p for an input of %s", (want, input) => {
-    const got = parseFontEncoding(input);
-    expect(got.type).toEqual(LatexFontEncodingType.Normal);
-    expect(got.encoding).toEqual(want);
-  });
+  ])(
+    "should return a normal encoding of %p for an input of %s",
+    (want, input) => {
+      const got = parseFontEncoding(input);
+      expect(got.type).toEqual(LatexFontEncodingType.Normal);
+      expect(got.encoding).toEqual(want);
+    },
+  );
 
   it("should give a local encoding based on input if the first letter is L", () => {
     const got = parseFontEncoding("LT1");
@@ -46,9 +49,18 @@ describe("parseFontEncoding", () => {
 describe("parseFontSeries", () => {
   test.each<[LatexFontSeriesValue, string]>([
     [{ weight: LatexFontWeight.Medium, width: LatexFontWidth.Medium }, "m"],
-    [{ weight: LatexFontWeight.Medium, width: LatexFontWidth.ExtraCondensed }, "ec"],
-    [{ weight: LatexFontWeight.SemiBold, width: LatexFontWidth.UltraExpanded }, "sbux"],
-    [{ weight: LatexFontWeight.UltraLight, width: LatexFontWidth.Medium }, "ul"],
+    [
+      { weight: LatexFontWeight.Medium, width: LatexFontWidth.ExtraCondensed },
+      "ec",
+    ],
+    [
+      { weight: LatexFontWeight.SemiBold, width: LatexFontWidth.UltraExpanded },
+      "sbux",
+    ],
+    [
+      { weight: LatexFontWeight.UltraLight, width: LatexFontWidth.Medium },
+      "ul",
+    ],
     [{ weight: LatexFontWeight.Light, width: LatexFontWidth.Condensed }, "lc"],
   ])("should return a series of %o for an input of %s", (want, input) => {
     const got = parseFontSeries(input);

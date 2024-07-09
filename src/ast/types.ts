@@ -15,8 +15,8 @@ export type LatexFontCommand = {
 };
 
 export enum LatexItemType {
-  BuiltIn,
-  FontCommand,
+  BuiltIn = 1,
+  FontCommand = 2,
 }
 
 // TODO: Figure out if Copilot suggested valid things

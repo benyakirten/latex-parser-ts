@@ -1,4 +1,4 @@
-import type { LexerCache, LatexToken } from "./types";
+import type { LatexToken, LexerCache } from "./types";
 
 /**
  * A simple caching behavior that stores by their position.
@@ -6,10 +6,10 @@ import type { LexerCache, LatexToken } from "./types";
  * tests to see where the breakpoint is.
  */
 export class SimpleCache implements LexerCache {
-  #cache: Map<number, LatexToken>;
+  private cache: Map<number, LatexToken>;
 
   constructor(cache?: Map<number, LatexToken>) {
-    this.#cache = cache ?? new Map();
+    this.cache = cache ?? new Map();
   }
 
   /**
@@ -17,9 +17,9 @@ export class SimpleCache implements LexerCache {
    * NOTE: Need performance tests to measure when this is needed.
    */
   evict(start: number, end: number): LexerCache {
-    for (const p of this.#cache.keys()) {
+    for (const p of this.cache.keys()) {
       if (p >= start && p < end) {
-        this.#cache.delete(p);
+        this.cache.delete(p);
       }
     }
 
@@ -27,7 +27,7 @@ export class SimpleCache implements LexerCache {
   }
 
   public add(position: number, token: LatexToken): LexerCache {
-    this.#cache.set(position, token);
+    this.cache.set(position, token);
     return this;
   }
 
@@ -35,56 +35,58 @@ export class SimpleCache implements LexerCache {
     let offset = 0;
     const movedEntries: [number, LatexToken][] = [];
 
-    for (const [p, t] of this.#cache.entries()) {
+    for (const [p, t] of this.cache.entries()) {
       if (p >= position) {
         movedEntries.push([p, t]);
       }
     }
 
     for (const token of tokens) {
-      this.#cache.set(position + offset, token);
+      this.cache.set(position + offset, token);
       offset += token.literal.length;
     }
 
     for (const [p, t] of movedEntries) {
-      this.#cache.set(offset + p, t);
+      this.cache.set(offset + p, t);
     }
 
     return this;
   }
 
   public remove(start: number, end: number): LexerCache {
-    if (start === end) {
+    let startPosition = start;
+    let endPosition = end;
+    if (startPosition === endPosition) {
       return this;
     }
 
-    // We could enforce start < end, but we can just swap the variables.
-    if (start > end) {
-      [start, end] = [end, start];
+    // We could enforce startPosition < endPosition, but we can just swap the variables.
+    if (startPosition > endPosition) {
+      [startPosition, endPosition] = [endPosition, startPosition];
     }
 
     // If we removed 2-10, we want to shift item in slot 11 to 2, which is 10 - 2 + 1
-    const offset = end - start + 1;
+    const offset = endPosition - startPosition + 1;
     const itemsToShift: [number, LatexToken][] = [];
-    for (const [p, t] of this.#cache.entries()) {
-      if (p > end) {
+    for (const [p, t] of this.cache.entries()) {
+      if (p > endPosition) {
         // Store the items to shift so we don't mutate the map while iterating through it (quirk of JavaScript).
         itemsToShift.push([p - offset, t]);
-        // Remove up to the designated position.
-      } else if (p >= start && p < end) {
-        this.#cache.delete(p);
+        this.cache.delete(p);
+      } else if (p >= startPosition && p < endPosition) {
+        this.cache.delete(p);
       }
     }
 
     for (const [p, t] of itemsToShift) {
-      this.#cache.set(p, t);
+      this.cache.set(p, t);
     }
 
     return this;
   }
 
   public get(position: number): LatexToken | null {
-    return this.#cache.get(position) ?? null;
+    return this.cache.get(position) ?? null;
   }
 }
 
