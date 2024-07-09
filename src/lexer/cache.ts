@@ -6,104 +6,104 @@ import type { LatexToken, LexerCache } from "./types";
  * tests to see where the breakpoint is.
  */
 export class SimpleCache implements LexerCache {
-	private cache: Map<number, LatexToken>;
+  private cache: Map<number, LatexToken>;
 
-	constructor(cache?: Map<number, LatexToken>) {
-		this.cache = cache ?? new Map();
-	}
+  constructor(cache?: Map<number, LatexToken>) {
+    this.cache = cache ?? new Map();
+  }
 
-	/**
-	 * Evict a portion of the cache if needed to reduce memory usage.
-	 * NOTE: Need performance tests to measure when this is needed.
-	 */
-	evict(start: number, end: number): LexerCache {
-		for (const p of this.cache.keys()) {
-			if (p >= start && p < end) {
-				this.cache.delete(p);
-			}
-		}
+  /**
+   * Evict a portion of the cache if needed to reduce memory usage.
+   * NOTE: Need performance tests to measure when this is needed.
+   */
+  evict(start: number, end: number): LexerCache {
+    for (const p of this.cache.keys()) {
+      if (p >= start && p < end) {
+        this.cache.delete(p);
+      }
+    }
 
-		return this;
-	}
+    return this;
+  }
 
-	public add(position: number, token: LatexToken): LexerCache {
-		this.cache.set(position, token);
-		return this;
-	}
+  public add(position: number, token: LatexToken): LexerCache {
+    this.cache.set(position, token);
+    return this;
+  }
 
-	public insert(position: number, tokens: LatexToken[]): LexerCache {
-		let offset = 0;
-		const movedEntries: [number, LatexToken][] = [];
+  public insert(position: number, tokens: LatexToken[]): LexerCache {
+    let offset = 0;
+    const movedEntries: [number, LatexToken][] = [];
 
-		for (const [p, t] of this.cache.entries()) {
-			if (p >= position) {
-				movedEntries.push([p, t]);
-			}
-		}
+    for (const [p, t] of this.cache.entries()) {
+      if (p >= position) {
+        movedEntries.push([p, t]);
+      }
+    }
 
-		for (const token of tokens) {
-			this.cache.set(position + offset, token);
-			offset += token.literal.length;
-		}
+    for (const token of tokens) {
+      this.cache.set(position + offset, token);
+      offset += token.literal.length;
+    }
 
-		for (const [p, t] of movedEntries) {
-			this.cache.set(offset + p, t);
-		}
+    for (const [p, t] of movedEntries) {
+      this.cache.set(offset + p, t);
+    }
 
-		return this;
-	}
+    return this;
+  }
 
-	public remove(start: number, end: number): LexerCache {
-		let startPosition = start;
-		let endPosition = end;
-		if (startPosition === endPosition) {
-			return this;
-		}
+  public remove(start: number, end: number): LexerCache {
+    let startPosition = start;
+    let endPosition = end;
+    if (startPosition === endPosition) {
+      return this;
+    }
 
-		// We could enforce startPosition < endPosition, but we can just swap the variables.
-		if (startPosition > endPosition) {
-			[startPosition, endPosition] = [endPosition, startPosition];
-		}
+    // We could enforce startPosition < endPosition, but we can just swap the variables.
+    if (startPosition > endPosition) {
+      [startPosition, endPosition] = [endPosition, startPosition];
+    }
 
-		// If we removed 2-10, we want to shift item in slot 11 to 2, which is 10 - 2 + 1
-		const offset = endPosition - startPosition + 1;
-		const itemsToShift: [number, LatexToken][] = [];
-		for (const [p, t] of this.cache.entries()) {
-			if (p > endPosition) {
-				// Store the items to shift so we don't mutate the map while iterating through it (quirk of JavaScript).
-				itemsToShift.push([p - offset, t]);
-				this.cache.delete(p);
-			} else if (p >= startPosition && p < endPosition) {
-				this.cache.delete(p);
-			}
-		}
+    // If we removed 2-10, we want to shift item in slot 11 to 2, which is 10 - 2 + 1
+    const offset = endPosition - startPosition + 1;
+    const itemsToShift: [number, LatexToken][] = [];
+    for (const [p, t] of this.cache.entries()) {
+      if (p > endPosition) {
+        // Store the items to shift so we don't mutate the map while iterating through it (quirk of JavaScript).
+        itemsToShift.push([p - offset, t]);
+        this.cache.delete(p);
+      } else if (p >= startPosition && p < endPosition) {
+        this.cache.delete(p);
+      }
+    }
 
-		for (const [p, t] of itemsToShift) {
-			this.cache.set(p, t);
-		}
+    for (const [p, t] of itemsToShift) {
+      this.cache.set(p, t);
+    }
 
-		return this;
-	}
+    return this;
+  }
 
-	public get(position: number): LatexToken | null {
-		return this.cache.get(position) ?? null;
-	}
+  public get(position: number): LatexToken | null {
+    return this.cache.get(position) ?? null;
+  }
 }
 
 export class NoCache implements LexerCache {
-	evict(): LexerCache {
-		return this;
-	}
-	add() {
-		return this;
-	}
-	insert(): LexerCache {
-		return this;
-	}
-	remove(): LexerCache {
-		return this;
-	}
-	get(): LatexToken | null {
-		return null;
-	}
+  evict(): LexerCache {
+    return this;
+  }
+  add() {
+    return this;
+  }
+  insert(): LexerCache {
+    return this;
+  }
+  remove(): LexerCache {
+    return this;
+  }
+  get(): LatexToken | null {
+    return null;
+  }
 }
