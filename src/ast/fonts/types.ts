@@ -261,3 +261,16 @@ export type AuthorCommand =
       type: AuthorCommandType.FontSize;
       value: LatexFontMeasurement;
     };
+
+// Special declarations
+export type DeclareFixedFontCommand = LatexFont & { name: string };
+export type DeclareTextFontCommand = {
+  name: string;
+  switches: AuthorCommand[];
+};
+export type DeclareOldFontCommand = {
+  name: string;
+  textSwitches: AuthorCommand[];
+  // TODO: Figure out how math switches differ from text switches.
+  mathSwitches: AuthorCommand[];
+};
