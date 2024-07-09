@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
 
-import { parseDeclareFixedFont } from "./declarations";
+import { parseDeclareFixedFont, parseDeclareTextFontCommand } from "./declarations";
 import { LatexTokenType, LatexCommandArgumentType, type CommandToken } from "../../../lexer/types";
 import {
   FontValueType,
@@ -208,3 +208,144 @@ describe("parseDeclareFixedFont", () => {
     });
   });
 });
+
+describe("parseDeclareTextFontCommand", () => {
+  it("should throw an error if the command is not named DeclareTextFontCommand", () => {
+    const command: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\DeclareFixedFont",
+      name: "DeclareFixedFont",
+      arguments: [],
+    };
+    expect(() => parseDeclareTextFontCommand(command)).toThrow();
+  });
+
+  it("should throw an error if the command does not have 2 arguments", () => {
+    const command: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\DeclareTextFont",
+      name: "DeclareTextFont",
+      arguments: [],
+    };
+    expect(() => parseDeclareTextFontCommand(command)).toThrow();
+  });
+
+  it("should throw an error if the first argument is not a macro", () => {
+    const command: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\DeclareTextFont",
+      name: "DeclareTextFont",
+      arguments: [
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Content,
+              literal: "name",
+              originalLength: 4,
+            },
+          ],
+        },
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Content,
+              literal: "switch1 switch2",
+              originalLength: 16,
+            },
+          ],
+        },
+      ],
+    };
+    expect(() => parseDeclareTextFontCommand(command)).toThrow();
+  });
+
+  it("should throw an error if the second argument contains invalid switches", () => {
+    const command: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\DeclareTextFont",
+      name: "DeclareTextFont",
+      arguments: [
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Command,
+              literal: "\\myfont",
+              name: "myfont",
+              arguments: [],
+            },
+          ],
+        },
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Command,
+              literal: "\\invalidswitch",
+              name: "invalidswitch",
+              arguments: [],
+            },
+          ],
+        },
+      ],
+    };
+    expect(() => parseDeclareTextFontCommand(command)).toThrow();
+  });
+
+  it("should parse the command correctly if all arguments are valid", () => {
+    const command: CommandToken = {
+      type: LatexTokenType.Command,
+      literal: "\\DeclareTextFont",
+      name: "DeclareTextFont",
+      arguments: [
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Command,
+              literal: "\\myswitch",
+              name: "myswitch",
+              arguments: [],
+            },
+          ],
+        },
+        {
+          type: LatexCommandArgumentType.Required,
+          content: [
+            {
+              type: LatexTokenType.Command,
+              literal: "\\normalfont",
+              name: "normalfont",
+              arguments: [],
+            },
+            {
+              type: LatexTokenType.Command,
+              literal: "\\itshape",
+              name: "itshape",
+              arguments: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const got = parseDeclareTextFontCommand(command);
+    expect(got).toEqual({
+      name: "myswitch",
+      switches: [
+        {
+          type: 0,
+          value: "normal",
+        },
+        {
+          type: 0,
+          value: "italics",
+        },
+      ],
+    });
+  });
+});
+
+describe.todo("parseDeclareOldFont");
