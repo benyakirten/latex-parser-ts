@@ -4,19 +4,19 @@ import type { LatexFont } from "./fonts/types";
 export type LatexItem = LatexBuiltin | LatexFontCommand;
 
 export type LatexBuiltin = {
-  type: LatexItemType.BuiltIn;
-  command: LatexBuiltinType;
-  name: string;
+	type: LatexItemType.BuiltIn;
+	command: LatexBuiltinType;
+	name: string;
 };
 
 export type LatexFontCommand = {
-  type: LatexItemType.FontCommand;
-  font: LatexFont;
+	type: LatexItemType.FontCommand;
+	font: LatexFont;
 };
 
 export enum LatexItemType {
-  BuiltIn,
-  FontCommand,
+	BuiltIn = 1,
+	FontCommand = 2,
 }
 
 // TODO: Figure out if Copilot suggested valid things
