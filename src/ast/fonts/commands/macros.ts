@@ -1,6 +1,8 @@
 import type { LatexFontCurrentValues } from "../types";
 
-export function determineCurrentFontKey(commandName: string): keyof LatexFontCurrentValues | null {
+export function determineCurrentFontKey(
+  commandName: string,
+): keyof LatexFontCurrentValues | null {
   switch (commandName.toLocaleLowerCase()) {
     case "f@encoding":
       return "encoding";

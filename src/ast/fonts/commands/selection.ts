@@ -1,11 +1,10 @@
 import {
-  LatexCommandArgumentType,
-  LatexTokenType,
   type CommandToken,
+  LatexCommandArgumentType,
   type LatexToken,
+  LatexTokenType,
 } from "../../../lexer/types";
 import {
-  SelectionCommandType,
   type LatexFont,
   type SelectionCommand,
   type SelectionCommandFontEncoding,
@@ -14,6 +13,7 @@ import {
   type SelectionCommandFontSeries,
   type SelectionCommandFontShape,
   type SelectionCommandFontSize,
+  SelectionCommandType,
 } from "../types";
 import {
   parseFontEncoding,
@@ -24,7 +24,9 @@ import {
   parseToFontValue,
 } from "../utils";
 
-function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFont {
+function parseSelectionCommands(
+  selectionCommands: SelectionCommand[],
+): LatexFont {
   const latexFont: LatexFont = {};
   for (const command of selectionCommands) {
     switch (command.type) {
@@ -52,19 +54,26 @@ function parseSelectionCommands(selectionCommands: SelectionCommand[]): LatexFon
   return latexFont;
 }
 
-function testForOneRequiredArgument(token: CommandToken, type: string): LatexToken {
+function testForOneRequiredArgument(
+  token: CommandToken,
+  type: string,
+): LatexToken {
   if (
     token.arguments.length !== 1 ||
     token.arguments[0].type !== LatexCommandArgumentType.Required ||
     token.arguments[0].content.length !== 1
   ) {
-    throw new Error(`Font ${type} requires one required argument with one item inside`);
+    throw new Error(
+      `Font ${type} requires one required argument with one item inside`,
+    );
   }
 
   return token.arguments[0].content[0];
 }
 
-function parseFontEncodingCommand(token: CommandToken): SelectionCommandFontEncoding {
+function parseFontEncodingCommand(
+  token: CommandToken,
+): SelectionCommandFontEncoding {
   const encToken = testForOneRequiredArgument(token, "encoding");
   const encoding = parseToFontValue(encToken, parseFontEncoding);
 
@@ -74,7 +83,9 @@ function parseFontEncodingCommand(token: CommandToken): SelectionCommandFontEnco
   };
 }
 
-function parseFontFamilyCommand(token: CommandToken): SelectionCommandFontFamily {
+function parseFontFamilyCommand(
+  token: CommandToken,
+): SelectionCommandFontFamily {
   const familyToken = testForOneRequiredArgument(token, "family");
   const family = parseToFontValue(familyToken, parseFontFamily);
   return {
@@ -83,7 +94,9 @@ function parseFontFamilyCommand(token: CommandToken): SelectionCommandFontFamily
   };
 }
 
-function parseFontSeriesCommand(token: CommandToken): SelectionCommandFontSeries {
+function parseFontSeriesCommand(
+  token: CommandToken,
+): SelectionCommandFontSeries {
   const seriesToken = testForOneRequiredArgument(token, "series");
   const series = parseToFontValue(seriesToken, parseFontSeries);
   return {
@@ -106,7 +119,9 @@ function parseFontSizeCommand(token: CommandToken): SelectionCommandFontSize {
     token.arguments.length !== 2 ||
     token.arguments.every((a) => a.type !== LatexCommandArgumentType.Required)
   ) {
-    throw new Error("Font size requires one required argument with two items inside");
+    throw new Error(
+      "Font size requires one required argument with two items inside",
+    );
   }
 
   const [fontSizeArg, baselineSkipArg] = token.arguments;
@@ -121,7 +136,10 @@ function parseFontSizeCommand(token: CommandToken): SelectionCommandFontSize {
   const baselineSkipToken = baselineSkipArg.content[0];
 
   const fontSize = parseToFontValue(fontSizeToken, parseFontMeasurement);
-  const baselineSkip = parseToFontValue(baselineSkipToken, parseFontMeasurement);
+  const baselineSkip = parseToFontValue(
+    baselineSkipToken,
+    parseFontMeasurement,
+  );
 
   return {
     type: SelectionCommandType.Size,
@@ -130,9 +148,11 @@ function parseFontSizeCommand(token: CommandToken): SelectionCommandFontSize {
   };
 }
 
-function parseFontLinespreadCommand(token: CommandToken): SelectionCommandFontLineSpread {
+function parseFontLinespreadCommand(
+  token: CommandToken,
+): SelectionCommandFontLineSpread {
   const linespreadToken = testForOneRequiredArgument(token, "linespread");
-  const lineSpread = parseToFontValue(linespreadToken, parseFloat);
+  const lineSpread = parseToFontValue(linespreadToken, Number.parseFloat);
 
   return {
     type: SelectionCommandType.LineSpread,
@@ -140,7 +160,9 @@ function parseFontLinespreadCommand(token: CommandToken): SelectionCommandFontLi
   };
 }
 
-export function parseSelectionCommandSection(token: CommandToken): SelectionCommand {
+export function parseSelectionCommandSection(
+  token: CommandToken,
+): SelectionCommand {
   switch (token.name.toLocaleLowerCase()) {
     case "fontencoding":
       return parseFontEncodingCommand(token);
@@ -192,7 +214,9 @@ export function parseUseFont(token: LatexToken): LatexFont {
     token.arguments.length !== 4 ||
     !token.arguments.every((a) => a.type === LatexCommandArgumentType.Required)
   ) {
-    throw new Error("Command must be a valid usefont command to be parsed as usefont");
+    throw new Error(
+      "Command must be a valid usefont command to be parsed as usefont",
+    );
   }
 
   const [encArg, familyArg, seriesArg, shapeArg] = token.arguments;

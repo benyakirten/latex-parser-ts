@@ -1,7 +1,7 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 
-import { determineCurrentFontKey } from "./macros";
 import type { LatexFontCurrentValues } from "../types";
+import { determineCurrentFontKey } from "./macros";
 
 describe("determineCurrentFontKey", () => {
   test.each([

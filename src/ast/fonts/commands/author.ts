@@ -5,23 +5,32 @@ import {
   type RequiredArgument,
 } from "../../../lexer/types";
 import {
-  LatexFontSizeUnit,
-  FontValueType,
-  type LatexFontMeasurementValue,
-  type LatexAuthorDefaults,
   type AuthorCommand,
   AuthorCommandType,
+  FontValueType,
+  type LatexAuthorDefaults,
+  type LatexFontMeasurementValue,
+  LatexFontSizeUnit,
 } from "../types";
-import { parseToFontValue, parseFontFamily, parseFontSeries, parseFontShape } from "../utils";
+import {
+  parseFontFamily,
+  parseFontSeries,
+  parseFontShape,
+  parseToFontValue,
+} from "../utils";
 
-function createAuthorDefaultCommand(cmd: keyof LatexAuthorDefaults): AuthorCommand {
+function createAuthorDefaultCommand(
+  cmd: keyof LatexAuthorDefaults,
+): AuthorCommand {
   return {
     type: AuthorCommandType.AuthorDefault,
     value: cmd,
   };
 }
 
-function createAuthorSizeCommand(size: LatexFontMeasurementValue): AuthorCommand {
+function createAuthorSizeCommand(
+  size: LatexFontMeasurementValue,
+): AuthorCommand {
   return {
     type: AuthorCommandType.FontSize,
     value: {
@@ -31,7 +40,9 @@ function createAuthorSizeCommand(size: LatexFontMeasurementValue): AuthorCommand
   };
 }
 
-export function parseAuthorCommand(authorCommand: string): AuthorCommand | null {
+export function parseAuthorCommand(
+  authorCommand: string,
+): AuthorCommand | null {
   // Source: https://www.latex-project.org/help/documentation/fntguide.pdf
   switch (authorCommand) {
     case "normalfont":
@@ -74,29 +85,58 @@ export function parseAuthorCommand(authorCommand: string): AuthorCommand | null 
     case "upshape":
       return createAuthorDefaultCommand("upcase");
     case "tiny":
-      return createAuthorSizeCommand({ value: 5, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 5,
+        unit: LatexFontSizeUnit.Point,
+      });
     case "scriptsize":
-      return createAuthorSizeCommand({ value: 7, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 7,
+        unit: LatexFontSizeUnit.Point,
+      });
     case "footnotesize":
-      return createAuthorSizeCommand({ value: 8, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 8,
+        unit: LatexFontSizeUnit.Point,
+      });
     case "normalsize":
-      return createAuthorSizeCommand({ value: 10, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 10,
+        unit: LatexFontSizeUnit.Point,
+      });
     case "large":
-      return createAuthorSizeCommand({ value: 12, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 12,
+        unit: LatexFontSizeUnit.Point,
+      });
     case "Large":
-      return createAuthorSizeCommand({ value: 14.4, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 14.4,
+        unit: LatexFontSizeUnit.Point,
+      });
     case "LARGE":
-      return createAuthorSizeCommand({ value: 17.28, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 17.28,
+        unit: LatexFontSizeUnit.Point,
+      });
     case "huge":
-      return createAuthorSizeCommand({ value: 20.74, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 20.74,
+        unit: LatexFontSizeUnit.Point,
+      });
     case "Huge":
-      return createAuthorSizeCommand({ value: 24.88, unit: LatexFontSizeUnit.Point });
+      return createAuthorSizeCommand({
+        value: 24.88,
+        unit: LatexFontSizeUnit.Point,
+      });
     default:
       return null;
   }
 }
 
-function determineAuthorCommandKey(commandName: string): keyof LatexAuthorDefaults | null {
+function determineAuthorCommandKey(
+  commandName: string,
+): keyof LatexAuthorDefaults | null {
   const namePieces = commandName.split("default");
   if (namePieces.length !== 2) {
     return null;
@@ -136,19 +176,27 @@ function determineAuthorCommandKey(commandName: string): keyof LatexAuthorDefaul
   }
 }
 
-export function setFontDefaults(renewCommand: CommandToken): Partial<LatexAuthorDefaults> | null {
+export function setFontDefaults(
+  renewCommand: CommandToken,
+): Partial<LatexAuthorDefaults> | null {
   if (renewCommand.name !== "renewcommand") {
-    throw new Error("Font defaults can only be set with the renewcommand command");
+    throw new Error(
+      "Font defaults can only be set with the renewcommand command",
+    );
   }
   const fontDefaults: Partial<LatexAuthorDefaults> = {};
   if (
     renewCommand.arguments.length !== 2 ||
-    renewCommand.arguments.every((arg) => arg.type !== LatexCommandArgumentType.Required)
+    renewCommand.arguments.every(
+      (arg) => arg.type !== LatexCommandArgumentType.Required,
+    )
   ) {
     throw new Error("Expected two required commands to follow renewcommand");
   }
 
-  const [arg1, arg2] = renewCommand.arguments.map((a) => a.content as RequiredArgument["content"]);
+  const [arg1, arg2] = renewCommand.arguments.map(
+    (a) => a.content as RequiredArgument["content"],
+  );
 
   if (arg1.length !== 1 || arg1[0].type !== LatexTokenType.Command) {
     throw new Error("First required argument must be a command");
@@ -166,7 +214,8 @@ export function setFontDefaults(renewCommand: CommandToken): Partial<LatexAuthor
 
   if (
     arg2.length !== 1 ||
-    (arg2[0].type !== LatexTokenType.Command && arg2[0].type !== LatexTokenType.Content)
+    (arg2[0].type !== LatexTokenType.Command &&
+      arg2[0].type !== LatexTokenType.Content)
   ) {
     throw new Error("Second required argument must be a command or argument");
   }

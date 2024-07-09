@@ -1,17 +1,21 @@
-import { expect, describe, test, it } from "bun:test";
+import { describe, expect, it, test } from "bun:test";
 
-import { parseAuthorCommand, setFontDefaults } from "./author";
 import {
+  type CommandToken,
+  LatexCommandArgumentType,
+  LatexTokenType,
+} from "../../../lexer/types";
+import {
+  type AuthorCommand,
   AuthorCommandType,
   FontValueType,
+  type LatexAuthorDefaults,
   LatexFontShapeValue,
   LatexFontSizeUnit,
   LatexFontWeight,
   LatexFontWidth,
-  type AuthorCommand,
-  type LatexAuthorDefaults,
 } from "../types";
-import { LatexCommandArgumentType, LatexTokenType, type CommandToken } from "../../../lexer/types";
+import { parseAuthorCommand, setFontDefaults } from "./author";
 
 describe("parseAuthorCommand", () => {
   test.each<[AuthorCommand | null, string]>([

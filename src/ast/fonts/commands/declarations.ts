@@ -1,7 +1,7 @@
 import {
+  type CommandToken,
   LatexCommandArgumentType,
   LatexTokenType,
-  type CommandToken,
   type RequiredArgument,
 } from "../../../lexer/types";
 import type {
@@ -11,16 +11,18 @@ import type {
   DeclareTextFontCommand,
 } from "../types";
 import {
-  parseToFontValue,
   parseFontEncoding,
   parseFontFamily,
+  parseFontMeasurement,
   parseFontSeries,
   parseFontShape,
-  parseFontMeasurement,
+  parseToFontValue,
 } from "../utils";
 import { parseAuthorCommand } from "./author";
 
-export function parseDeclareFixedFont(command: CommandToken): DeclareFixedFontCommand {
+export function parseDeclareFixedFont(
+  command: CommandToken,
+): DeclareFixedFontCommand {
   const commandName = command.name;
   if (commandName !== "DeclareFixedFont") {
     throw new Error("Command must be named DeclareFixedFont");
@@ -35,9 +37,13 @@ export function parseDeclareFixedFont(command: CommandToken): DeclareFixedFontCo
     throw new Error("DeclareFixedFont command must have 6 arguments");
   }
 
-  const [nameArg, encArg, familyArg, seriesArg, shapeArg, sizeArg] = args as RequiredArgument[];
+  const [nameArg, encArg, familyArg, seriesArg, shapeArg, sizeArg] =
+    args as RequiredArgument[];
 
-  if (nameArg.content.length !== 1 || nameArg.content[0].type !== LatexTokenType.Command) {
+  if (
+    nameArg.content.length !== 1 ||
+    nameArg.content[0].type !== LatexTokenType.Command
+  ) {
     throw new Error("First argument must be macro to add");
   }
 
@@ -59,20 +65,28 @@ export function parseDeclareFixedFont(command: CommandToken): DeclareFixedFontCo
   };
 }
 
-export function parseDeclareTextFontCommand(command: CommandToken): DeclareTextFontCommand {
+export function parseDeclareTextFontCommand(
+  command: CommandToken,
+): DeclareTextFontCommand {
   const commandName = command.name;
   if (commandName !== "DeclareTextFont") {
     throw new Error("Command must be named DeclareTextFontCommand");
   }
 
   const args = command.arguments;
-  if (args.length !== 2 || args.every((arg) => arg.type !== LatexCommandArgumentType.Required)) {
+  if (
+    args.length !== 2 ||
+    args.every((arg) => arg.type !== LatexCommandArgumentType.Required)
+  ) {
     throw new Error("DeclareTextFontCommand command must have 2 arguments");
   }
 
   const [nameArg, switchArg] = args as RequiredArgument[];
 
-  if (nameArg.content.length !== 1 || nameArg.content[0].type !== LatexTokenType.Command) {
+  if (
+    nameArg.content.length !== 1 ||
+    nameArg.content[0].type !== LatexTokenType.Command
+  ) {
     throw new Error("First argument must be the macro create");
   }
 
@@ -81,7 +95,9 @@ export function parseDeclareTextFontCommand(command: CommandToken): DeclareTextF
   const authorCommands: AuthorCommand[] = [];
   for (const token of switchArg.content) {
     if (token.type !== LatexTokenType.Command || token.arguments.length !== 0) {
-      throw new Error("Second argument must be a list of switches with no arguments");
+      throw new Error(
+        "Second argument must be a list of switches with no arguments",
+      );
     }
 
     const authorCommand = parseAuthorCommand(token.name);
@@ -99,20 +115,28 @@ export function parseDeclareTextFontCommand(command: CommandToken): DeclareTextF
 }
 
 // TODO: Finish functionality after we have math switches
-export function parseDeclareOldFont(command: CommandToken): DeclareOldFontCommand {
+export function parseDeclareOldFont(
+  command: CommandToken,
+): DeclareOldFontCommand {
   const commandName = command.name;
   if (commandName !== "DeclareTextFont") {
     throw new Error("Command must be named DeclareTextFontCommand");
   }
 
   const args = command.arguments;
-  if (args.length !== 2 || args.every((arg) => arg.type !== LatexCommandArgumentType.Required)) {
+  if (
+    args.length !== 2 ||
+    args.every((arg) => arg.type !== LatexCommandArgumentType.Required)
+  ) {
     throw new Error("DeclareTextFontCommand command must have 2 arguments");
   }
 
   const [nameArg, textSwitches] = args as RequiredArgument[];
 
-  if (nameArg.content.length !== 1 || nameArg.content[0].type !== LatexTokenType.Command) {
+  if (
+    nameArg.content.length !== 1 ||
+    nameArg.content[0].type !== LatexTokenType.Command
+  ) {
     throw new Error("First argument must be the macro create");
   }
 
@@ -121,7 +145,9 @@ export function parseDeclareOldFont(command: CommandToken): DeclareOldFontComman
   const authorCommands: AuthorCommand[] = [];
   for (const token of textSwitches.content) {
     if (token.type !== LatexTokenType.Command || token.arguments.length !== 0) {
-      throw new Error("Second argument must be a list of switches with no arguments");
+      throw new Error(
+        "Second argument must be a list of switches with no arguments",
+      );
     }
 
     const authorCommand = parseAuthorCommand(token.name);
