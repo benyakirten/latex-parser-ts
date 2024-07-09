@@ -1,22 +1,22 @@
 {
-	"name": "latex-parser",
-	"module": "index.ts",
-	"type": "module",
-	"author": {
-		"name": "Ben Horowitz",
-		"email": "ben@benyakiredits.com"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.8.3",
-		"@types/bun": "latest",
-		"globals": "^15.6.0"
-	},
-	"peerDependencies": {
-		"typescript": "^5.0.0"
-	},
-	"scripts": {
-		"lint": "biome check",
-		"lint:fix": "biome check --write",
-		"lint:ci": "biome ci"
-	}
+  "name": "latex-parser",
+  "module": "index.ts",
+  "type": "module",
+  "author": {
+    "name": "Ben Horowitz",
+    "email": "ben@benyakiredits.com"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.8.3",
+    "@types/bun": "latest",
+    "globals": "^15.6.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "lint:ci": "biome ci"
+  }
 }
