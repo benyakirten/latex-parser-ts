@@ -1,10 +1,22 @@
 import {
-	LatexCommandArgumentType,
-	LatexTokenType,
 	type CommandToken,
+	LatexCommandArgumentType,
 	type LatexToken,
+	LatexTokenType,
 } from "../../lexer/types";
-import type { MathAlphabetDeclaration } from "./types";
+import type { FontValue } from "../fonts/types";
+import {
+	parseFontEncoding,
+	parseFontFamily,
+	parseFontSeries,
+	parseFontShape,
+	parseToFontValue,
+} from "../fonts/utils";
+import {
+	type MathAlphabetDeclaration,
+	MathAlphabetDeclarationType,
+	type MathAlphabetDeclarationValue,
+} from "./types";
 
 export function validateDeclaredMathVersion(
 	command: CommandToken,
@@ -23,6 +35,23 @@ export function validateDeclaredMathVersion(
 	return literal;
 }
 
+function parsePossibleToken<T>(
+	token: LatexToken | undefined,
+	callback: (token: string) => T,
+): MathAlphabetDeclarationValue<FontValue<T>> {
+	if (!token) {
+		return {
+			type: MathAlphabetDeclarationType.Reset,
+		};
+	}
+
+	const value = parseToFontValue(token, callback);
+	return {
+		type: MathAlphabetDeclarationType.Set,
+		value,
+	};
+}
+
 export function declareMathAlphabet(
 	command: CommandToken,
 ): MathAlphabetDeclaration | null {
@@ -32,7 +61,7 @@ export function declareMathAlphabet(
 		command.arguments.every(
 			(arg) =>
 				arg.type !== LatexCommandArgumentType.Required ||
-				arg.content.length !== 1 ||
+				arg.content.length > 1 ||
 				(arg.content[0].type !== LatexTokenType.Content &&
 					arg.content[0].type !== LatexTokenType.Command),
 		)
@@ -49,5 +78,16 @@ export function declareMathAlphabet(
 
 	const name = nameToken.literal;
 
-	//
+	const encoding = parsePossibleToken(encodingToken, parseFontEncoding);
+	const family = parsePossibleToken(familyToken, parseFontFamily);
+	const series = parsePossibleToken(seriesToken, parseFontSeries);
+	const shape = parsePossibleToken(shapeToken, parseFontShape);
+
+	return {
+		name,
+		encoding,
+		family,
+		series,
+		shape,
+	};
 }

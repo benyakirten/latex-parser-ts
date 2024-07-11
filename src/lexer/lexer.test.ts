@@ -90,6 +90,19 @@ describe("LatexLexer", () => {
 			});
 		});
 
+		it("should be ble to lex a command with a required argument that's empty", () => {
+			const got = new LatexLexer("\\command{}").readToEnd();
+			expect(got).toHaveLength(1);
+
+			const [token] = got;
+			expect(token).toEqual({
+				type: LatexTokenType.Command,
+				literal: "\\command{}",
+				arguments: [{ type: LatexCommandArgumentType.Required, content: [] }],
+				name: "command",
+			});
+		});
+
 		it("should be able to lex a command with a required argument with nested arguments", () => {
 			const got = new LatexLexer(
 				"\\command{\\command2{arg1}{\\command3}}",
