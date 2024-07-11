@@ -1,11 +1,11 @@
 import {
-	type LatexFont,
 	FontValueType,
-	LatexFontEncodingType,
+	type LatexFont,
 	LatexFontEncodingNormalValue,
+	LatexFontEncodingType,
+	LatexFontShapeValue,
 	LatexFontWeight,
 	LatexFontWidth,
-	LatexFontShapeValue,
 } from "../fonts/types";
 import { MathFont, MathSymbolFonts } from "./types";
 
