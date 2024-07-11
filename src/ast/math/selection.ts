@@ -18,7 +18,7 @@ export function isMathSelection(name: string): name is MathFont {
 
 export function isMathVersion(
 	command: CommandToken,
-	declaredVersions: string[],
+	declaredVersions: string[] = [],
 ): boolean {
 	if (command.arguments.length > 1) {
 		return false;
@@ -34,13 +34,9 @@ export function isMathVersion(
 	}
 
 	const [version] = mathVersion;
-	if (
+	return (
 		version === "bold" ||
 		version === "normal" ||
 		declaredVersions.includes(version)
-	) {
-		return true;
-	}
-
-	return false;
+	);
 }
