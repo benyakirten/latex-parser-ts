@@ -1,12 +1,12 @@
-import { expect, it, describe } from "bun:test";
+import { describe, expect, it } from "bun:test";
 
-import { isMathSelection, isMathVersion } from "./selection";
-import { MathFont } from "./types";
 import {
+	type CommandToken,
 	LatexCommandArgumentType,
 	LatexTokenType,
-	type CommandToken,
 } from "../../lexer/types";
+import { isMathSelection, isMathVersion } from "./selection";
+import { MathFont } from "./types";
 
 describe("isMathSelection", () => {
 	it("should return true for valid MathFont names", () => {
