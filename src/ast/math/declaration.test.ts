@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, test } from "bun:test";
 
 import {
 	type CommandToken,
@@ -13,11 +13,16 @@ import {
 } from "../fonts/types";
 import {
 	declareMathOrSymbolAlphabet,
-	setMathOrSymbolFont,
 	declareMathVersion,
 	declareSymbolFontAlphabet,
+	setMathOrSymbolFont,
 } from "./declaration";
-import { MathAlphabetDeclarationType } from "./types";
+import {
+	MathAlphabetDeclarationType,
+	MathFont,
+	MathSymbolFont,
+	type SymbolFontAlphabet,
+} from "./types";
 
 describe("declareMathVersion", () => {
 	it("should return the literal value if the command has one required argument with one content token", () => {
@@ -835,4 +840,98 @@ describe("declareSymbolFontAlphabet", () => {
 			symbolFont: "validfont",
 		});
 	});
+
+	test.each<[SymbolFontAlphabet, MathFont, MathSymbolFont]>([
+		[
+			{
+				mathAlphabet: MathFont.Normal,
+				symbolFont: MathSymbolFont.Operators,
+			},
+			MathFont.Normal,
+			MathSymbolFont.Operators,
+		],
+		[
+			{
+				mathAlphabet: MathFont.BoldRoman,
+				symbolFont: MathSymbolFont.Letters,
+			},
+			MathFont.BoldRoman,
+			MathSymbolFont.Letters,
+		],
+		[
+			{
+				mathAlphabet: MathFont.Calligraphic,
+				symbolFont: MathSymbolFont.Symbols,
+			},
+			MathFont.Calligraphic,
+			MathSymbolFont.Symbols,
+		],
+		[
+			{
+				mathAlphabet: MathFont.SansSerif,
+				symbolFont: MathSymbolFont.LargeSymbols,
+			},
+			MathFont.SansSerif,
+			MathSymbolFont.LargeSymbols,
+		],
+		[
+			{
+				mathAlphabet: MathFont.Serif,
+				symbolFont: MathSymbolFont.Operators,
+			},
+			MathFont.Serif,
+			MathSymbolFont.Operators,
+		],
+		[
+			{
+				mathAlphabet: MathFont.TextItalic,
+				symbolFont: MathSymbolFont.Operators,
+			},
+			MathFont.TextItalic,
+			MathSymbolFont.Operators,
+		],
+
+		[
+			{
+				mathAlphabet: MathFont.Typewriter,
+				symbolFont: MathSymbolFont.Operators,
+			},
+			MathFont.Typewriter,
+			MathSymbolFont.Operators,
+		],
+	])(
+		"should return %o given a math alphabet of %s and a symbol font of %s",
+		(want, mathAlphabet, symbolFont) => {
+			const command: CommandToken = {
+				name: "DeclareSymbolFontAlphabet",
+				literal: "\\DeclareSymbolFontAlphabet",
+				type: LatexTokenType.Command,
+				arguments: [
+					{
+						type: LatexCommandArgumentType.Required,
+						content: [
+							{
+								type: LatexTokenType.Command,
+								literal: `\\${mathAlphabet}`,
+								name: mathAlphabet,
+								arguments: [],
+							},
+						],
+					},
+					{
+						type: LatexCommandArgumentType.Required,
+						content: [
+							{
+								type: LatexTokenType.Content,
+								literal: symbolFont,
+								originalLength: symbolFont.length,
+							},
+						],
+					},
+				],
+			};
+			const got = declareSymbolFontAlphabet(command);
+			expect(got).toEqual(want);
+		},
+	);
 });
