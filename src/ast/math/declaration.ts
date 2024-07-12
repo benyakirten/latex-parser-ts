@@ -161,7 +161,7 @@ export function declareSymbolFontAlphabet(
 	symbolFonts: string[] = [],
 ): SymbolFontAlphabet | null {
 	if (
-		command.name !== "DeclareSymbolFont" ||
+		command.name !== "DeclareSymbolFontAlphabet" ||
 		command.arguments.length !== 2 ||
 		command.arguments.every(
 			(arg) =>

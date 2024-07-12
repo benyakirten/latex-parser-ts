@@ -15,6 +15,7 @@ import {
 	declareMathOrSymbolAlphabet,
 	setMathOrSymbolFont,
 	declareMathVersion,
+	declareSymbolFontAlphabet,
 } from "./declaration";
 import { MathAlphabetDeclarationType } from "./types";
 
@@ -651,6 +652,187 @@ describe("setMathOrSymbolFont", () => {
 					value: LatexFontShapeValue.Italic,
 				},
 			},
+		});
+	});
+});
+describe("declareSymbolFontAlphabet", () => {
+	it("should return null if the command name is not 'DeclareSymbolFontAlphabet'", () => {
+		const command: CommandToken = {
+			name: "InvalidCommand",
+			literal: "\\InvalidCommand",
+			type: LatexTokenType.Command,
+			arguments: [],
+		};
+
+		const result = declareSymbolFontAlphabet(command);
+		expect(result).toBeNull();
+	});
+
+	it("should return null if the command has less than 2 arguments", () => {
+		const command: CommandToken = {
+			name: "DeclareSymbolFontAlphabet",
+			literal: "\\DeclareSymbolFontAlphabet",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [],
+				},
+			],
+		};
+
+		const result = declareSymbolFontAlphabet(command);
+		expect(result).toBeNull();
+	});
+
+	it("should return null if any argument content has more than one token", () => {
+		const command: CommandToken = {
+			name: "DeclareSymbolFontAlphabet",
+			literal: "\\DeclareSymbolFontAlphabet",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "argument1",
+							originalLength: 9,
+						},
+						{
+							type: LatexTokenType.Content,
+							literal: "extraToken",
+							originalLength: 10,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "argument2",
+							originalLength: 9,
+						},
+					],
+				},
+			],
+		};
+
+		const result = declareSymbolFontAlphabet(command);
+		expect(result).toBeNull();
+	});
+
+	it("should return null if the math alphabet is not valid", () => {
+		const command: CommandToken = {
+			name: "DeclareSymbolFontAlphabet",
+			literal: "\\DeclareSymbolFontAlphabet",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Command,
+							literal: "\\invalidalphabet",
+							name: "invalidalphabet",
+							arguments: [],
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "fontname",
+							originalLength: 8,
+						},
+					],
+				},
+			],
+		};
+
+		const result = declareSymbolFontAlphabet(command, ["validalphabet"]);
+		expect(result).toBeNull();
+	});
+
+	it("should return null if the symbol font is not valid", () => {
+		const command: CommandToken = {
+			name: "DeclareSymbolFontAlphabet",
+			literal: "\\DeclareSymbolFontAlphabet",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Command,
+							literal: "\\validalphabet",
+							name: "validalphabet",
+							arguments: [],
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "invalidfont",
+							originalLength: 10,
+						},
+					],
+				},
+			],
+		};
+
+		const result = declareSymbolFontAlphabet(
+			command,
+			["validalphabet"],
+			["validfont"],
+		);
+		expect(result).toBeNull();
+	});
+
+	it("should return the SymbolFontAlphabet object if the command is valid", () => {
+		const command: CommandToken = {
+			name: "DeclareSymbolFontAlphabet",
+			literal: "\\DeclareSymbolFontAlphabet",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Command,
+							literal: "\\validalphabet",
+							name: "validalphabet",
+							arguments: [],
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "validfont",
+							originalLength: 9,
+						},
+					],
+				},
+			],
+		};
+
+		const result = declareSymbolFontAlphabet(
+			command,
+			["validalphabet"],
+			["validfont"],
+		);
+		expect(result).toEqual({
+			mathAlphabet: "validalphabet",
+			symbolFont: "validfont",
 		});
 	});
 });
