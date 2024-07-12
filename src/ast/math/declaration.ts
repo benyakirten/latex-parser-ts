@@ -57,7 +57,9 @@ export function declareMathAlphabet(
 	command: CommandToken,
 ): MathAlphabetDeclaration | null {
 	if (
-		command.name !== "DeclareMathAlphabet" ||
+		// Allow SetMathAlphabet to reuse this functionality
+		(command.name !== "DeclareMathAlphabet" &&
+			command.name !== "SetMathAlphabet") ||
 		command.arguments.length !== 5 ||
 		command.arguments.every(
 			(arg) =>
