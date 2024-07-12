@@ -16,6 +16,7 @@ import {
 	type MathAlphabetDeclaration,
 	MathAlphabetDeclarationType,
 	type MathAlphabetDeclarationValue,
+	type SetMathAlphabetDeclaration,
 } from "./types";
 
 export function validateDeclaredMathVersion(
@@ -87,5 +88,38 @@ export function declareMathAlphabet(
 		family,
 		series,
 		shape,
+	};
+}
+
+export function setMathAlphabet(
+	command: CommandToken,
+): SetMathAlphabetDeclaration | null {
+	if (command.name !== "SetMathAlphabet" || command.arguments.length !== 6) {
+		return null;
+	}
+
+	const versionToken = command.arguments[1];
+	if (
+		versionToken.type !== LatexCommandArgumentType.Required ||
+		versionToken.content.length !== 1 ||
+		versionToken.content[0].type !== LatexTokenType.Content
+	) {
+		return null;
+	}
+
+	const version = versionToken.content[0].literal;
+
+	const newCommand = structuredClone(command);
+	newCommand.arguments = newCommand.arguments.toSpliced(1, 1);
+
+	const declaration = declareMathAlphabet(newCommand);
+
+	if (!declaration) {
+		return null;
+	}
+
+	return {
+		...declaration,
+		version,
 	};
 }

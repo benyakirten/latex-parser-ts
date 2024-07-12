@@ -48,3 +48,7 @@ export type MathAlphabetDeclaration = {
 	series: MathAlphabetDeclarationValue<LatexFontSeries>;
 	shape: MathAlphabetDeclarationValue<LatexFontShape>;
 };
+
+export type SetMathAlphabetDeclaration = MathAlphabetDeclaration & {
+	version: string;
+};
