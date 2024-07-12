@@ -12,17 +12,17 @@ import {
 	parseFontShape,
 	parseToFontValue,
 } from "../fonts/utils";
+import { isMathSelection, isSymbolFont } from "./selection";
 import {
 	type MathAlphabetBase,
 	type MathAlphabetDeclaration,
 	MathAlphabetDeclarationType,
 	type MathAlphabetDeclarationValue,
 	type SetMathAlphabetDeclaration,
+	type SymbolFontAlphabet,
 } from "./types";
 
-export function validateDeclaredMathVersion(
-	command: CommandToken,
-): string | null {
+export function declareMathVersion(command: CommandToken): string | null {
 	if (
 		command.arguments.length !== 1 ||
 		command.arguments[0].type !== LatexCommandArgumentType.Required ||
@@ -73,7 +73,8 @@ export function declareMathOrSymbolAlphabet(
 ): MathAlphabetDeclaration | null {
 	if (
 		// Allow SetMathAlphabet to reuse this functionality
-		command.name !== "DeclareMathAlphabet" ||
+		(command.name !== "DeclareMathAlphabet" &&
+			command.name !== "DeclareSymbolFont") ||
 		command.arguments.length !== 5 ||
 		command.arguments.every(
 			(arg) =>
@@ -108,7 +109,7 @@ export function setMathOrSymbolFont(
 	command: CommandToken,
 ): SetMathAlphabetDeclaration | null {
 	if (
-		command.name !== "SetMathAlphabet" ||
+		(command.name !== "SetMathAlphabet" && command.name !== "SetSymbolFont") ||
 		command.arguments.length !== 6 ||
 		command.arguments.every(
 			(arg) => arg.type !== LatexCommandArgumentType.Required,
@@ -151,5 +152,54 @@ export function setMathOrSymbolFont(
 			seriesToken,
 			shapeToken,
 		),
+	};
+}
+
+export function declareSymbolFontAlphabet(
+	command: CommandToken,
+	mathAlphabets: string[] = [],
+	symbolFonts: string[] = [],
+): SymbolFontAlphabet | null {
+	if (
+		command.name !== "DeclareSymbolFont" ||
+		command.arguments.length !== 2 ||
+		command.arguments.every(
+			(arg) =>
+				arg.type !== LatexCommandArgumentType.Required ||
+				arg.content.length > 1,
+		)
+	) {
+		return null;
+	}
+
+	const [mathAlphabet, symbolFont] = command.arguments.map((arg) =>
+		(arg.content as LatexToken[]).at(0),
+	);
+
+	if (!mathAlphabet || mathAlphabet.type !== LatexTokenType.Command) {
+		return null;
+	}
+
+	const alphabetName = mathAlphabet.name;
+
+	if (!symbolFont || symbolFont.type !== LatexTokenType.Content) {
+		return null;
+	}
+
+	const fontName = symbolFont.literal;
+
+	if (
+		!(isMathSelection(alphabetName) || mathAlphabets.includes(alphabetName))
+	) {
+		return null;
+	}
+
+	if (!(isSymbolFont(fontName) || symbolFonts.includes(fontName))) {
+		return null;
+	}
+
+	return {
+		mathAlphabet: alphabetName,
+		symbolFont: fontName,
 	};
 }

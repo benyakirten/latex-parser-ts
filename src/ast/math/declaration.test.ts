@@ -14,11 +14,11 @@ import {
 import {
 	declareMathOrSymbolAlphabet,
 	setMathOrSymbolFont,
-	validateDeclaredMathVersion,
+	declareMathVersion,
 } from "./declaration";
 import { MathAlphabetDeclarationType } from "./types";
 
-describe("validateDeclaredMathVersion", () => {
+describe("declareMathVersion", () => {
 	it("should return the literal value if the command has one required argument with one content token", () => {
 		const command: CommandToken = {
 			name: "mathversion",
@@ -38,7 +38,7 @@ describe("validateDeclaredMathVersion", () => {
 			],
 		};
 
-		const result = validateDeclaredMathVersion(command);
+		const result = declareMathVersion(command);
 		expect(result).toBe("normal");
 	});
 
@@ -50,7 +50,7 @@ describe("validateDeclaredMathVersion", () => {
 			arguments: [],
 		};
 
-		const result = validateDeclaredMathVersion(command);
+		const result = declareMathVersion(command);
 		expect(result).toBeNull();
 	});
 
@@ -83,7 +83,7 @@ describe("validateDeclaredMathVersion", () => {
 			],
 		};
 
-		const result = validateDeclaredMathVersion(command);
+		const result = declareMathVersion(command);
 		expect(result).toBeNull();
 	});
 
@@ -100,7 +100,7 @@ describe("validateDeclaredMathVersion", () => {
 			],
 		};
 
-		const result = validateDeclaredMathVersion(command);
+		const result = declareMathVersion(command);
 		expect(result).toBeNull();
 	});
 
@@ -128,7 +128,7 @@ describe("validateDeclaredMathVersion", () => {
 			],
 		};
 
-		const result = validateDeclaredMathVersion(command);
+		const result = declareMathVersion(command);
 		expect(result).toBeNull();
 	});
 
@@ -152,13 +152,13 @@ describe("validateDeclaredMathVersion", () => {
 			],
 		};
 
-		const result = validateDeclaredMathVersion(command);
+		const result = declareMathVersion(command);
 		expect(result).toBeNull();
 	});
 });
 
 describe("declareMathOrSymbolAlphabet", () => {
-	it("should return null if the command name is not 'DeclareMathAlphabet'", () => {
+	it("should return null if the command name is not 'DeclareMathAlphabet' or 'DeclareSymbolFont", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
@@ -362,7 +362,7 @@ describe("declareMathOrSymbolAlphabet", () => {
 });
 
 describe("setMathOrSymbolFont", () => {
-	it("should return null if the command name is not 'SetMathAlphabet'", () => {
+	it("should return null if the command name is not 'SetMathAlphabet' or 'SetSymbolFont'	", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",

@@ -1,5 +1,5 @@
 import type { CommandToken } from "../../lexer/types";
-import { MathFont } from "./types";
+import { MathFont, MathSymbolFont } from "./types";
 
 export function isMathSelection(name: string): name is MathFont {
 	switch (name) {
@@ -10,6 +10,18 @@ export function isMathSelection(name: string): name is MathFont {
 		case MathFont.TextItalic:
 		case MathFont.Typewriter:
 		case MathFont.Calligraphic:
+			return true;
+		default:
+			return false;
+	}
+}
+
+export function isSymbolFont(name: string): name is MathSymbolFont {
+	switch (name) {
+		case MathSymbolFont.Operators:
+		case MathSymbolFont.Letters:
+		case MathSymbolFont.Symbols:
+		case MathSymbolFont.LargeSymbols:
 			return true;
 		default:
 			return false;
@@ -37,6 +49,7 @@ export function isMathVersion(
 	return (
 		version === "bold" ||
 		version === "normal" ||
-		declaredVersions.includes(version)
+		declaredVersions.includes(version) ||
+		declaredVersions.includes(command.name)
 	);
 }

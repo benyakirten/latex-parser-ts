@@ -7,7 +7,7 @@ import {
 	LatexFontWeight,
 	LatexFontWidth,
 } from "../fonts/types";
-import { MathFont, MathSymbolFonts } from "./types";
+import { MathFont, MathSymbolFont } from "./types";
 
 const mathNormalCorrespondence: LatexFont = {
 	encoding: {
@@ -247,16 +247,16 @@ export function getMathCorrespondenceFont(
 }
 
 export function getMathSymbolsCorrespondenceFont(
-	name: MathSymbolFonts,
+	name: MathSymbolFont,
 ): LatexFont | null {
 	switch (name) {
-		case MathSymbolFonts.Letters:
+		case MathSymbolFont.Letters:
 			return fontCorrespondence.normal;
-		case MathSymbolFonts.Operators:
+		case MathSymbolFont.Operators:
 			return fontCorrespondence.roman;
-		case MathSymbolFonts.Symbols:
+		case MathSymbolFont.Symbols:
 			return fontCorrespondence.calligraphicSymbols;
-		case MathSymbolFonts.LargeSymbols:
+		case MathSymbolFont.LargeSymbols:
 			return fontCorrespondence.callgraphicLargeSymbols;
 		default:
 			return null;

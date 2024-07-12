@@ -15,7 +15,7 @@ export enum MathFont {
 	Calligraphic = "mathcal",
 }
 
-export enum MathSymbolFonts {
+export enum MathSymbolFont {
 	Operators = "operators", // symbols from \mathrm
 	Letters = "letters", // symbols from \mathnormal
 	Symbols = "symbols", // most LATEX symbols
@@ -55,4 +55,9 @@ export type MathAlphabetDeclaration = MathAlphabetBase & {
 export type SetMathAlphabetDeclaration = MathAlphabetDeclaration & {
 	name: string;
 	version: string;
+};
+
+export type SymbolFontAlphabet = {
+	mathAlphabet: string;
+	symbolFont: string;
 };
