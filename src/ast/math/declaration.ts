@@ -153,3 +153,39 @@ export function setMathAlphabet(
 		),
 	};
 }
+
+export function declareSymbolFont(
+	command: CommandToken,
+): MathAlphabetDeclaration | null {
+	if (
+		// Allow SetMathAlphabet to reuse this functionality
+		command.name !== "DeclareSymbolFont" ||
+		command.arguments.length !== 5 ||
+		command.arguments.every(
+			(arg) =>
+				arg.type !== LatexCommandArgumentType.Required ||
+				arg.content.length > 1,
+		)
+	) {
+		return null;
+	}
+
+	const [nameToken, encodingToken, familyToken, seriesToken, shapeToken] =
+		command.arguments.map((arg) => (arg.content as LatexToken[]).at(0));
+
+	if (!nameToken || nameToken.type !== LatexTokenType.Command) {
+		return null;
+	}
+
+	const { name } = nameToken;
+
+	return {
+		name,
+		...parseAlphabetDeclarationTokens(
+			encodingToken,
+			familyToken,
+			seriesToken,
+			shapeToken,
+		),
+	};
+}
