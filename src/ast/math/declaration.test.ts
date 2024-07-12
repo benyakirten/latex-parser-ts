@@ -405,7 +405,39 @@ describe("setMathAlphabet", () => {
 		expect(result).toBeNull();
 	});
 
-	it("should return null if the version argument is not of type Required with one content token", () => {
+	it("should return null if every argument is not of type Required", () => {
+		const command: CommandToken = {
+			name: "SetMathAlphabet",
+			literal: "\\SetMathAlphabet",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [],
+				},
+				{
+					type: LatexCommandArgumentType.Optional,
+					content: [],
+				},
+			],
+		};
+		const result = setMathAlphabet(command);
+		expect(result).toBeNull();
+	});
+
+	it("should return null if the version argument does not contain one content token", () => {
 		const command: CommandToken = {
 			name: "SetMathAlphabet",
 			literal: "\\SetMathAlphabet",

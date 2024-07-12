@@ -41,14 +41,18 @@ export enum MathAlphabetDeclarationType {
 	Reset = 2,
 }
 
-export type MathAlphabetDeclaration = {
-	name: string;
+export type MathAlphabetBase = {
 	encoding: MathAlphabetDeclarationValue<LatexFontEncoding>;
 	family: MathAlphabetDeclarationValue<LatexFontFamily>;
 	series: MathAlphabetDeclarationValue<LatexFontSeries>;
 	shape: MathAlphabetDeclarationValue<LatexFontShape>;
 };
 
+export type MathAlphabetDeclaration = MathAlphabetBase & {
+	name: string;
+};
+
 export type SetMathAlphabetDeclaration = MathAlphabetDeclaration & {
+	name: string;
 	version: string;
 };
