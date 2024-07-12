@@ -68,7 +68,7 @@ function parseAlphabetDeclarationTokens(
 	return { encoding, family, series, shape };
 }
 
-export function declareMathAlphabet(
+export function declareMathOrSymbolAlphabet(
 	command: CommandToken,
 ): MathAlphabetDeclaration | null {
 	if (
@@ -104,7 +104,7 @@ export function declareMathAlphabet(
 	};
 }
 
-export function setMathAlphabet(
+export function setMathOrSymbolFont(
 	command: CommandToken,
 ): SetMathAlphabetDeclaration | null {
 	if (
@@ -144,42 +144,6 @@ export function setMathAlphabet(
 
 	return {
 		version,
-		name,
-		...parseAlphabetDeclarationTokens(
-			encodingToken,
-			familyToken,
-			seriesToken,
-			shapeToken,
-		),
-	};
-}
-
-export function declareSymbolFont(
-	command: CommandToken,
-): MathAlphabetDeclaration | null {
-	if (
-		// Allow SetMathAlphabet to reuse this functionality
-		command.name !== "DeclareSymbolFont" ||
-		command.arguments.length !== 5 ||
-		command.arguments.every(
-			(arg) =>
-				arg.type !== LatexCommandArgumentType.Required ||
-				arg.content.length > 1,
-		)
-	) {
-		return null;
-	}
-
-	const [nameToken, encodingToken, familyToken, seriesToken, shapeToken] =
-		command.arguments.map((arg) => (arg.content as LatexToken[]).at(0));
-
-	if (!nameToken || nameToken.type !== LatexTokenType.Command) {
-		return null;
-	}
-
-	const { name } = nameToken;
-
-	return {
 		name,
 		...parseAlphabetDeclarationTokens(
 			encodingToken,
