@@ -1,9 +1,9 @@
 import {
-	LatexCommandArgumentType,
-	LatexTokenType,
 	type CommandToken,
 	type LatexArgument,
+	LatexCommandArgumentType,
 	type LatexToken,
+	LatexTokenType,
 	type SimpleMacro,
 } from "./types";
 

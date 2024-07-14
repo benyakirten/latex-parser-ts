@@ -1,14 +1,14 @@
-import { describe, it, expect } from "bun:test";
+import { describe, expect, it } from "bun:test";
 
 import {
-	type SimpleMacro,
-	LatexTokenType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	type PlaceholderToken,
-	type LatexArgument,
 	type ContentToken,
+	type LatexArgument,
+	LatexCommandArgumentType,
 	type LatexToken,
+	LatexTokenType,
+	type PlaceholderToken,
+	type SimpleMacro,
 } from "./types";
 import {
 	getRequiredContent,

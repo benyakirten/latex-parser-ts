@@ -1,5 +1,12 @@
-import { expect, it, describe, test } from "bun:test";
+import { describe, expect, it, test } from "bun:test";
 
+import {
+	type CommandToken,
+	LatexCommandArgumentType,
+	type LatexToken,
+	LatexTokenType,
+} from "../../lexer/types";
+import { LatexFontSizeUnit } from "../fonts/types";
 import {
 	declareMathAccent,
 	declareMathDelimiter,
@@ -9,18 +16,11 @@ import {
 	getMathSymbolType,
 } from "./symbols";
 import {
+	type MathSize,
 	MathSymbolFont,
 	MathSymbolType,
 	MathSymbolValueType,
-	type MathSize,
 } from "./types";
-import {
-	LatexCommandArgumentType,
-	LatexTokenType,
-	type CommandToken,
-	type LatexToken,
-} from "../../lexer/types";
-import { LatexFontSizeUnit } from "../fonts/types";
 
 describe("getMathSymbolType", () => {
 	test.each<[MathSymbolType, string]>([
