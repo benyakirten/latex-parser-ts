@@ -1,9 +1,9 @@
 import {
-	LatexCommandArgumentType,
-	LatexTokenType,
 	type CommandToken,
 	type LatexArgument,
+	LatexCommandArgumentType,
 	type LatexToken,
+	LatexTokenType,
 	type RequiredArgument,
 } from "../../lexer/types";
 import { getRequiredContent, isSimpleMacro } from "../../lexer/utils";
@@ -11,14 +11,14 @@ import type { LatexFontMeasurementValue } from "../fonts/types";
 import { parseFontMeasurement } from "../fonts/utils";
 import { isSymbolFont } from "./selection";
 import {
-	MathSymbolType,
-	MathSymbolValueType,
 	type MathAccent,
 	type MathDelimiter,
 	type MathRadical,
 	type MathSize,
 	type MathSymbol,
+	MathSymbolType,
 	type MathSymbolValue,
+	MathSymbolValueType,
 	type SymbolFontWithSlot,
 } from "./types";
 
