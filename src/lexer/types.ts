@@ -27,7 +27,16 @@ export type OptionalArgument = {
 	content: CommandToken | ContentToken | LabeledArgContent[];
 };
 
-export type LatexArguments = (RequiredArgument | OptionalArgument)[];
+export type LatexArgument = RequiredArgument | OptionalArgument;
+export type LatexArguments = LatexArgument[];
+
+export type SimpleMacro = {
+	type: LatexTokenType.Command;
+	literal: `\\${string}`;
+	name: string;
+	arguments: [];
+};
+
 export type CommandToken = {
 	type: LatexTokenType.Command;
 	literal: `\\${string}`;

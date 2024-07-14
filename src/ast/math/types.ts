@@ -91,6 +91,17 @@ export type MathSymbolValue =
 export type MathSymbol = {
 	symbol: MathSymbolValue;
 	type: MathSymbolType;
+	fontSlot: SymbolFontWithSlot;
+};
+
+export type SymbolFontWithSlot = {
 	symbolFont: string;
 	slot: string;
+};
+
+export type MathDelimiter = {
+	symbol: MathSymbolValue;
+	type: MathSymbolType;
+	fontSlot1: SymbolFontWithSlot;
+	fontSlot2: SymbolFontWithSlot;
 };
