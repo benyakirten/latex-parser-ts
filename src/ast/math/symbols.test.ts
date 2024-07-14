@@ -4,16 +4,23 @@ import {
 	declareMathAccent,
 	declareMathDelimiter,
 	declareMathRadical,
+	declareMathSizes,
 	declareMathSymbol,
 	getMathSymbolType,
 } from "./symbols";
-import { MathSymbolFont, MathSymbolType, MathSymbolValueType } from "./types";
+import {
+	MathSymbolFont,
+	MathSymbolType,
+	MathSymbolValueType,
+	type MathSize,
+} from "./types";
 import {
 	LatexCommandArgumentType,
 	LatexTokenType,
 	type CommandToken,
 	type LatexToken,
 } from "../../lexer/types";
+import { LatexFontSizeUnit } from "../fonts/types";
 
 describe("getMathSymbolType", () => {
 	test.each<[MathSymbolType, string]>([
@@ -1638,5 +1645,236 @@ describe("declareMathRadical", () => {
 			fontSlot1: { symbolFont: MathSymbolFont.Operators, slot: '"00' },
 			fontSlot2: { symbolFont: MathSymbolFont.LargeSymbols, slot: '"01' },
 		});
+	});
+});
+
+describe("declareMathSizes", () => {
+	it("should return null if command name is not 'DeclareMathSizes'", () => {
+		const command: CommandToken = {
+			name: "InvalidCommand",
+			literal: "\\InvalidCommand",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "10pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "12pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "14pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "16pt",
+							originalLength: 4,
+						},
+					],
+				},
+			],
+		};
+		const got = declareMathSizes(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if number of arguments is not 4", () => {
+		const command: CommandToken = {
+			name: "DeclareMathSizes",
+			literal: "\\DeclareMathSizes",
+			type: LatexTokenType.Command,
+			arguments: [],
+		};
+		const got = declareMathSizes(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if any of arguments is not required", () => {
+		const command: CommandToken = {
+			name: "DeclareMathSizes",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "10pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "12pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "14pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Optional,
+					content: {
+						type: LatexTokenType.Content,
+						literal: "16pt",
+						originalLength: 4,
+					},
+				},
+			],
+			literal: "\\DeclareMathSizes",
+			type: LatexTokenType.Command,
+		};
+
+		const got = declareMathSizes(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if any argument's content has length !== 1", () => {
+		const command: CommandToken = {
+			name: "DeclareMathSizes",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "10pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "12pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "14pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "16pt",
+							originalLength: 4,
+						},
+						{
+							type: LatexTokenType.Content,
+							literal: "18pt",
+							originalLength: 4,
+						},
+					],
+				},
+			],
+			literal: "\\DeclareMathSizes",
+			type: LatexTokenType.Command,
+		};
+		const got = declareMathSizes(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return a valid MathSize object if all conditions are met", () => {
+		const command: CommandToken = {
+			name: "DeclareMathSizes",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "10pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "12pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "14pt",
+							originalLength: 4,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "16pt",
+							originalLength: 4,
+						},
+					],
+				},
+			],
+			literal: "\\DeclareMathSizes",
+			type: LatexTokenType.Command,
+		};
+		const got = declareMathSizes(command);
+		const expected: MathSize = {
+			mathTextSize: { value: 12, unit: LatexFontSizeUnit.Point },
+			currentTextSize: { value: 10, unit: LatexFontSizeUnit.Point },
+			scriptSize: { value: 14, unit: LatexFontSizeUnit.Point },
+			scriptScriptSize: { value: 16, unit: LatexFontSizeUnit.Point },
+		};
+		expect(got).toEqual(expected);
 	});
 });

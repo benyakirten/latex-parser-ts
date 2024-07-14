@@ -288,7 +288,7 @@ function parseMeasurementFromArg(
 	return parseFontMeasurement(currentSize);
 }
 
-export function declareMathSize(command: CommandToken): MathSize | null {
+export function declareMathSizes(command: CommandToken): MathSize | null {
 	if (
 		command.name !== "DeclareMathSizes" ||
 		command.arguments.length !== 4 ||
