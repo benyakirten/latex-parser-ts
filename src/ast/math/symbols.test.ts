@@ -2,6 +2,7 @@ import { expect, it, describe, test } from "bun:test";
 
 import {
 	declareMathAccent,
+	declareMathDelimiter,
 	declareMathSymbol,
 	getMathSymbolType,
 } from "./symbols";
@@ -846,6 +847,526 @@ describe("declareMathAccent", () => {
 			symbol: { type: MathSymbolValueType.Char, value: "-" },
 			type: MathSymbolType.Ordinary,
 			fontSlot: { symbolFont: "symbolFont", slot: '"00' },
+		});
+	});
+});
+
+describe("declareMathDelimiter", () => {
+	it("should return null if command name is not 'DeclareMathDelimiter'", () => {
+		const command: CommandToken = {
+			name: "InvalidCommand",
+			literal: "\\InvalidCommand",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "0",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: MathSymbolFont.Operators.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.LargeSymbols,
+							originalLength: MathSymbolFont.LargeSymbols.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"01',
+							originalLength: 3,
+						},
+					],
+				},
+			],
+		};
+		const got = declareMathDelimiter(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if number of arguments is not 6", () => {
+		const command: CommandToken = {
+			name: "DeclareMathDelimiter",
+			literal: "\\DeclareMathDelimiter",
+			type: LatexTokenType.Command,
+			arguments: [],
+		};
+		const got = declareMathDelimiter(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if any of arguments is not required", () => {
+		const command: CommandToken = {
+			name: "DeclareMathDelimiter",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "0",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: MathSymbolFont.Operators.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Optional,
+					content: {
+						type: LatexTokenType.Content,
+						literal: '"00',
+						originalLength: 3,
+					},
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.LargeSymbols,
+							originalLength: MathSymbolFont.LargeSymbols.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"01',
+							originalLength: 3,
+						},
+					],
+				},
+			],
+			literal: "\\DeclareMathDelimiter",
+			type: LatexTokenType.Command,
+		};
+
+		const got = declareMathDelimiter(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if any argument's content has length !== 1", () => {
+		const command: CommandToken = {
+			name: "DeclareMathDelimiter",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "0",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: MathSymbolFont.Operators.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.LargeSymbols,
+							originalLength: MathSymbolFont.LargeSymbols.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"01',
+							originalLength: 3,
+						},
+					],
+				},
+			],
+			literal: "\\DeclareMathDelimiter",
+			type: LatexTokenType.Command,
+		};
+		const got = declareMathDelimiter(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if name token is not a valid math symbol name", () => {
+		const command: CommandToken = {
+			name: "DeclareMathDelimiter",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "0",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: MathSymbolFont.Operators.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: MathSymbolFont.Operators.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+			],
+			literal: "\\DeclareMathDelimiter",
+			type: LatexTokenType.Command,
+		};
+		const got = declareMathDelimiter(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if type token is not a valid math symbol type", () => {
+		const command: CommandToken = {
+			name: "DeclareMathDelimiter",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "2000",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: MathSymbolFont.Operators.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: MathSymbolFont.Operators.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+			],
+			literal: "\\DeclareMathDelimiter",
+			type: LatexTokenType.Command,
+		};
+		const got = declareMathDelimiter(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if symbol font or slot is not valid", () => {
+		const command: CommandToken = {
+			name: "DeclareMathDelimiter",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "0",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "invalid",
+							originalLength: 7,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "invalid",
+							originalLength: 7,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+			],
+			literal: "\\DeclareMathDelimiter",
+			type: LatexTokenType.Command,
+		};
+		const got = declareMathDelimiter(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return a valid MathDelimiter object if all conditions are met", () => {
+		const command: CommandToken = {
+			name: "DeclareMathDelimiter",
+			literal: "\\DeclareMathDelimiter",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "0",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: MathSymbolFont.Operators.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.LargeSymbols,
+							originalLength: MathSymbolFont.LargeSymbols.length,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"01',
+							originalLength: 3,
+						},
+					],
+				},
+			],
+		};
+		const got = declareMathDelimiter(command);
+		expect(got).toEqual({
+			symbol: { type: MathSymbolValueType.Char, value: "-" },
+			type: MathSymbolType.Ordinary,
+			fontSlot1: { symbolFont: MathSymbolFont.Operators, slot: '"00' },
+			fontSlot2: { symbolFont: MathSymbolFont.LargeSymbols, slot: '"01' },
 		});
 	});
 });
