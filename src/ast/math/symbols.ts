@@ -2,9 +2,12 @@ import {
 	LatexCommandArgumentType,
 	LatexTokenType,
 	type CommandToken,
+	type LatexArgument,
 	type LatexToken,
 	type RequiredArgument,
 } from "../../lexer/types";
+import { getRequiredContent } from "../../lexer/utils";
+import type { LatexFontMeasurementValue } from "../fonts/types";
 import { parseFontMeasurement } from "../fonts/utils";
 import { isSymbolFont } from "./selection";
 import {
@@ -279,6 +282,16 @@ export function declareMathRadical(
 	};
 }
 
+function parseMeasurementFromArg(
+	arg?: LatexArgument,
+): LatexFontMeasurementValue | null {
+	const currentSize = getRequiredContent(arg);
+	if (!currentSize) {
+		return null;
+	}
+	return parseFontMeasurement(currentSize);
+}
+
 export function declareMathSize(command: CommandToken): MathSize | null {
 	if (
 		command.name !== "DeclareMathSizes" ||
@@ -292,49 +305,22 @@ export function declareMathSize(command: CommandToken): MathSize | null {
 		return null;
 	}
 
-	const currentSizeToken = (
-		command.arguments[0] as RequiredArgument
-	).content.at(0);
-	if (!currentSizeToken || currentSizeToken.type !== LatexTokenType.Content) {
-		return null;
-	}
-	const currentSize = parseFontMeasurement(currentSizeToken.literal);
+	const currentSize = parseMeasurementFromArg(command.arguments.at(0));
 	if (!currentSize) {
 		return null;
 	}
 
-	const mainSizeToken = (command.arguments[0] as RequiredArgument).content.at(
-		0,
-	);
-	if (!mainSizeToken || mainSizeToken.type !== LatexTokenType.Content) {
-		return null;
-	}
-	const mainSize = parseFontMeasurement(mainSizeToken.literal);
+	const mainSize = parseMeasurementFromArg(command.arguments[1]);
 	if (!mainSize) {
 		return null;
 	}
 
-	const scriptSizeToken = (command.arguments[0] as RequiredArgument).content.at(
-		0,
-	);
-	if (!scriptSizeToken || scriptSizeToken.type !== LatexTokenType.Content) {
-		return null;
-	}
-	const scriptSize = parseFontMeasurement(scriptSizeToken.literal);
+	const scriptSize = parseMeasurementFromArg(command.arguments[2]);
 	if (!scriptSize) {
 		return null;
 	}
 
-	const scriptScriptSizeToken = (
-		command.arguments[0] as RequiredArgument
-	).content.at(0);
-	if (
-		!scriptScriptSizeToken ||
-		scriptScriptSizeToken.type !== LatexTokenType.Content
-	) {
-		return null;
-	}
-	const scriptScriptSize = parseFontMeasurement(scriptScriptSizeToken.literal);
+	const scriptScriptSize = parseMeasurementFromArg(command.arguments[3]);
 	if (!scriptScriptSize) {
 		return null;
 	}
