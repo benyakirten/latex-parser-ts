@@ -14,6 +14,9 @@ export function isSimpleMacro(token: LatexToken): token is SimpleMacro {
 	return token.type === LatexTokenType.Command && token.arguments.length === 0;
 }
 
+/**
+ * Verifies that an argument is required, has one content item and then returns the content.
+ */
 export function getRequiredContentItem(arg?: LatexArgument): LatexToken | null {
 	if (
 		!arg ||
@@ -26,6 +29,9 @@ export function getRequiredContentItem(arg?: LatexArgument): LatexToken | null {
 	return arg.content.at(0) ?? null;
 }
 
+/**
+ * Verifies that an argument is required and contains a simple macro and returns the macro.
+ */
 export function getRequiredSimpleMacro(
 	arg?: LatexArgument,
 ): CommandToken | null {
@@ -37,6 +43,9 @@ export function getRequiredSimpleMacro(
 	return token;
 }
 
+/**
+ * Verifies that an argument is required and contains content and returns the content's literal.
+ */
 export function getRequiredContent(arg?: LatexArgument): string | null {
 	const token = getRequiredContentItem(arg);
 	if (!token || token.type !== LatexTokenType.Content) {
