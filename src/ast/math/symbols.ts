@@ -11,6 +11,7 @@ import {
 	MathSymbolValueType,
 	type MathAccent,
 	type MathDelimiter,
+	type MathRadical,
 	type MathSymbol,
 	type MathSymbolValue,
 	type SymbolFontWithSlot,
@@ -226,6 +227,52 @@ export function declareMathDelimiter(
 export function declareMathAccent(
 	command: CommandToken,
 	symbolFonts: string[] = [],
-): MathAccent {
+): MathAccent | null {
 	return validateMathSymbol(command, "DeclareMathAccent", symbolFonts);
+}
+
+export function declareMathRadical(
+	command: CommandToken,
+	symbolFonts: string[] = [],
+): MathRadical | null {
+	if (
+		command.name !== "DeclareMathRadical" ||
+		command.arguments.length !== 5 ||
+		command.arguments.every(
+			(arg) =>
+				arg.type !== LatexCommandArgumentType.Required ||
+				arg.content.length !== 1,
+		)
+	) {
+		return null;
+	}
+
+	const nameToken = (command.arguments[0] as RequiredArgument).content.at(0);
+	const name = getMathSymbolName(nameToken);
+	if (!name) {
+		return null;
+	}
+
+	const symbolFont1 = (command.arguments[1] as RequiredArgument).content.at(0);
+	const slot1 = (command.arguments[2] as RequiredArgument).content.at(0);
+
+	const fontSlot1 = validateSymbolFontWithSlot(symbolFont1, slot1, symbolFonts);
+
+	if (!fontSlot1) {
+		return null;
+	}
+
+	const symbolFont2 = (command.arguments[3] as RequiredArgument).content.at(0);
+	const slot2 = (command.arguments[4] as RequiredArgument).content.at(0);
+
+	const fontSlot2 = validateSymbolFontWithSlot(symbolFont2, slot2, symbolFonts);
+	if (!fontSlot2) {
+		return null;
+	}
+
+	return {
+		symbol: name,
+		fontSlot1,
+		fontSlot2,
+	};
 }

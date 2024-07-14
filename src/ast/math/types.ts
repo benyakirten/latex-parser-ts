@@ -107,3 +107,9 @@ export type MathDelimiter = {
 };
 
 export type MathAccent = MathSymbol;
+
+export type MathRadical = {
+	symbol: MathSymbolValue;
+	fontSlot1: SymbolFontWithSlot;
+	fontSlot2: SymbolFontWithSlot;
+};
