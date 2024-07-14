@@ -3,6 +3,7 @@ import { expect, it, describe, test } from "bun:test";
 import {
 	declareMathAccent,
 	declareMathDelimiter,
+	declareMathRadical,
 	declareMathSymbol,
 	getMathSymbolType,
 } from "./symbols";
@@ -1365,6 +1366,275 @@ describe("declareMathDelimiter", () => {
 		expect(got).toEqual({
 			symbol: { type: MathSymbolValueType.Char, value: "-" },
 			type: MathSymbolType.Ordinary,
+			fontSlot1: { symbolFont: MathSymbolFont.Operators, slot: '"00' },
+			fontSlot2: { symbolFont: MathSymbolFont.LargeSymbols, slot: '"01' },
+		});
+	});
+});
+
+describe("declareMathRadical", () => {
+	it("should return null if command name is not 'DeclareMathRadical'", () => {
+		const command: CommandToken = {
+			name: "InvalidCommand",
+			literal: "\\InvalidCommand",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 7,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"01',
+							originalLength: 7,
+						},
+					],
+				},
+			],
+		};
+		const got = declareMathRadical(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if number of arguments is not 5", () => {
+		const command: CommandToken = {
+			name: "DeclareMathRadical",
+			literal: "\\DeclareMathRadical",
+			type: LatexTokenType.Command,
+			arguments: [],
+		};
+		const got = declareMathRadical(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if any of arguments is not required", () => {
+		const command: CommandToken = {
+			name: "DeclareMathRadical",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 7,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Optional,
+					content: {
+						type: LatexTokenType.Content,
+						literal: '"01',
+						originalLength: 7,
+					},
+				},
+			],
+			literal: "\\DeclareMathRadical",
+			type: LatexTokenType.Command,
+		};
+
+		const got = declareMathRadical(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return null if any argument's content has length !== 1", () => {
+		const command: CommandToken = {
+			name: "DeclareMathRadical",
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 7,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: 1,
+						},
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"01',
+							originalLength: 7,
+						},
+					],
+				},
+			],
+			literal: "\\DeclareMathRadical",
+			type: LatexTokenType.Command,
+		};
+		const got = declareMathRadical(command);
+		expect(got).toBeNull();
+	});
+
+	it("should return a valid MathRadical object if all conditions are met", () => {
+		const command: CommandToken = {
+			name: "DeclareMathRadical",
+			literal: "\\DeclareMathRadical",
+			type: LatexTokenType.Command,
+			arguments: [
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: "-",
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.Operators,
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"00',
+							originalLength: 7,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: MathSymbolFont.LargeSymbols,
+							originalLength: 1,
+						},
+					],
+				},
+				{
+					type: LatexCommandArgumentType.Required,
+					content: [
+						{
+							type: LatexTokenType.Content,
+							literal: '"01',
+							originalLength: 7,
+						},
+					],
+				},
+			],
+		};
+		const got = declareMathRadical(command);
+		expect(got).toEqual({
+			symbol: { type: MathSymbolValueType.Char, value: "-" },
 			fontSlot1: { symbolFont: MathSymbolFont.Operators, slot: '"00' },
 			fontSlot2: { symbolFont: MathSymbolFont.LargeSymbols, slot: '"01' },
 		});

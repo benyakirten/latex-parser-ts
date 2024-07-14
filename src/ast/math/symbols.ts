@@ -259,7 +259,6 @@ export function declareMathRadical(
 	const slot1 = (command.arguments[2] as RequiredArgument).content.at(0);
 
 	const fontSlot1 = validateSymbolFontWithSlot(symbolFont1, slot1, symbolFonts);
-
 	if (!fontSlot1) {
 		return null;
 	}
