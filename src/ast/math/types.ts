@@ -61,3 +61,36 @@ export type SymbolFontAlphabet = {
 	mathAlphabet: string;
 	symbolFont: string;
 };
+
+export enum MathSymbolType {
+	Ordinary = "\\mathord", // 0
+	LargeOperator = "\\mathop", // 1
+	BinaryOperator = "\\mathbin", // 2
+	Relation = "\\mathrel", // 3
+	Open = "\\mathopen", // 4
+	Close = "\\mathclose", // 5
+	Punctuation = "\\mathpunct", // 6
+	AlphabetChar = "\\mathalpha", // 7
+}
+
+export enum MathSymbolValueType {
+	Char = 1,
+	Command = 2,
+}
+
+export type MathSymbolValue =
+	| {
+			type: MathSymbolValueType.Command;
+			value: string;
+	  }
+	| {
+			type: MathSymbolValueType.Char;
+			value: string;
+	  };
+
+export type MathSymbol = {
+	symbol: MathSymbolValue;
+	type: MathSymbolType;
+	symbolFont: string;
+	slot: string;
+};
