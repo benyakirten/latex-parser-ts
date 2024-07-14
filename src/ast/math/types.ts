@@ -105,3 +105,5 @@ export type MathDelimiter = {
 	fontSlot1: SymbolFontWithSlot;
 	fontSlot2: SymbolFontWithSlot;
 };
+
+export type MathAccent = MathSymbol;

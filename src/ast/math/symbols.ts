@@ -9,6 +9,7 @@ import { isSymbolFont } from "./selection";
 import {
 	MathSymbolType,
 	MathSymbolValueType,
+	type MathAccent,
 	type MathDelimiter,
 	type MathSymbol,
 	type MathSymbolValue,
@@ -106,12 +107,13 @@ function validateSymbolFontWithSlot(
 	return { symbolFont, slot };
 }
 
-export function declareMathSymbol(
+function validateMathSymbol(
 	command: CommandToken,
+	commandName: string,
 	symbolFonts: string[] = [],
 ): MathSymbol | null {
 	if (
-		command.name !== "DeclareMathSymbol" ||
+		command.name !== commandName ||
 		command.arguments.length !== 4 ||
 		command.arguments.every(
 			(arg) =>
@@ -156,6 +158,13 @@ export function declareMathSymbol(
 		type,
 		fontSlot,
 	};
+}
+
+export function declareMathSymbol(
+	command: CommandToken,
+	symbolFonts: string[] = [],
+): MathSymbol | null {
+	return validateMathSymbol(command, "DeclareMathSymbol", symbolFonts);
 }
 
 export function declareMathDelimiter(
@@ -212,4 +221,11 @@ export function declareMathDelimiter(
 		fontSlot1,
 		fontSlot2,
 	};
+}
+
+export function declareMathAccent(
+	command: CommandToken,
+	symbolFonts: string[] = [],
+): MathAccent {
+	return validateMathSymbol(command, "DeclareMathAccent", symbolFonts);
 }
