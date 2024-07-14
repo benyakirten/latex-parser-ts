@@ -5,6 +5,7 @@ import {
 	type LatexToken,
 	type RequiredArgument,
 } from "../../lexer/types";
+import { parseFontMeasurement } from "../fonts/utils";
 import { isSymbolFont } from "./selection";
 import {
 	MathSymbolType,
@@ -12,6 +13,7 @@ import {
 	type MathAccent,
 	type MathDelimiter,
 	type MathRadical,
+	type MathSize,
 	type MathSymbol,
 	type MathSymbolValue,
 	type SymbolFontWithSlot,
@@ -116,7 +118,7 @@ function validateMathSymbol(
 	if (
 		command.name !== commandName ||
 		command.arguments.length !== 4 ||
-		command.arguments.every(
+		command.arguments.some(
 			(arg) =>
 				arg.type !== LatexCommandArgumentType.Required ||
 				arg.content.length !== 1,
@@ -175,7 +177,7 @@ export function declareMathDelimiter(
 	if (
 		command.name !== "DeclareMathDelimiter" ||
 		command.arguments.length !== 6 ||
-		command.arguments.every(
+		command.arguments.some(
 			(arg) =>
 				arg.type !== LatexCommandArgumentType.Required ||
 				arg.content.length !== 1,
@@ -238,7 +240,7 @@ export function declareMathRadical(
 	if (
 		command.name !== "DeclareMathRadical" ||
 		command.arguments.length !== 5 ||
-		command.arguments.every(
+		command.arguments.some(
 			(arg) =>
 				arg.type !== LatexCommandArgumentType.Required ||
 				arg.content.length !== 1,
@@ -274,5 +276,73 @@ export function declareMathRadical(
 		symbol: name,
 		fontSlot1,
 		fontSlot2,
+	};
+}
+
+export function declareMathSize(command: CommandToken): MathSize | null {
+	if (
+		command.name !== "DeclareMathSizes" ||
+		command.arguments.length !== 4 ||
+		command.arguments.some(
+			(arg) =>
+				arg.type !== LatexCommandArgumentType.Required ||
+				arg.content.length !== 1,
+		)
+	) {
+		return null;
+	}
+
+	const currentSizeToken = (
+		command.arguments[0] as RequiredArgument
+	).content.at(0);
+	if (!currentSizeToken || currentSizeToken.type !== LatexTokenType.Content) {
+		return null;
+	}
+	const currentSize = parseFontMeasurement(currentSizeToken.literal);
+	if (!currentSize) {
+		return null;
+	}
+
+	const mainSizeToken = (command.arguments[0] as RequiredArgument).content.at(
+		0,
+	);
+	if (!mainSizeToken || mainSizeToken.type !== LatexTokenType.Content) {
+		return null;
+	}
+	const mainSize = parseFontMeasurement(mainSizeToken.literal);
+	if (!mainSize) {
+		return null;
+	}
+
+	const scriptSizeToken = (command.arguments[0] as RequiredArgument).content.at(
+		0,
+	);
+	if (!scriptSizeToken || scriptSizeToken.type !== LatexTokenType.Content) {
+		return null;
+	}
+	const scriptSize = parseFontMeasurement(scriptSizeToken.literal);
+	if (!scriptSize) {
+		return null;
+	}
+
+	const scriptScriptSizeToken = (
+		command.arguments[0] as RequiredArgument
+	).content.at(0);
+	if (
+		!scriptScriptSizeToken ||
+		scriptScriptSizeToken.type !== LatexTokenType.Content
+	) {
+		return null;
+	}
+	const scriptScriptSize = parseFontMeasurement(scriptScriptSizeToken.literal);
+	if (!scriptScriptSize) {
+		return null;
+	}
+
+	return {
+		mathTextSize: mainSize,
+		currentTextSize: currentSize,
+		scriptSize,
+		scriptScriptSize,
 	};
 }

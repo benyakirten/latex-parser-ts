@@ -1,6 +1,7 @@
 import type {
 	LatexFontEncoding,
 	LatexFontFamily,
+	LatexFontMeasurementValue,
 	LatexFontSeries,
 	LatexFontShape,
 } from "../fonts/types";
@@ -112,4 +113,11 @@ export type MathRadical = {
 	symbol: MathSymbolValue;
 	fontSlot1: SymbolFontWithSlot;
 	fontSlot2: SymbolFontWithSlot;
+};
+
+export type MathSize = {
+	currentTextSize: LatexFontMeasurementValue;
+	mathTextSize: LatexFontMeasurementValue;
+	scriptSize: LatexFontMeasurementValue;
+	scriptScriptSize: LatexFontMeasurementValue;
 };
