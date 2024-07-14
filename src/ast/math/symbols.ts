@@ -6,7 +6,7 @@ import {
 	type LatexToken,
 	type RequiredArgument,
 } from "../../lexer/types";
-import { getRequiredContent } from "../../lexer/utils";
+import { getRequiredContent, isSimpleMacro } from "../../lexer/utils";
 import type { LatexFontMeasurementValue } from "../fonts/types";
 import { parseFontMeasurement } from "../fonts/utils";
 import { isSymbolFont } from "./selection";
@@ -22,39 +22,42 @@ import {
 	type SymbolFontWithSlot,
 } from "./types";
 
-export function validateMathSymbolType(
-	symbolType: string | number,
-): MathSymbolType | null {
-	switch (symbolType) {
-		case 0:
+export function getMathSymbolType(token?: LatexToken): MathSymbolType | null {
+	let symbol: string;
+	if (!token) {
+		return null;
+	}
+
+	if (token.type === LatexTokenType.Content) {
+		symbol = token.literal;
+	} else if (token.type === LatexTokenType.Command && isSimpleMacro(token)) {
+		symbol = token.name;
+	} else {
+		return null;
+	}
+
+	switch (symbol) {
 		case "0":
 		case "mathord":
 			return MathSymbolType.Ordinary;
-		case 1:
 		case "1":
 		case "mathop":
 			return MathSymbolType.LargeOperator;
-		case 2:
 		case "2":
 		case "mathbin":
 			return MathSymbolType.BinaryOperator;
-		case 3:
 		case "3":
 		case "mathrel":
 			return MathSymbolType.Relation;
-		case 4:
 		case "4":
 		case "mathopen":
 			return MathSymbolType.Open;
-		case 5:
 		case "5":
 		case "mathclose":
 			return MathSymbolType.Close;
-		case 6:
 		case "6":
 		case "mathpunct":
 			return MathSymbolType.Punctuation;
-		case 7:
 		case "7":
 		case "mathalpha":
 			return MathSymbolType.AlphabetChar;
@@ -137,10 +140,7 @@ function validateMathSymbol(
 	}
 
 	const typeToken = (command.arguments[1] as RequiredArgument).content.at(0);
-	if (!typeToken || typeToken.type !== LatexTokenType.Content) {
-		return null;
-	}
-	const type = validateMathSymbolType(typeToken.literal);
+	const type = getMathSymbolType(typeToken);
 	if (!type) {
 		return null;
 	}
@@ -196,10 +196,7 @@ export function declareMathDelimiter(
 	}
 
 	const typeToken = (command.arguments[1] as RequiredArgument).content.at(0);
-	if (!typeToken || typeToken.type !== LatexTokenType.Content) {
-		return null;
-	}
-	const type = validateMathSymbolType(typeToken.literal);
+	const type = getMathSymbolType(typeToken);
 	if (!type) {
 		return null;
 	}
