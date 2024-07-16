@@ -1,14 +1,14 @@
 import { describe, expect, it } from "bun:test";
 
 import {
+	type Argument,
+	CommandArgumentType,
 	type CommandToken,
 	type ContentToken,
-	type LatexArgument,
-	LatexCommandArgumentType,
-	type LatexToken,
-	LatexTokenType,
 	type PlaceholderToken,
 	type SimpleMacro,
+	type Token,
+	TokenType,
 } from "./types";
 import {
 	getRequiredContent,
@@ -20,7 +20,7 @@ import {
 describe("isSimpleMacro", () => {
 	it("should return true if the token is a command with no arguments", () => {
 		const token: SimpleMacro = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\macro",
 			name: "macro",
 			arguments: [],
@@ -30,7 +30,7 @@ describe("isSimpleMacro", () => {
 
 	it("should return false if the token is not a command", () => {
 		const token: PlaceholderToken = {
-			type: LatexTokenType.Placeholder,
+			type: TokenType.Placeholder,
 			literal: "#1",
 			content: 1,
 		};
@@ -39,12 +39,12 @@ describe("isSimpleMacro", () => {
 
 	it("should return false if the token has arguments", () => {
 		const token: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\macro",
 			name: "macro",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 			],
@@ -60,8 +60,8 @@ describe("getRequiredContentItem", () => {
 	});
 
 	it("should return null if the argument type is not Required", () => {
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Optional,
+		const arg: Argument = {
+			type: CommandArgumentType.Optional,
 			content: [],
 		};
 		const got = getRequiredContentItem(arg);
@@ -69,11 +69,11 @@ describe("getRequiredContentItem", () => {
 	});
 
 	it("should return null if the argument content length is not 1", () => {
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Required,
+		const arg: Argument = {
+			type: CommandArgumentType.Required,
 			content: [
-				{ type: LatexTokenType.Content, literal: "item1", originalLength: 5 },
-				{ type: LatexTokenType.Content, literal: "item2", originalLength: 5 },
+				{ type: TokenType.Content, literal: "item1", originalLength: 5 },
+				{ type: TokenType.Content, literal: "item2", originalLength: 5 },
 			],
 		};
 		const got = getRequiredContentItem(arg);
@@ -82,12 +82,12 @@ describe("getRequiredContentItem", () => {
 
 	it("should return the content item if the argument is valid", () => {
 		const contentToken: ContentToken = {
-			type: LatexTokenType.Content,
+			type: TokenType.Content,
 			literal: "item1",
 			originalLength: 5,
 		};
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Required,
+		const arg: Argument = {
+			type: CommandArgumentType.Required,
 			content: [contentToken],
 		};
 		const got = getRequiredContentItem(arg);
@@ -102,8 +102,8 @@ describe("getRequiredSimpleMacro", () => {
 	});
 
 	it("should return null if the argument is not a required content item", () => {
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Optional,
+		const arg: Argument = {
+			type: CommandArgumentType.Optional,
 			content: [],
 		};
 		const got = getRequiredSimpleMacro(arg);
@@ -111,25 +111,25 @@ describe("getRequiredSimpleMacro", () => {
 	});
 
 	it("should return null if the argument content is not a simple macro", () => {
-		let contentToken: LatexToken = {
-			type: LatexTokenType.Content,
+		let contentToken: Token = {
+			type: TokenType.Content,
 			literal: "item1",
 			originalLength: 5,
 		};
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Required,
+		const arg: Argument = {
+			type: CommandArgumentType.Required,
 			content: [contentToken],
 		};
 		let got = getRequiredSimpleMacro(arg);
 		expect(got).toBeNull();
 
 		contentToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\macro",
 			name: "macro",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 			],
@@ -140,13 +140,13 @@ describe("getRequiredSimpleMacro", () => {
 
 	it("should return the simple macro if the argument is valid", () => {
 		const token: SimpleMacro = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\macro",
 			name: "macro",
 			arguments: [],
 		};
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Required,
+		const arg: Argument = {
+			type: CommandArgumentType.Required,
 			content: [token],
 		};
 		const got = getRequiredSimpleMacro(arg);
@@ -160,8 +160,8 @@ describe("getRequiredContent", () => {
 	});
 
 	it("should return null if the argument type is not Required", () => {
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Optional,
+		const arg: Argument = {
+			type: CommandArgumentType.Optional,
 			content: [],
 		};
 		const got = getRequiredContent(arg);
@@ -169,11 +169,11 @@ describe("getRequiredContent", () => {
 	});
 
 	it("should return null if the argument content is not a content token", () => {
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Required,
+		const arg: Argument = {
+			type: CommandArgumentType.Required,
 			content: [
 				{
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 					literal: "\\macro",
 					name: "macro",
 					arguments: [],
@@ -185,13 +185,13 @@ describe("getRequiredContent", () => {
 	});
 
 	it("should return the content literal if the argument is valid", () => {
-		const contentToken: LatexToken = {
-			type: LatexTokenType.Content,
+		const contentToken: Token = {
+			type: TokenType.Content,
 			literal: "item1",
 			originalLength: 5,
 		};
-		const arg: LatexArgument = {
-			type: LatexCommandArgumentType.Required,
+		const arg: Argument = {
+			type: CommandArgumentType.Required,
 			content: [contentToken],
 		};
 		const got = getRequiredContent(arg);

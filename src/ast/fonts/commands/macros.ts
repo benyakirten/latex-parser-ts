@@ -1,8 +1,8 @@
-import type { LatexFontCurrentValues } from "../types";
+import type { FontCurrentValues } from "../types";
 
 export function determineCurrentFontKey(
 	commandName: string,
-): keyof LatexFontCurrentValues | null {
+): keyof FontCurrentValues | null {
 	switch (commandName.toLocaleLowerCase()) {
 		case "f@encoding":
 			return "encoding";

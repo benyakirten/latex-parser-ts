@@ -1,11 +1,11 @@
 import {
+	CommandArgumentType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	type LatexToken,
-	LatexTokenType,
+	type Token,
+	TokenType,
 } from "../../../lexer/types";
 import {
-	type LatexFont,
+	type Font,
 	type SelectionCommand,
 	type SelectionCommandFontEncoding,
 	type SelectionCommandFontFamily,
@@ -24,43 +24,38 @@ import {
 	parseToFontValue,
 } from "../utils";
 
-function parseSelectionCommands(
-	selectionCommands: SelectionCommand[],
-): LatexFont {
-	const latexFont: LatexFont = {};
+function parseSelectionCommands(selectionCommands: SelectionCommand[]): Font {
+	const Font: Font = {};
 	for (const command of selectionCommands) {
 		switch (command.type) {
 			case SelectionCommandType.Encoding:
-				latexFont.encoding = command.encoding;
+				Font.encoding = command.encoding;
 				break;
 			case SelectionCommandType.Family:
-				latexFont.family = command.family;
+				Font.family = command.family;
 				break;
 			case SelectionCommandType.Series:
-				latexFont.series = command.series;
+				Font.series = command.series;
 				break;
 			case SelectionCommandType.Shape:
-				latexFont.shape = command.shape;
+				Font.shape = command.shape;
 				break;
 			case SelectionCommandType.Size:
-				latexFont.size = command.size;
-				latexFont.baselineSkip = command.baselineSkip;
+				Font.size = command.size;
+				Font.baselineSkip = command.baselineSkip;
 				break;
 			case SelectionCommandType.LineSpread:
-				latexFont.lineSpread = command.value;
+				Font.lineSpread = command.value;
 		}
 	}
 
-	return latexFont;
+	return Font;
 }
 
-function testForOneRequiredArgument(
-	token: CommandToken,
-	type: string,
-): LatexToken {
+function testForOneRequiredArgument(token: CommandToken, type: string): Token {
 	if (
 		token.arguments.length !== 1 ||
-		token.arguments[0].type !== LatexCommandArgumentType.Required ||
+		token.arguments[0].type !== CommandArgumentType.Required ||
 		token.arguments[0].content.length !== 1
 	) {
 		throw new Error(
@@ -117,7 +112,7 @@ function parseFontShapeCommand(token: CommandToken): SelectionCommandFontShape {
 function parseFontSizeCommand(token: CommandToken): SelectionCommandFontSize {
 	if (
 		token.arguments.length !== 2 ||
-		token.arguments.every((a) => a.type !== LatexCommandArgumentType.Required)
+		token.arguments.every((a) => a.type !== CommandArgumentType.Required)
 	) {
 		throw new Error(
 			"Font size requires one required argument with two items inside",
@@ -126,8 +121,8 @@ function parseFontSizeCommand(token: CommandToken): SelectionCommandFontSize {
 
 	const [fontSizeArg, baselineSkipArg] = token.arguments;
 	if (
-		fontSizeArg.type !== LatexCommandArgumentType.Required ||
-		baselineSkipArg.type !== LatexCommandArgumentType.Required
+		fontSizeArg.type !== CommandArgumentType.Required ||
+		baselineSkipArg.type !== CommandArgumentType.Required
 	) {
 		throw new Error("");
 	}
@@ -182,20 +177,20 @@ export function parseSelectionCommandSection(
 }
 
 /** Expects the lexer to be at the backslash before the command name (e.g.. \fontsize) */
-export function parseSelectionCommandSections(tokens: LatexToken[]): LatexFont {
+export function parseSelectionCommandSections(tokens: Token[]): Font {
 	const selectionCommands: SelectionCommand[] = [];
 
 	const selectFontToken = tokens.at(-1);
 	if (
 		!selectFontToken ||
-		selectFontToken.type !== LatexTokenType.Command ||
+		selectFontToken.type !== TokenType.Command ||
 		selectFontToken.name !== "selectfont"
 	) {
 		throw new Error("Command selectfont must end a font selection sequence");
 	}
 
 	for (const token of tokens.slice(0, -1)) {
-		if (token.type !== LatexTokenType.Command) {
+		if (token.type !== TokenType.Command) {
 			continue;
 		}
 
@@ -207,12 +202,12 @@ export function parseSelectionCommandSections(tokens: LatexToken[]): LatexFont {
 }
 
 /** Expects the lexer to be at the backslash before the command name (e.g.. \usefont) */
-export function parseUseFont(token: LatexToken): LatexFont {
+export function parseUseFont(token: Token): Font {
 	if (
-		token.type !== LatexTokenType.Command ||
+		token.type !== TokenType.Command ||
 		token.name !== "usefont" ||
 		token.arguments.length !== 4 ||
-		!token.arguments.every((a) => a.type === LatexCommandArgumentType.Required)
+		!token.arguments.every((a) => a.type === CommandArgumentType.Required)
 	) {
 		throw new Error(
 			"Command must be a valid usefont command to be parsed as usefont",

@@ -1,15 +1,15 @@
 import { describe, expect, it, test } from "bun:test";
 
 import {
+	CommandArgumentType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	LatexTokenType,
+	TokenType,
 } from "../../lexer/types";
 import {
+	FontEncodingNormalValue,
+	FontEncodingType,
+	FontShapeValue,
 	FontValueType,
-	LatexFontEncodingNormalValue,
-	LatexFontEncodingType,
-	LatexFontShapeValue,
 } from "../fonts/types";
 import {
 	declareMathOrSymbolAlphabet,
@@ -29,13 +29,13 @@ describe("declareMathVersion", () => {
 		const command: CommandToken = {
 			name: "mathversion",
 			literal: "\\mathversion",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "normal",
 							originalLength: 6,
 						},
@@ -52,7 +52,7 @@ describe("declareMathVersion", () => {
 		const command: CommandToken = {
 			name: "mathversion",
 			literal: "\\mathversion",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 
@@ -64,23 +64,23 @@ describe("declareMathVersion", () => {
 		const command: CommandToken = {
 			name: "mathversion",
 			literal: "\\mathversion",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "normal",
 							originalLength: 6,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "bold",
 							originalLength: 4,
 						},
@@ -97,10 +97,10 @@ describe("declareMathVersion", () => {
 		const command: CommandToken = {
 			name: "mathversion",
 			literal: "\\mathversion",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Optional,
+					type: CommandArgumentType.Optional,
 					content: [],
 				},
 			],
@@ -114,18 +114,18 @@ describe("declareMathVersion", () => {
 		const command: CommandToken = {
 			name: "mathversion",
 			literal: "\\mathversion",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "normal",
 							originalLength: 6,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "bold",
 							originalLength: 4,
 						},
@@ -142,13 +142,13 @@ describe("declareMathVersion", () => {
 		const command: CommandToken = {
 			name: "mathversion",
 			literal: "\\mathversion",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\normal",
 							name: "normal",
 							arguments: [],
@@ -168,7 +168,7 @@ describe("declareMathOrSymbolAlphabet", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 
@@ -180,22 +180,22 @@ describe("declareMathOrSymbolAlphabet", () => {
 		const command: CommandToken = {
 			name: "DeclareMathAlphabet",
 			literal: "\\DeclareMathAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 			],
@@ -209,58 +209,58 @@ describe("declareMathOrSymbolAlphabet", () => {
 		const command: CommandToken = {
 			name: "DeclareMathAlphabet",
 			literal: "\\DeclareMathAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "argument1",
 							originalLength: 9,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "extraToken",
 							originalLength: 10,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "argument2",
 							originalLength: 9,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "argument3",
 							originalLength: 9,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "argument4",
 							originalLength: 9,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "argument5",
 							originalLength: 9,
 						},
@@ -277,13 +277,13 @@ describe("declareMathOrSymbolAlphabet", () => {
 		const command: CommandToken = {
 			name: "DeclareMathAlphabet",
 			literal: "\\DeclareMathAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\mathfontname",
 							name: "mathfontname",
 							arguments: [],
@@ -291,24 +291,24 @@ describe("declareMathOrSymbolAlphabet", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "OT1",
 							originalLength: 38,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\coolcommand",
 							name: "coolcommand",
 							arguments: [],
@@ -316,10 +316,10 @@ describe("declareMathOrSymbolAlphabet", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "it",
 							originalLength: 2,
 						},
@@ -336,8 +336,8 @@ describe("declareMathOrSymbolAlphabet", () => {
 				value: {
 					type: FontValueType.FontValue,
 					value: {
-						type: LatexFontEncodingType.Normal,
-						encoding: LatexFontEncodingNormalValue.KnuthTexText,
+						type: FontEncodingType.Normal,
+						encoding: FontEncodingNormalValue.KnuthTexText,
 					},
 				},
 			},
@@ -349,7 +349,7 @@ describe("declareMathOrSymbolAlphabet", () => {
 				value: {
 					type: FontValueType.CommandToken,
 					value: {
-						type: LatexTokenType.Command,
+						type: TokenType.Command,
 						literal: "\\coolcommand",
 						name: "coolcommand",
 						arguments: [],
@@ -360,7 +360,7 @@ describe("declareMathOrSymbolAlphabet", () => {
 				type: MathAlphabetDeclarationType.Set,
 				value: {
 					type: FontValueType.FontValue,
-					value: LatexFontShapeValue.Italic,
+					value: FontShapeValue.Italic,
 				},
 			},
 		});
@@ -372,7 +372,7 @@ describe("setMathOrSymbolFont", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 		const result = setMathOrSymbolFont(command);
@@ -383,26 +383,26 @@ describe("setMathOrSymbolFont", () => {
 		const command: CommandToken = {
 			name: "SetMathAlphabet",
 			literal: "\\SetMathAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 			],
@@ -415,26 +415,26 @@ describe("setMathOrSymbolFont", () => {
 		const command: CommandToken = {
 			name: "SetMathAlphabet",
 			literal: "\\SetMathAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Optional,
+					type: CommandArgumentType.Optional,
 					content: [],
 				},
 			],
@@ -447,41 +447,41 @@ describe("setMathOrSymbolFont", () => {
 		const command: CommandToken = {
 			name: "SetMathAlphabet",
 			literal: "\\SetMathAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Optional,
+					type: CommandArgumentType.Optional,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "version",
 							originalLength: 7,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "extraToken",
 							originalLength: 10,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 			],
@@ -494,13 +494,13 @@ describe("setMathOrSymbolFont", () => {
 		const command: CommandToken = {
 			name: "SetMathAlphabet",
 			literal: "\\SetMathAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\mathfontname",
 							name: "mathfontname",
 							arguments: [],
@@ -508,34 +508,34 @@ describe("setMathOrSymbolFont", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "normal",
 							originalLength: 6,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Placeholder,
+							type: TokenType.Placeholder,
 							literal: "#1",
 							content: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\coolcommand",
 							name: "coolcommand",
 							arguments: [],
@@ -543,10 +543,10 @@ describe("setMathOrSymbolFont", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "it",
 							originalLength: 2,
 						},
@@ -561,13 +561,13 @@ describe("setMathOrSymbolFont", () => {
 		const command: CommandToken = {
 			name: "SetMathAlphabet",
 			literal: "\\SetMathAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\mathfontname",
 							name: "mathfontname",
 							arguments: [],
@@ -575,34 +575,34 @@ describe("setMathOrSymbolFont", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "normal",
 							originalLength: 6,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "OT1",
 							originalLength: 3,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\coolcommand",
 							name: "coolcommand",
 							arguments: [],
@@ -610,10 +610,10 @@ describe("setMathOrSymbolFont", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "it",
 							originalLength: 2,
 						},
@@ -630,8 +630,8 @@ describe("setMathOrSymbolFont", () => {
 				value: {
 					type: FontValueType.FontValue,
 					value: {
-						type: LatexFontEncodingType.Normal,
-						encoding: LatexFontEncodingNormalValue.KnuthTexText,
+						type: FontEncodingType.Normal,
+						encoding: FontEncodingNormalValue.KnuthTexText,
 					},
 				},
 			},
@@ -643,7 +643,7 @@ describe("setMathOrSymbolFont", () => {
 				value: {
 					type: FontValueType.CommandToken,
 					value: {
-						type: LatexTokenType.Command,
+						type: TokenType.Command,
 						literal: "\\coolcommand",
 						name: "coolcommand",
 						arguments: [],
@@ -654,7 +654,7 @@ describe("setMathOrSymbolFont", () => {
 				type: MathAlphabetDeclarationType.Set,
 				value: {
 					type: FontValueType.FontValue,
-					value: LatexFontShapeValue.Italic,
+					value: FontShapeValue.Italic,
 				},
 			},
 		});
@@ -665,7 +665,7 @@ describe("declareSymbolFontAlphabet", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 
@@ -677,10 +677,10 @@ describe("declareSymbolFontAlphabet", () => {
 		const command: CommandToken = {
 			name: "DeclareSymbolFontAlphabet",
 			literal: "\\DeclareSymbolFontAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 			],
@@ -694,28 +694,28 @@ describe("declareSymbolFontAlphabet", () => {
 		const command: CommandToken = {
 			name: "DeclareSymbolFontAlphabet",
 			literal: "\\DeclareSymbolFontAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "argument1",
 							originalLength: 9,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "extraToken",
 							originalLength: 10,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "argument2",
 							originalLength: 9,
 						},
@@ -732,13 +732,13 @@ describe("declareSymbolFontAlphabet", () => {
 		const command: CommandToken = {
 			name: "DeclareSymbolFontAlphabet",
 			literal: "\\DeclareSymbolFontAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\invalidalphabet",
 							name: "invalidalphabet",
 							arguments: [],
@@ -746,10 +746,10 @@ describe("declareSymbolFontAlphabet", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "fontname",
 							originalLength: 8,
 						},
@@ -766,13 +766,13 @@ describe("declareSymbolFontAlphabet", () => {
 		const command: CommandToken = {
 			name: "DeclareSymbolFontAlphabet",
 			literal: "\\DeclareSymbolFontAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\validalphabet",
 							name: "validalphabet",
 							arguments: [],
@@ -780,10 +780,10 @@ describe("declareSymbolFontAlphabet", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "invalidfont",
 							originalLength: 10,
 						},
@@ -804,13 +804,13 @@ describe("declareSymbolFontAlphabet", () => {
 		const command: CommandToken = {
 			name: "DeclareSymbolFontAlphabet",
 			literal: "\\DeclareSymbolFontAlphabet",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\validalphabet",
 							name: "validalphabet",
 							arguments: [],
@@ -818,10 +818,10 @@ describe("declareSymbolFontAlphabet", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "validfont",
 							originalLength: 9,
 						},
@@ -905,13 +905,13 @@ describe("declareSymbolFontAlphabet", () => {
 			const command: CommandToken = {
 				name: "DeclareSymbolFontAlphabet",
 				literal: "\\DeclareSymbolFontAlphabet",
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				arguments: [
 					{
-						type: LatexCommandArgumentType.Required,
+						type: CommandArgumentType.Required,
 						content: [
 							{
-								type: LatexTokenType.Command,
+								type: TokenType.Command,
 								literal: `\\${mathAlphabet}`,
 								name: mathAlphabet,
 								arguments: [],
@@ -919,10 +919,10 @@ describe("declareSymbolFontAlphabet", () => {
 						],
 					},
 					{
-						type: LatexCommandArgumentType.Required,
+						type: CommandArgumentType.Required,
 						content: [
 							{
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 								literal: symbolFont,
 								originalLength: symbolFont.length,
 							},

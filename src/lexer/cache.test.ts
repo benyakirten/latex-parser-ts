@@ -2,26 +2,26 @@ import { beforeEach, describe, expect, it } from "bun:test";
 
 import { NoCache, SimpleCache } from "./cache";
 import {
-	LatexAccentType,
-	type LatexToken,
-	LatexTokenType,
 	type LexerCache,
+	type Token,
+	TokenType,
+	VariableAccent,
 } from "./types";
 
 describe("NoCache", () => {
 	it("should not store any data in the cache", () => {
 		const cache: LexerCache = new NoCache();
-		cache.add(0, { type: LatexTokenType.ColumnAlign, literal: "&" });
+		cache.add(0, { type: TokenType.ColumnAlign, literal: "&" });
 
 		let got = cache.get(0);
 		expect(got).toBeNull();
 
 		cache.add(8, {
-			type: LatexTokenType.Accent,
+			type: TokenType.Accent,
 			literal: "\\^h",
-			detail: LatexAccentType.Circumflex,
+			detail: VariableAccent.Circumflex,
 			content: {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				originalLength: 1,
 				literal: "h",
 			},
@@ -39,21 +39,21 @@ describe("SimpleCache", () => {
 		cache = new SimpleCache();
 	});
 
-	const tokens: LatexToken[] = [
+	const tokens: Token[] = [
 		{
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\mycommand",
 			name: "mycommand",
 			arguments: [],
 		},
-		{ type: LatexTokenType.ColumnAlign, literal: "&" },
-		{ type: LatexTokenType.Content, literal: " content1 ", originalLength: 10 },
+		{ type: TokenType.ColumnAlign, literal: "&" },
+		{ type: TokenType.Content, literal: " content1 ", originalLength: 10 },
 		{
-			type: LatexTokenType.Accent,
+			type: TokenType.Accent,
 			literal: "\\^h",
-			detail: LatexAccentType.Circumflex,
+			detail: VariableAccent.Circumflex,
 			content: {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				originalLength: 1,
 				literal: "h",
 			},
@@ -62,8 +62,8 @@ describe("SimpleCache", () => {
 
 	describe("get and set", () => {
 		it("should store and retrieve data in the cache", () => {
-			const token: LatexToken = {
-				type: LatexTokenType.ColumnAlign,
+			const token: Token = {
+				type: TokenType.ColumnAlign,
 				literal: "&",
 			};
 			cache.add(0, token);
@@ -72,15 +72,15 @@ describe("SimpleCache", () => {
 		});
 
 		it("should overwrite the value at that position if it already exists", () => {
-			const token1: LatexToken = {
-				type: LatexTokenType.Content,
+			const token1: Token = {
+				type: TokenType.Content,
 				literal: " content1 ",
 				originalLength: 10,
 			};
 			cache.add(0, token1);
 
-			const token2: LatexToken = {
-				type: LatexTokenType.ColumnAlign,
+			const token2: Token = {
+				type: TokenType.ColumnAlign,
 				literal: "&",
 			};
 			cache.add(0, token2);

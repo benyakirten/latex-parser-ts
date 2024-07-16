@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
 
 import {
+	CommandArgumentType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	LatexTokenType,
+	TokenType,
 } from "../../lexer/types";
 import { isMathSelection, isMathVersion } from "./selection";
 import { MathFont } from "./types";
@@ -32,23 +32,23 @@ describe("isMathVersion", () => {
 		const command: CommandToken = {
 			name: "mathversion",
 			literal: "\\mathversion",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "normal",
 							originalLength: 6,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "normal",
 							originalLength: 6,
 						},
@@ -65,13 +65,13 @@ describe("isMathVersion", () => {
 		const command: CommandToken = {
 			name: "mathversion",
 			literal: "\\mathversion",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "normal",
 							originalLength: 6,
 						},
@@ -88,7 +88,7 @@ describe("isMathVersion", () => {
 		let command: CommandToken = {
 			name: "normalmath",
 			literal: "\\normalmath",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 
@@ -98,7 +98,7 @@ describe("isMathVersion", () => {
 		command = {
 			name: "boldmath",
 			literal: "\\boldmath",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 
@@ -110,7 +110,7 @@ describe("isMathVersion", () => {
 		const command: CommandToken = {
 			name: "coolmath",
 			literal: "\\coolmath",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 
@@ -122,7 +122,7 @@ describe("isMathVersion", () => {
 		const command: CommandToken = {
 			name: "coolmath",
 			literal: "\\coolmath",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 

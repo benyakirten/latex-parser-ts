@@ -1,17 +1,14 @@
 import { beforeEach, describe, expect, it, test } from "bun:test";
 
-import { LatexLexer } from "./lexer";
+import { Lexer } from "./lexer";
 import {
 	type AccentToken,
 	type BlockToken,
+	CommandArgumentType,
 	type CommandToken,
 	type CommentToken,
 	type ContentToken,
 	type LabeledArgContent,
-	LatexAccentType,
-	LatexCommandArgumentType,
-	type LatexToken,
-	LatexTokenType,
 	MathPosition,
 	type MathToken,
 	type OptionalArgument,
@@ -19,24 +16,26 @@ import {
 	type RequiredArgument,
 	type ScriptToken,
 	ScriptTokenType,
+	type Token,
+	TokenType,
 } from "./types";
 
-const SHORT_LATEX_DOC = "\\documentclass[12pt]{article}";
+const SHORT__DOC = "\\documentclass[12pt]{article}";
 
-describe("LatexLexer", () => {
-	let lexer: LatexLexer;
+describe("Lexer", () => {
+	let lexer: Lexer;
 	beforeEach(() => {
-		lexer = new LatexLexer(SHORT_LATEX_DOC);
+		lexer = new Lexer(SHORT__DOC);
 	});
 
 	describe("command tokens", () => {
 		it("should lex a command with no arguments", () => {
-			const got = new LatexLexer("\\command").readToEnd();
+			const got = new Lexer("\\command").readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
 			expect(token).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command",
 				arguments: [],
 				name: "command",
@@ -44,22 +43,22 @@ describe("LatexLexer", () => {
 		});
 
 		it("should be able to lex a command with a simple required argument", () => {
-			const got = new LatexLexer("\\command{arg}").readToEnd();
+			const got = new Lexer("\\command{arg}").readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
 			const contentArg: ContentToken = {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "arg",
 				originalLength: 3,
 			};
 			const wantArg: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [contentArg],
 			};
 
 			expect(token).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command{arg}",
 				arguments: [wantArg],
 				name: "command",
@@ -67,23 +66,23 @@ describe("LatexLexer", () => {
 		});
 
 		it("should be able to lex a command with a required argument that's a nested command", () => {
-			const got = new LatexLexer("\\command{\\command2}").readToEnd();
+			const got = new Lexer("\\command{\\command2}").readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
 			const commandArg: CommandToken = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command2",
 				arguments: [],
 				name: "command2",
 			};
 			const wantArg: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [commandArg],
 			};
 
 			expect(token).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command{\\command2}",
 				arguments: [wantArg],
 				name: "command",
@@ -91,20 +90,20 @@ describe("LatexLexer", () => {
 		});
 
 		it("should be ble to lex a command with a required argument that's empty", () => {
-			const got = new LatexLexer("\\command{}").readToEnd();
+			const got = new Lexer("\\command{}").readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
 			expect(token).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command{}",
-				arguments: [{ type: LatexCommandArgumentType.Required, content: [] }],
+				arguments: [{ type: CommandArgumentType.Required, content: [] }],
 				name: "command",
 			});
 		});
 
 		it("should be able to lex a command with a required argument with nested arguments", () => {
-			const got = new LatexLexer(
+			const got = new Lexer(
 				"\\command{\\command2{arg1}{\\command3}}",
 			).readToEnd();
 			expect(got).toHaveLength(1);
@@ -112,40 +111,40 @@ describe("LatexLexer", () => {
 			const [token] = got;
 
 			const nestedArg1: ContentToken = {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "arg1",
 				originalLength: 4,
 			};
 			const nestedRequiredArg1: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [nestedArg1],
 			};
 
 			const nestedArg2: CommandToken = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command3",
 				arguments: [],
 				name: "command3",
 			};
 			const nestedRequiredArg2: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [nestedArg2],
 			};
 
 			const topCommandArg: CommandToken = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command2{arg1}{\\command3}",
 				arguments: [nestedRequiredArg1, nestedRequiredArg2],
 				name: "command2",
 			};
 
 			const wantArg: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [topCommandArg],
 			};
 
 			expect(token).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command{\\command2{arg1}{\\command3}}",
 				arguments: [wantArg],
 				name: "command",
@@ -153,22 +152,22 @@ describe("LatexLexer", () => {
 		});
 
 		it("should be able to lex a command with a simple optional argument", () => {
-			const got = new LatexLexer("\\command[arg]").readToEnd();
+			const got = new Lexer("\\command[arg]").readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
 			const contentArg: ContentToken = {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "arg",
 				originalLength: 3,
 			};
 			const optionalArg: OptionalArgument = {
-				type: LatexCommandArgumentType.Optional,
+				type: CommandArgumentType.Optional,
 				content: contentArg,
 			};
 
 			expect(token).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command[arg]",
 				arguments: [optionalArg],
 				name: "command",
@@ -176,22 +175,22 @@ describe("LatexLexer", () => {
 		});
 
 		it("should be lex an optional argument with commas as one content token", () => {
-			const got = new LatexLexer("\\command[a,b,c]").readToEnd();
+			const got = new Lexer("\\command[a,b,c]").readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
 			const contentArg: ContentToken = {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "a,b,c",
 				originalLength: 5,
 			};
 			const optionalArg: OptionalArgument = {
-				type: LatexCommandArgumentType.Optional,
+				type: CommandArgumentType.Optional,
 				content: contentArg,
 			};
 
 			expect(token).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command[a,b,c]",
 				arguments: [optionalArg],
 				name: "command",
@@ -199,7 +198,7 @@ describe("LatexLexer", () => {
 		});
 
 		it("should be able to lex commands with multiple labeled optional arguments", () => {
-			const got = new LatexLexer(
+			const got = new Lexer(
 				"\\command[a=b,c=d,e=\\command2,f=g,h=\\command3,i=j]",
 			).readToEnd();
 			expect(got).toHaveLength(1);
@@ -209,7 +208,7 @@ describe("LatexLexer", () => {
 				key: "a",
 				value: [
 					{
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: "b",
 						originalLength: 1,
 					},
@@ -220,7 +219,7 @@ describe("LatexLexer", () => {
 				key: "c",
 				value: [
 					{
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: "d",
 						originalLength: 1,
 					},
@@ -231,7 +230,7 @@ describe("LatexLexer", () => {
 				key: "e",
 				value: [
 					{
-						type: LatexTokenType.Command,
+						type: TokenType.Command,
 						literal: "\\command2",
 						arguments: [],
 						name: "command2",
@@ -243,7 +242,7 @@ describe("LatexLexer", () => {
 				key: "f",
 				value: [
 					{
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: "g",
 						originalLength: 1,
 					},
@@ -254,7 +253,7 @@ describe("LatexLexer", () => {
 				key: "h",
 				value: [
 					{
-						type: LatexTokenType.Command,
+						type: TokenType.Command,
 						literal: "\\command3",
 						arguments: [],
 						name: "command3",
@@ -266,7 +265,7 @@ describe("LatexLexer", () => {
 				key: "i",
 				value: [
 					{
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: "j",
 						originalLength: 1,
 					},
@@ -283,12 +282,12 @@ describe("LatexLexer", () => {
 			];
 
 			const optionalArg: OptionalArgument = {
-				type: LatexCommandArgumentType.Optional,
+				type: CommandArgumentType.Optional,
 				content: optionalArgs,
 			};
 
 			expect(token).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command[a=b,c=d,e=\\command2,f=g,h=\\command3,i=j]",
 				arguments: [optionalArg],
 				name: "command",
@@ -298,15 +297,15 @@ describe("LatexLexer", () => {
 		it("should be able to lex a new macro command that's written over multiple lines", () => {
 			const command =
 				"\\newcommand{\\mycommand}[2]{%\n  First argument: #1 \\\\\n  Second argument: #2}";
-			const got = new LatexLexer(command).readToEnd();
+			const got = new Lexer(command).readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
 			const firstArg: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [
 					{
-						type: LatexTokenType.Command,
+						type: TokenType.Command,
 						literal: "\\mycommand",
 						arguments: [],
 						name: "mycommand",
@@ -315,42 +314,42 @@ describe("LatexLexer", () => {
 			};
 
 			const contentToken: ContentToken = {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "2",
 				originalLength: 1,
 			};
 			const secondArg: OptionalArgument = {
-				type: LatexCommandArgumentType.Optional,
+				type: CommandArgumentType.Optional,
 				content: contentToken,
 			};
 
 			const commentToken: CommentToken = {
-				type: LatexTokenType.Comment,
+				type: TokenType.Comment,
 				literal: "%\n",
 				content: "",
 			};
 			const firstContentToken: ContentToken = {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "  First argument: ",
 				originalLength: 18,
 			};
 			const firstPlaceholderToken: PlaceholderToken = {
-				type: LatexTokenType.Placeholder,
+				type: TokenType.Placeholder,
 				literal: "#1",
 				content: 1,
 			};
 			const secondContentToken: ContentToken = {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: " \\\n  Second argument: ",
 				originalLength: 36,
 			};
 			const secondPlaceholderToken: PlaceholderToken = {
-				type: LatexTokenType.Placeholder,
+				type: TokenType.Placeholder,
 				literal: "#2",
 				content: 2,
 			};
 			const thirdArg: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [
 					commentToken,
 					firstContentToken,
@@ -361,7 +360,7 @@ describe("LatexLexer", () => {
 			};
 
 			const want: CommandToken = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal:
 					"\\newcommand{\\mycommand}[2]{%\n  First argument: #1 @@<!BACKSLASH!>\n  Second argument: #2}",
 				arguments: [firstArg, secondArg, thirdArg],
@@ -374,16 +373,16 @@ describe("LatexLexer", () => {
 		it("should be able to lex a command of arbitrary complexity", () => {
 			const command =
 				"\\newcommand{\\mycommand}[\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]}]";
-			const got = new LatexLexer(command).readToEnd();
+			const got = new Lexer(command).readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
 
 			const arg1: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [
 					{
-						type: LatexTokenType.Command,
+						type: TokenType.Command,
 						literal: "\\mycommand",
 						name: "mycommand",
 						arguments: [],
@@ -391,49 +390,49 @@ describe("LatexLexer", () => {
 				],
 			};
 
-			const nestedComment4RequiredArgTokens: LatexToken[] = [
+			const nestedComment4RequiredArgTokens: Token[] = [
 				{
-					type: LatexTokenType.Comment,
+					type: TokenType.Comment,
 					literal: "%\n",
 					content: "",
 				},
 				{
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: "Cool Th",
 					originalLength: 7,
 				},
 				{
-					type: LatexTokenType.Script,
+					type: TokenType.Script,
 					literal: "_i",
 					detail: ScriptTokenType.Sub,
 					content: {
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: "i",
 						originalLength: 1,
 					},
 				},
 				{
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: "n",
 					originalLength: 1,
 				},
 				{
-					type: LatexTokenType.Script,
+					type: TokenType.Script,
 					detail: ScriptTokenType.Super,
 					literal: "^g",
 					content: {
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: "g",
 						originalLength: 1,
 					},
 				},
 				{
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: ": ",
 					originalLength: 2,
 				},
 				{
-					type: LatexTokenType.Placeholder,
+					type: TokenType.Placeholder,
 					literal: "#1",
 					content: 1,
 				},
@@ -444,11 +443,11 @@ describe("LatexLexer", () => {
 					key: "d",
 					value: [
 						{
-							type: LatexTokenType.Script,
+							type: TokenType.Script,
 							literal: "^7",
 							detail: ScriptTokenType.Super,
 							content: {
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 								literal: "7",
 								originalLength: 1,
 							},
@@ -459,68 +458,66 @@ describe("LatexLexer", () => {
 					key: "e",
 					value: [
 						{
-							type: LatexTokenType.Script,
+							type: TokenType.Script,
 							literal: "^f",
 							detail: ScriptTokenType.Super,
 							content: {
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 								literal: "f",
 								originalLength: 1,
 							},
 						},
 						{
-							type: LatexTokenType.Script,
+							type: TokenType.Script,
 							literal: "_f",
 							detail: ScriptTokenType.Sub,
 							content: {
 								literal: "f",
 								originalLength: 1,
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 							},
 						},
 					],
 				},
 				{
 					key: "g",
-					value: [
-						{ type: LatexTokenType.Content, literal: "h", originalLength: 1 },
-					],
+					value: [{ type: TokenType.Content, literal: "h", originalLength: 1 }],
 				},
 			];
 
 			const nestedCommand4: CommandToken = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h]",
 				name: "command4",
 				arguments: [
 					{
-						type: LatexCommandArgumentType.Required,
+						type: CommandArgumentType.Required,
 						content: nestedComment4RequiredArgTokens,
 					},
 					{
-						type: LatexCommandArgumentType.Optional,
+						type: CommandArgumentType.Optional,
 						content: nestedComment4OptionalArgTokens,
 					},
 				],
 			};
 
 			const arg2OptionalArg: OptionalArgument = {
-				type: LatexCommandArgumentType.Optional,
+				type: CommandArgumentType.Optional,
 				content: {
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: "2",
 					originalLength: 1,
 				},
 			};
 
 			const arg2RequiredArgOptionalArgument: OptionalArgument = {
-				type: LatexCommandArgumentType.Optional,
+				type: CommandArgumentType.Optional,
 				content: [
 					{
 						key: "a",
 						value: [
 							{
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 								literal: "b",
 								originalLength: 1,
 							},
@@ -534,7 +531,7 @@ describe("LatexLexer", () => {
 						key: "i",
 						value: [
 							{
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 								literal: "j",
 								originalLength: 1,
 							},
@@ -544,7 +541,7 @@ describe("LatexLexer", () => {
 			};
 
 			const arg2RequiredArgOptionalArgumentCommand: CommandToken = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal:
 					"\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]",
 				name: "command3",
@@ -552,14 +549,14 @@ describe("LatexLexer", () => {
 			};
 
 			const arg2RequiredArg: RequiredArgument = {
-				type: LatexCommandArgumentType.Required,
+				type: CommandArgumentType.Required,
 				content: [arg2RequiredArgOptionalArgumentCommand],
 			};
 
 			const arg2: OptionalArgument = {
-				type: LatexCommandArgumentType.Optional,
+				type: CommandArgumentType.Optional,
 				content: {
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 					literal:
 						"\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]}",
 					arguments: [arg2OptionalArg, arg2RequiredArg],
@@ -568,7 +565,7 @@ describe("LatexLexer", () => {
 			};
 
 			const want: CommandToken = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal:
 					"\\newcommand{\\mycommand}[\\mycommand2[2]{\\command3[a=b,c=\\command4{%\nCool Th_in^g: #1}[d=^7,e=^f_f,g=h],i=j]}]",
 				name: "newcommand",
@@ -579,39 +576,39 @@ describe("LatexLexer", () => {
 		});
 
 		it("should correctly parse a command that isn't at the end of a block", () => {
-			let got = new LatexLexer("\\command hello").readToEnd();
+			let got = new Lexer("\\command hello").readToEnd();
 			expect(got).toHaveLength(2);
 
 			let [command, content] = got as [CommandToken, ContentToken];
 			expect(command).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command",
 				name: "command",
 				arguments: [],
 			});
 			expect(content).toEqual({
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: " hello",
 				originalLength: 6,
 			});
 
-			got = new LatexLexer("hello \\command").readToEnd();
+			got = new Lexer("hello \\command").readToEnd();
 			expect(got).toHaveLength(2);
 
 			[content, command] = got as [ContentToken, CommandToken];
 			expect(command).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command",
 				name: "command",
 				arguments: [],
 			});
 			expect(content).toEqual({
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "hello ",
 				originalLength: 6,
 			});
 
-			got = new LatexLexer("hello \\command bye").readToEnd();
+			got = new Lexer("hello \\command bye").readToEnd();
 			expect(got).toHaveLength(3);
 
 			const [content1, command1, content2] = got as [
@@ -620,18 +617,18 @@ describe("LatexLexer", () => {
 				ContentToken,
 			];
 			expect(content1).toEqual({
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "hello ",
 				originalLength: 6,
 			});
 			expect(command1).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command",
 				name: "command",
 				arguments: [],
 			});
 			expect(content2).toEqual({
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: " bye",
 				originalLength: 4,
 			});
@@ -643,17 +640,17 @@ describe("LatexLexer", () => {
 			"\\newcommand{\\mycommand2",
 			"\\newcommand[\\mycommand2",
 		])("should throw an error for an input of %s", (input) => {
-			expect(() => new LatexLexer(input).readToEnd()).toThrow();
+			expect(() => new Lexer(input).readToEnd()).toThrow();
 		});
 	});
 
 	describe("placeholder tokens", () => {
 		it("should decode # followed by a number as a placeholder", () => {
-			const got = new LatexLexer("#1").readToEnd();
+			const got = new Lexer("#1").readToEnd();
 			expect(got).toHaveLength(1);
 			expect(got).toEqual([
 				{
-					type: LatexTokenType.Placeholder,
+					type: TokenType.Placeholder,
 					literal: "#1",
 					content: 1,
 				},
@@ -661,45 +658,45 @@ describe("LatexLexer", () => {
 		});
 
 		it("should throw if something other than a number follows the #", () => {
-			expect(() => new LatexLexer("##").readToEnd()).toThrow();
+			expect(() => new Lexer("##").readToEnd()).toThrow();
 		});
 	});
 
 	it("should throw on lexing an unescaped closing brace and bracket", () => {
-		expect(() => new LatexLexer("{\\command3}}").readToEnd()).toThrow();
-		expect(() => new LatexLexer("]").readToEnd()).toThrow();
+		expect(() => new Lexer("{\\command3}}").readToEnd()).toThrow();
+		expect(() => new Lexer("]").readToEnd()).toThrow();
 	});
 
 	describe("block", () => {
 		it("should build a block on an open brace encapsulating all content until the close brace", () => {
-			const got = new LatexLexer(
+			const got = new Lexer(
 				"{\\mycommand this is my block {this is a subblock}}",
 			).readToEnd();
 			expect(got).toHaveLength(1);
 
 			const [token] = got;
-			expect(token.type).toEqual(LatexTokenType.Block);
+			expect(token.type).toEqual(TokenType.Block);
 
 			const { content } = token as BlockToken;
 			expect(content).toHaveLength(3);
 			expect(content).toEqual([
 				{
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 					name: "mycommand",
 					literal: "\\mycommand",
 					arguments: [],
 				},
 				{
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: " this is my block ",
 					originalLength: 18,
 				},
 				{
-					type: LatexTokenType.Block,
+					type: TokenType.Block,
 					literal: "{this is a subblock}",
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "this is a subblock",
 							originalLength: 18,
 						},
@@ -710,38 +707,32 @@ describe("LatexLexer", () => {
 
 		it("should throw if the block is never closed", () => {
 			expect(() =>
-				new LatexLexer("{\\mycommand this is my block").readToEnd(),
+				new Lexer("{\\mycommand this is my block").readToEnd(),
 			).toThrow();
 		});
 	});
 
-	describe("superscripts, subscripts and accents", () => {
+	describe.todo("accents", () => {
+		//
+	});
+
+	describe("superscripts and subscripts", () => {
 		const tokenTypes = [
 			{
-				start: "\\~",
-				wantType: LatexTokenType.Accent as LatexTokenType.Accent,
-				wantDetail: LatexAccentType.Tilde,
-			},
-			{
-				start: "\\^",
-				wantType: LatexTokenType.Accent as LatexTokenType.Accent,
-				wantDetail: LatexAccentType.Circumflex,
-			},
-			{
 				start: "^",
-				wantType: LatexTokenType.Script as LatexTokenType.Script,
+				wantType: TokenType.Script as TokenType.Script,
 				wantDetail: ScriptTokenType.Super,
 			},
 			{
 				start: "_",
-				wantType: LatexTokenType.Script as LatexTokenType.Script,
+				wantType: TokenType.Script as TokenType.Script,
 				wantDetail: ScriptTokenType.Sub,
 			},
 		];
 
 		it("should include a block token if the text is wrapped in braces", () => {
 			for (const { start, wantType, wantDetail } of tokenTypes) {
-				const got = new LatexLexer(`${start}{hello}`).readToEnd();
+				const got = new Lexer(`${start}{hello}`).readToEnd();
 				expect(got).toHaveLength(1);
 				const [token] = got as [AccentToken | ScriptToken];
 
@@ -751,11 +742,11 @@ describe("LatexLexer", () => {
 				expect(literal.startsWith(start));
 
 				expect(content).toEqual({
-					type: LatexTokenType.Block,
+					type: TokenType.Block,
 					literal: "{hello}",
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "hello",
 							originalLength: 5,
 						},
@@ -766,7 +757,7 @@ describe("LatexLexer", () => {
 
 		it("should include a content token of the next character if the text is not wrapped", () => {
 			for (const { start, wantType, wantDetail } of tokenTypes) {
-				const got = new LatexLexer(`${start}nothing here`).readToEnd();
+				const got = new Lexer(`${start}nothing here`).readToEnd();
 				expect(got).toHaveLength(2);
 				const [token, otherContent] = got as [
 					AccentToken | ScriptToken,
@@ -779,13 +770,13 @@ describe("LatexLexer", () => {
 				expect(literal.startsWith(start));
 
 				expect(content).toEqual({
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: "n",
 					originalLength: 1,
 				});
 
 				expect(otherContent).toEqual({
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: "othing here",
 					originalLength: 11,
 				});
@@ -794,7 +785,7 @@ describe("LatexLexer", () => {
 
 		it("should correctly parse a following command token if a backslash follows", () => {
 			for (const { start, wantType, wantDetail } of tokenTypes) {
-				const got = new LatexLexer(`${start}\\command1{arg1}`).readToEnd();
+				const got = new Lexer(`${start}\\command1{arg1}`).readToEnd();
 				expect(got).toHaveLength(1);
 				const [token] = got as [AccentToken | ScriptToken];
 
@@ -804,15 +795,15 @@ describe("LatexLexer", () => {
 				expect(literal.startsWith(start));
 
 				expect(content).toEqual({
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 					literal: "\\command1{arg1}",
 					name: "command1",
 					arguments: [
 						{
-							type: LatexCommandArgumentType.Required,
+							type: CommandArgumentType.Required,
 							content: [
 								{
-									type: LatexTokenType.Content,
+									type: TokenType.Content,
 									literal: "arg1",
 									originalLength: 4,
 								},
@@ -827,7 +818,7 @@ describe("LatexLexer", () => {
 		it("should throw if any other token type immediately follows", () => {
 			for (const end of ["[hello]", "#1", "^"]) {
 				for (const { start } of tokenTypes) {
-					expect(() => new LatexLexer(`${start}${end}`).readToEnd()).toThrow();
+					expect(() => new Lexer(`${start}${end}`).readToEnd()).toThrow();
 				}
 			}
 		});
@@ -835,7 +826,7 @@ describe("LatexLexer", () => {
 
 	describe("escaped characters", () => {
 		it("should properly escape characters that are escaped, no matter how nested", () => {
-			const got = new LatexLexer(
+			const got = new Lexer(
 				"100\\% \\command{\\$\\^{}\\~{}} \\_T {\\{Nested{\\{Double\\_ Nested}}",
 			).readToEnd();
 
@@ -843,21 +834,21 @@ describe("LatexLexer", () => {
 
 			const [content1, command, content2, block] = got;
 			expect(content1).toEqual({
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: "100% ",
 				originalLength: 17,
 			});
 
 			expect(command).toEqual({
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\command{@@<!DOLLAR!>@@<!CARET!>@@<!TILDE!>}",
 				name: "command",
 				arguments: [
 					{
-						type: LatexCommandArgumentType.Required,
+						type: CommandArgumentType.Required,
 						content: [
 							{
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 								literal: "$^~",
 								originalLength: 34,
 							},
@@ -867,7 +858,7 @@ describe("LatexLexer", () => {
 			});
 
 			expect(content2).toEqual({
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: " _T ",
 				originalLength: 19,
 			});
@@ -877,35 +868,35 @@ describe("LatexLexer", () => {
 					{
 						literal: "{Nested",
 						originalLength: 18,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						content: [
 							{
 								literal: "{Double_ Nested",
 								originalLength: 41,
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 							},
 						],
 						literal: "{@@<!LCURLY!>Double@@<!UNDERSCORE!> Nested}",
-						type: LatexTokenType.Block,
+						type: TokenType.Block,
 					},
 				],
 				literal:
 					"{@@<!LCURLY!>Nested{@@<!LCURLY!>Double@@<!UNDERSCORE!> Nested}}",
-				type: LatexTokenType.Block,
+				type: TokenType.Block,
 			});
 		});
 	});
 
 	describe("comments", () => {
 		it("should encapsulate everything after the % until the end of line in a comment", () => {
-			const got = new LatexLexer("% this is a comment \\\\").readToEnd();
+			const got = new Lexer("% this is a comment \\\\").readToEnd();
 			expect(got.length).toEqual(1);
 
 			const [token] = got;
 			expect(token).toEqual({
-				type: LatexTokenType.Comment,
+				type: TokenType.Comment,
 				content: " this is a comment \\\\",
 				literal: "% this is a comment @@<!BACKSLASH!>",
 			});
@@ -933,10 +924,10 @@ describe("LatexLexer", () => {
 
 		it("should encapsulate everything that occurs between the start and end sequences", () => {
 			for (const { start, end, wantPosition } of tokenTypes) {
-				const got = new LatexLexer(`${start}e = mc^2${end}`).readToEnd();
+				const got = new Lexer(`${start}e = mc^2${end}`).readToEnd();
 				expect(got).toHaveLength(1);
 				const [token] = got as [MathToken];
-				expect(token.type).toEqual(LatexTokenType.Math);
+				expect(token.type).toEqual(TokenType.Math);
 				expect(token.position).toEqual(wantPosition);
 
 				expect(token.literal).toEqual(
@@ -944,16 +935,16 @@ describe("LatexLexer", () => {
 				);
 				expect(token.content).toEqual([
 					{
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: "e = mc",
 						originalLength: 6,
 					},
 					{
-						type: LatexTokenType.Script,
+						type: TokenType.Script,
 						detail: ScriptTokenType.Super,
 						literal: "^2",
 						content: {
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "2",
 							originalLength: 1,
 						},
@@ -964,7 +955,7 @@ describe("LatexLexer", () => {
 
 		it("should throw if the block is not closed correctly", () => {
 			for (const { start } of tokenTypes) {
-				expect(() => new LatexLexer(`${start}e = mc^2`).readToEnd()).toThrow();
+				expect(() => new Lexer(`${start}e = mc^2`).readToEnd()).toThrow();
 			}
 		});
 	});
@@ -977,39 +968,39 @@ describe("LatexLexer", () => {
 
 			const tokens = got.readToEnd();
 
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					arguments: [],
 					literal: "\\somecommand",
 					name: "somecommand",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 				},
 				{
 					literal: " ",
 					originalLength: 1,
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 				},
 				{
 					arguments: [],
 					literal: "\\somecommand2",
 					name: "somecommand2",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 				},
 				{
 					literal: " documentclass[12pt]",
 					originalLength: 20,
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 				},
 				{
 					content: [
 						{
 							literal: "article",
 							originalLength: 7,
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 						},
 					],
 					literal: "{article}",
-					type: LatexTokenType.Block,
+					type: TokenType.Block,
 				},
 			];
 			expect(tokens).toEqual(want);
@@ -1017,31 +1008,31 @@ describe("LatexLexer", () => {
 
 		it("should insert by distance from the end if the position is negative", () => {
 			const got = lexer.insert(-1, "fast:introduction").readToEnd();
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					arguments: [
 						{
 							content: {
 								literal: "12pt",
 								originalLength: 4,
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 							},
-							type: LatexCommandArgumentType.Optional,
+							type: CommandArgumentType.Optional,
 						},
 						{
 							content: [
 								{
 									literal: "articlefast:introduction",
 									originalLength: 24,
-									type: LatexTokenType.Content,
+									type: TokenType.Content,
 								},
 							],
-							type: LatexCommandArgumentType.Required,
+							type: CommandArgumentType.Required,
 						},
 					],
 					literal: "\\documentclass[12pt]{articlefast:introduction}",
 					name: "documentclass",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 				},
 			];
 			expect(got).toEqual(want);
@@ -1049,16 +1040,16 @@ describe("LatexLexer", () => {
 
 		it("should insert at the beginning for a sufficiently large negative value", () => {
 			const got = lexer.insert(-10000, "\\somecommand ").readToEnd();
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					literal: "\\somecommand",
 					name: "somecommand",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 					arguments: [],
 				},
 				{
 					literal: " ",
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					originalLength: 1,
 				},
 				{
@@ -1067,24 +1058,24 @@ describe("LatexLexer", () => {
 							content: {
 								literal: "12pt",
 								originalLength: 4,
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 							},
-							type: LatexCommandArgumentType.Optional,
+							type: CommandArgumentType.Optional,
 						},
 						{
 							content: [
 								{
 									literal: "article",
 									originalLength: 7,
-									type: LatexTokenType.Content,
+									type: TokenType.Content,
 								},
 							],
-							type: LatexCommandArgumentType.Required,
+							type: CommandArgumentType.Required,
 						},
 					],
 					literal: "\\documentclass[12pt]{article}",
 					name: "documentclass",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 				},
 			];
 			expect(got).toEqual(want);
@@ -1093,34 +1084,34 @@ describe("LatexLexer", () => {
 		it("should insert at the end for a sufficiently large positive value", () => {
 			const got = lexer.insert(1000, " \\$").readToEnd();
 
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					arguments: [
 						{
 							content: {
 								literal: "12pt",
 								originalLength: 4,
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 							},
-							type: LatexCommandArgumentType.Optional,
+							type: CommandArgumentType.Optional,
 						},
 						{
 							content: [
 								{
 									literal: "article",
 									originalLength: 7,
-									type: LatexTokenType.Content,
+									type: TokenType.Content,
 								},
 							],
-							type: LatexCommandArgumentType.Required,
+							type: CommandArgumentType.Required,
 						},
 					],
 					literal: "\\documentclass[12pt]{article}",
 					name: "documentclass",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 				},
 				{
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: " $",
 					originalLength: 13,
 				},
@@ -1129,9 +1120,9 @@ describe("LatexLexer", () => {
 		});
 
 		describe("cursor positioning", () => {
-			let lexer: LatexLexer;
+			let lexer: Lexer;
 			beforeEach(() => {
-				lexer = new LatexLexer("a&b&c&d&e");
+				lexer = new Lexer("a&b&c&d&e");
 			});
 
 			it("should move the cursor position forward by the moved amount if the position was at leat at the start of the inserted items", () => {
@@ -1143,7 +1134,7 @@ describe("LatexLexer", () => {
 
 				expect(want).toEqual(got);
 				expect(want).toEqual({
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: "b",
 					originalLength: 1,
 				});
@@ -1153,34 +1144,34 @@ describe("LatexLexer", () => {
 					{
 						literal: "b",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						literal: "&",
-						type: LatexTokenType.ColumnAlign,
+						type: TokenType.ColumnAlign,
 					},
 					{
 						literal: "c",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						literal: "&",
-						type: LatexTokenType.ColumnAlign,
+						type: TokenType.ColumnAlign,
 					},
 					{
 						literal: "d",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						literal: "&",
-						type: LatexTokenType.ColumnAlign,
+						type: TokenType.ColumnAlign,
 					},
 					{
 						literal: "e",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 				]);
 			});
@@ -1194,7 +1185,7 @@ describe("LatexLexer", () => {
 
 				expect(want).toEqual(got);
 				expect(want).toEqual({
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: "b",
 					originalLength: 1,
 				});
@@ -1204,52 +1195,52 @@ describe("LatexLexer", () => {
 					{
 						literal: "b",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						literal: "&",
-						type: LatexTokenType.ColumnAlign,
+						type: TokenType.ColumnAlign,
 					},
 					{
 						literal: "c",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						literal: "&",
-						type: LatexTokenType.ColumnAlign,
+						type: TokenType.ColumnAlign,
 					},
 					{
 						literal: "d",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						literal: "&",
-						type: LatexTokenType.ColumnAlign,
+						type: TokenType.ColumnAlign,
 					},
 					{
 						literal: "e",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						literal: "&",
-						type: LatexTokenType.ColumnAlign,
+						type: TokenType.ColumnAlign,
 					},
 					{
 						literal: "f",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 					{
 						literal: "&",
-						type: LatexTokenType.ColumnAlign,
+						type: TokenType.ColumnAlign,
 					},
 					{
 						literal: "g",
 						originalLength: 1,
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 					},
 				]);
 			});
@@ -1259,31 +1250,31 @@ describe("LatexLexer", () => {
 	describe("remove", () => {
 		it("should remove the segment from the lexer's input", () => {
 			const got = lexer.remove(1, 9).readToEnd();
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					arguments: [
 						{
 							content: {
 								literal: "12pt",
 								originalLength: 4,
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 							},
-							type: LatexCommandArgumentType.Optional,
+							type: CommandArgumentType.Optional,
 						},
 						{
 							content: [
 								{
 									literal: "article",
 									originalLength: 7,
-									type: LatexTokenType.Content,
+									type: TokenType.Content,
 								},
 							],
-							type: LatexCommandArgumentType.Required,
+							type: CommandArgumentType.Required,
 						},
 					],
 					literal: "\\class[12pt]{article}",
 					name: "class",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 				},
 			];
 
@@ -1292,22 +1283,22 @@ describe("LatexLexer", () => {
 
 		it("should remove the segment from the lexer's input when the start value is negative", () => {
 			const got = lexer.remove(-100, 9).readToEnd();
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					literal: "class[12pt]",
 					originalLength: 11,
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 				},
 				{
 					content: [
 						{
 							literal: "article",
 							originalLength: 7,
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 						},
 					],
 					literal: "{article}",
-					type: LatexTokenType.Block,
+					type: TokenType.Block,
 				},
 			];
 			expect(got).toEqual(want);
@@ -1316,33 +1307,33 @@ describe("LatexLexer", () => {
 		it("should reverse the start and end values if the start value is greater than the end value", () => {
 			lexer.remove(9, -100);
 			const got = [...lexer];
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					content: [
 						{
 							literal: "article",
 							originalLength: 7,
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 						},
 					],
 					literal: "{article}",
-					type: LatexTokenType.Block,
+					type: TokenType.Block,
 				},
 				{
 					literal: "class[12pt]",
 					originalLength: 11,
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 				},
 				{
 					content: [
 						{
 							literal: "article",
 							originalLength: 7,
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 						},
 					],
 					literal: "{article}",
-					type: LatexTokenType.Block,
+					type: TokenType.Block,
 				},
 			];
 			expect(got).toEqual(want);
@@ -1351,12 +1342,12 @@ describe("LatexLexer", () => {
 		it("should remove to the end of the document if the end value is very large", () => {
 			lexer.remove(9, 10000);
 			const got = [...lexer];
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					arguments: [],
 					literal: "\\document",
 					name: "document",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 				},
 			];
 			expect(got).toEqual(want);
@@ -1365,31 +1356,31 @@ describe("LatexLexer", () => {
 		it("should not alter the doc if the start and end values are the same", () => {
 			lexer.remove(9, 9);
 			const got = [...lexer];
-			const want: LatexToken[] = [
+			const want: Token[] = [
 				{
 					arguments: [
 						{
 							content: {
 								literal: "12pt",
 								originalLength: 4,
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 							},
-							type: LatexCommandArgumentType.Optional,
+							type: CommandArgumentType.Optional,
 						},
 						{
 							content: [
 								{
 									literal: "article",
 									originalLength: 7,
-									type: LatexTokenType.Content,
+									type: TokenType.Content,
 								},
 							],
-							type: LatexCommandArgumentType.Required,
+							type: CommandArgumentType.Required,
 						},
 					],
 					literal: "\\documentclass[12pt]{article}",
 					name: "documentclass",
-					type: LatexTokenType.Command,
+					type: TokenType.Command,
 				},
 			];
 

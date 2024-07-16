@@ -1,8 +1,8 @@
 import {
+	CommandArgumentType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	type LatexToken,
-	LatexTokenType,
+	type Token,
+	TokenType,
 } from "../../lexer/types";
 import type { FontValue } from "../fonts/types";
 import {
@@ -25,9 +25,9 @@ import {
 export function declareMathVersion(command: CommandToken): string | null {
 	if (
 		command.arguments.length !== 1 ||
-		command.arguments[0].type !== LatexCommandArgumentType.Required ||
+		command.arguments[0].type !== CommandArgumentType.Required ||
 		command.arguments[0].content.length !== 1 ||
-		command.arguments[0].content[0].type !== LatexTokenType.Content
+		command.arguments[0].content[0].type !== TokenType.Content
 	) {
 		return null;
 	}
@@ -38,7 +38,7 @@ export function declareMathVersion(command: CommandToken): string | null {
 }
 
 function parsePossibleToken<T>(
-	token: LatexToken | undefined,
+	token: Token | undefined,
 	callback: (token: string) => T,
 ): MathAlphabetDeclarationValue<FontValue<T>> {
 	if (!token) {
@@ -55,10 +55,10 @@ function parsePossibleToken<T>(
 }
 
 function parseAlphabetDeclarationTokens(
-	encodingToken: LatexToken | undefined,
-	familyToken: LatexToken | undefined,
-	seriesToken: LatexToken | undefined,
-	shapeToken: LatexToken | undefined,
+	encodingToken: Token | undefined,
+	familyToken: Token | undefined,
+	seriesToken: Token | undefined,
+	shapeToken: Token | undefined,
 ): MathAlphabetBase {
 	const encoding = parsePossibleToken(encodingToken, parseFontEncoding);
 	const family = parsePossibleToken(familyToken, parseFontFamily);
@@ -78,17 +78,16 @@ export function declareMathOrSymbolAlphabet(
 		command.arguments.length !== 5 ||
 		command.arguments.every(
 			(arg) =>
-				arg.type !== LatexCommandArgumentType.Required ||
-				arg.content.length > 1,
+				arg.type !== CommandArgumentType.Required || arg.content.length > 1,
 		)
 	) {
 		return null;
 	}
 
 	const [nameToken, encodingToken, familyToken, seriesToken, shapeToken] =
-		command.arguments.map((arg) => (arg.content as LatexToken[]).at(0));
+		command.arguments.map((arg) => (arg.content as Token[]).at(0));
 
-	if (!nameToken || nameToken.type !== LatexTokenType.Command) {
+	if (!nameToken || nameToken.type !== TokenType.Command) {
 		return null;
 	}
 
@@ -111,9 +110,7 @@ export function setMathOrSymbolFont(
 	if (
 		(command.name !== "SetMathAlphabet" && command.name !== "SetSymbolFont") ||
 		command.arguments.length !== 6 ||
-		command.arguments.every(
-			(arg) => arg.type !== LatexCommandArgumentType.Required,
-		)
+		command.arguments.every((arg) => arg.type !== CommandArgumentType.Required)
 	) {
 		return null;
 	}
@@ -125,11 +122,11 @@ export function setMathOrSymbolFont(
 		familyToken,
 		seriesToken,
 		shapeToken,
-	] = command.arguments.map((arg) => (arg.content as LatexToken[]).at(0));
+	] = command.arguments.map((arg) => (arg.content as Token[]).at(0));
 
 	if (
 		!nameToken ||
-		nameToken.type !== LatexTokenType.Command ||
+		nameToken.type !== TokenType.Command ||
 		nameToken.arguments.length > 0
 	) {
 		return null;
@@ -137,7 +134,7 @@ export function setMathOrSymbolFont(
 
 	const { name } = nameToken;
 
-	if (!versionToken || versionToken.type !== LatexTokenType.Content) {
+	if (!versionToken || versionToken.type !== TokenType.Content) {
 		return null;
 	}
 
@@ -165,24 +162,23 @@ export function declareSymbolFontAlphabet(
 		command.arguments.length !== 2 ||
 		command.arguments.every(
 			(arg) =>
-				arg.type !== LatexCommandArgumentType.Required ||
-				arg.content.length > 1,
+				arg.type !== CommandArgumentType.Required || arg.content.length > 1,
 		)
 	) {
 		return null;
 	}
 
 	const [mathAlphabet, symbolFont] = command.arguments.map((arg) =>
-		(arg.content as LatexToken[]).at(0),
+		(arg.content as Token[]).at(0),
 	);
 
-	if (!mathAlphabet || mathAlphabet.type !== LatexTokenType.Command) {
+	if (!mathAlphabet || mathAlphabet.type !== TokenType.Command) {
 		return null;
 	}
 
 	const alphabetName = mathAlphabet.name;
 
-	if (!symbolFont || symbolFont.type !== LatexTokenType.Content) {
+	if (!symbolFont || symbolFont.type !== TokenType.Content) {
 		return null;
 	}
 
