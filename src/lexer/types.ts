@@ -152,7 +152,7 @@ export enum CharType {
  * or a group of characters enclosed in braces. For accents that are alphabetic characters, the accent must
  * be followed by a group of characters (or a single character) enclosed in braces.
  */
-export type AccentType = VariableAccent | BraceRequiredAccent;
+export type AccentType = VariableAccent | BlockRequiredAccent;
 export enum VariableAccent {
 	Circumflex = "^",
 	Tilde = "~",
@@ -163,7 +163,7 @@ export enum VariableAccent {
 	OverDot = ".",
 }
 
-export enum BraceRequiredAccent {
+export enum BlockRequiredAccent {
 	HungarianUmlaut = "H",
 	Cedilla = "c",
 	UnderBar = "b",

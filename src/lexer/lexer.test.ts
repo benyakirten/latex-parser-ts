@@ -18,6 +18,7 @@ import {
 	ScriptTokenType,
 	type Token,
 	TokenType,
+	type VariableAccent,
 } from "./types";
 
 const SHORT__DOC = "\\documentclass[12pt]{article}";
@@ -712,8 +713,96 @@ describe("Lexer", () => {
 		});
 	});
 
-	describe.todo("accents", () => {
-		//
+	describe("accents", () => {
+		it("should allow a single character or a block for a variable accent token", () => {
+			for (const _accent of Lexer.VARIABLE_ACCENT_CHARACTERS) {
+				const accent = _accent as VariableAccent;
+				let got = new Lexer(`\\${accent}a`).readToEnd();
+				expect(got).toHaveLength(1);
+
+				let [token] = got;
+
+				const contentToken: ContentToken = {
+					type: TokenType.Content,
+					literal: "a",
+					originalLength: 1,
+				};
+				expect(token).toEqual({
+					type: TokenType.Accent,
+					literal: `\\${accent}a`,
+					detail: accent,
+					content: contentToken,
+				});
+
+				got = new Lexer(`\\${accent}{a}`).readToEnd();
+				expect(got).toHaveLength(1);
+
+				[token] = got;
+
+				const blockToken: BlockToken = {
+					type: TokenType.Block,
+					literal: "{a}",
+					content: [
+						{
+							type: TokenType.Content,
+							literal: "a",
+							originalLength: 1,
+						},
+					],
+				};
+				expect(token).toEqual({
+					type: TokenType.Accent,
+					literal: `\\${accent}{a}`,
+					detail: accent,
+					content: blockToken,
+				});
+			}
+		});
+
+		it("should allow a block for a block required token", () => {
+			for (const _accent of Lexer.BLOCK_REQUIRED_ACCENT_CHARACTERS) {
+				const accent = _accent as VariableAccent;
+				const got = new Lexer(`\\${accent}{a}`).readToEnd();
+				expect(got).toHaveLength(1);
+
+				const [token] = got;
+
+				const blockToken: BlockToken = {
+					type: TokenType.Block,
+					literal: "{a}",
+					content: [
+						{
+							type: TokenType.Content,
+							literal: "a",
+							originalLength: 1,
+						},
+					],
+				};
+				expect(token).toEqual({
+					type: TokenType.Accent,
+					literal: `\\${accent}{a}`,
+					detail: accent,
+					content: blockToken,
+				});
+			}
+		});
+
+		it("should detect a command instead if a block does not follow a brace required token", () => {
+			for (const _accent of Lexer.BLOCK_REQUIRED_ACCENT_CHARACTERS) {
+				const accent = _accent as VariableAccent;
+				const got = new Lexer(`\\${accent}a`).readToEnd();
+				expect(got).toHaveLength(1);
+
+				const [token] = got;
+
+				expect(token).toEqual({
+					type: TokenType.Command,
+					literal: `\\${accent}a`,
+					name: `${accent}a`,
+					arguments: [],
+				});
+			}
+		});
 	});
 
 	describe("superscripts and subscripts", () => {

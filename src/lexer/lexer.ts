@@ -3,8 +3,8 @@ import { NoCache } from "./cache";
 import {
 	type AccentToken,
 	type Arguments,
+	type BlockRequiredAccent,
 	type BlockToken,
-	type BraceRequiredAccent,
 	CharType,
 	CommandArgumentType,
 	type CommandToken,
@@ -55,7 +55,7 @@ export class Lexer {
 		".",
 	]);
 
-	static readonly BRACES_REQUIRED_ACCENT_CHARACTERS = new Set([
+	static readonly BLOCK_REQUIRED_ACCENT_CHARACTERS = new Set([
 		"H",
 		"c",
 		"b",
@@ -362,12 +362,12 @@ export class Lexer {
 	private isBracesRequiredAccent(
 		nextChar: string,
 		charAfter: string | undefined,
-	): nextChar is BraceRequiredAccent {
+	): nextChar is BlockRequiredAccent {
 		if (charAfter !== CharType.OpenBrace) {
 			return false;
 		}
 
-		return Lexer.BRACES_REQUIRED_ACCENT_CHARACTERS.has(nextChar);
+		return Lexer.BLOCK_REQUIRED_ACCENT_CHARACTERS.has(nextChar);
 	}
 
 	private isVariableAccent(nextChar: string): nextChar is VariableAccent {
@@ -376,7 +376,7 @@ export class Lexer {
 
 	private buildBracketRequiredAccent(
 		startPosition: number,
-		accentChar: BraceRequiredAccent,
+		accentChar: BlockRequiredAccent,
 	): AccentToken {
 		const token = this.buildBlock(startPosition + 1);
 		return {
