@@ -1,20 +1,20 @@
-import type { LatexBuiltinType } from "./builtins/types";
-import type { LatexFont } from "./fonts/types";
+import type { BuiltinType } from "./builtins/types";
+import type { Font } from "./fonts/types";
 
-export type LatexItem = LatexBuiltin | LatexFontCommand;
+export type Item = Builtin | FontCommand;
 
-export type LatexBuiltin = {
-	type: LatexItemType.BuiltIn;
-	command: LatexBuiltinType;
+export type Builtin = {
+	type: ItemType.BuiltIn;
+	command: BuiltinType;
 	name: string;
 };
 
-export type LatexFontCommand = {
-	type: LatexItemType.FontCommand;
-	font: LatexFont;
+export type FontCommand = {
+	type: ItemType.FontCommand;
+	font: Font;
 };
 
-export enum LatexItemType {
+export enum ItemType {
 	BuiltIn = 1,
 	FontCommand = 2,
 }

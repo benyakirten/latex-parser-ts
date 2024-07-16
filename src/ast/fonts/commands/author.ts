@@ -1,16 +1,16 @@
 import {
+	CommandArgumentType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	LatexTokenType,
 	type RequiredArgument,
+	TokenType,
 } from "../../../lexer/types";
 import {
 	type AuthorCommand,
 	AuthorCommandType,
+	type AuthorDefaults,
+	type FontMeasurementValue,
+	FontSizeUnit,
 	FontValueType,
-	type LatexAuthorDefaults,
-	type LatexFontMeasurementValue,
-	LatexFontSizeUnit,
 } from "../types";
 import {
 	parseFontFamily,
@@ -19,18 +19,14 @@ import {
 	parseToFontValue,
 } from "../utils";
 
-function createAuthorDefaultCommand(
-	cmd: keyof LatexAuthorDefaults,
-): AuthorCommand {
+function createAuthorDefaultCommand(cmd: keyof AuthorDefaults): AuthorCommand {
 	return {
 		type: AuthorCommandType.AuthorDefault,
 		value: cmd,
 	};
 }
 
-function createAuthorSizeCommand(
-	size: LatexFontMeasurementValue,
-): AuthorCommand {
+function createAuthorSizeCommand(size: FontMeasurementValue): AuthorCommand {
 	return {
 		type: AuthorCommandType.FontSize,
 		value: {
@@ -87,47 +83,47 @@ export function parseAuthorCommand(
 		case "tiny":
 			return createAuthorSizeCommand({
 				value: 5,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		case "scriptsize":
 			return createAuthorSizeCommand({
 				value: 7,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		case "footnotesize":
 			return createAuthorSizeCommand({
 				value: 8,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		case "normalsize":
 			return createAuthorSizeCommand({
 				value: 10,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		case "large":
 			return createAuthorSizeCommand({
 				value: 12,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		case "Large":
 			return createAuthorSizeCommand({
 				value: 14.4,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		case "LARGE":
 			return createAuthorSizeCommand({
 				value: 17.28,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		case "huge":
 			return createAuthorSizeCommand({
 				value: 20.74,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		case "Huge":
 			return createAuthorSizeCommand({
 				value: 24.88,
-				unit: LatexFontSizeUnit.Point,
+				unit: FontSizeUnit.Point,
 			});
 		default:
 			return null;
@@ -136,7 +132,7 @@ export function parseAuthorCommand(
 
 function determineAuthorCommandKey(
 	commandName: string,
-): keyof LatexAuthorDefaults | null {
+): keyof AuthorDefaults | null {
 	const namePieces = commandName.split("default");
 	if (namePieces.length !== 2) {
 		return null;
@@ -178,17 +174,17 @@ function determineAuthorCommandKey(
 
 export function setFontDefaults(
 	renewCommand: CommandToken,
-): Partial<LatexAuthorDefaults> | null {
+): Partial<AuthorDefaults> | null {
 	if (renewCommand.name !== "renewcommand") {
 		throw new Error(
 			"Font defaults can only be set with the renewcommand command",
 		);
 	}
-	const fontDefaults: Partial<LatexAuthorDefaults> = {};
+	const fontDefaults: Partial<AuthorDefaults> = {};
 	if (
 		renewCommand.arguments.length !== 2 ||
 		renewCommand.arguments.every(
-			(arg) => arg.type !== LatexCommandArgumentType.Required,
+			(arg) => arg.type !== CommandArgumentType.Required,
 		)
 	) {
 		throw new Error("Expected two required commands to follow renewcommand");
@@ -198,7 +194,7 @@ export function setFontDefaults(
 		(a) => a.content as RequiredArgument["content"],
 	);
 
-	if (arg1.length !== 1 || arg1[0].type !== LatexTokenType.Command) {
+	if (arg1.length !== 1 || arg1[0].type !== TokenType.Command) {
 		throw new Error("First required argument must be a command");
 	}
 	const [command] = arg1;
@@ -214,8 +210,7 @@ export function setFontDefaults(
 
 	if (
 		arg2.length !== 1 ||
-		(arg2[0].type !== LatexTokenType.Command &&
-			arg2[0].type !== LatexTokenType.Content)
+		(arg2[0].type !== TokenType.Command && arg2[0].type !== TokenType.Content)
 	) {
 		throw new Error("Second required argument must be a command or argument");
 	}

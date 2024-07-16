@@ -1,4 +1,4 @@
-export enum LatexBuiltinType {
+export enum BuiltinType {
 	Begin = 1,
 	End = 2,
 	Item = 3,

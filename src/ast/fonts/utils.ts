@@ -1,56 +1,56 @@
-import { type LatexToken, LatexTokenType } from "../../lexer/types";
+import { type Token, TokenType } from "../../lexer/types";
 import {
+	type FontEncodingLocal,
+	FontEncodingNormalValue,
+	FontEncodingType,
+	type FontEncodingValue,
+	type FontMeasurementValue,
+	type FontSeriesValue,
+	FontShapeValue,
+	FontSizeUnit,
 	type FontValue,
 	FontValueType,
-	type LatexFontEncodingLocal,
-	LatexFontEncodingNormalValue,
-	LatexFontEncodingType,
-	type LatexFontEncodingValue,
-	type LatexFontMeasurementValue,
-	type LatexFontSeriesValue,
-	LatexFontShapeValue,
-	LatexFontSizeUnit,
-	LatexFontWeight,
-	LatexFontWidth,
+	FontWeight,
+	FontWidth,
 } from "./types";
 
-export function parseFontEncoding(rawCommand: string): LatexFontEncodingValue {
+export function parseFontEncoding(rawCommand: string): FontEncodingValue {
 	if (rawCommand.toLocaleUpperCase().startsWith("L")) {
-		const fontEncoding: LatexFontEncodingLocal = {
-			type: LatexFontEncodingType.Local,
+		const fontEncoding: FontEncodingLocal = {
+			type: FontEncodingType.Local,
 			encoding: rawCommand,
 		};
 
 		return fontEncoding;
 	}
 
-	let encoding: LatexFontEncodingNormalValue;
+	let encoding: FontEncodingNormalValue;
 
 	switch (rawCommand.toLocaleUpperCase()) {
 		case "OT1":
-			encoding = LatexFontEncodingNormalValue.KnuthTexText;
+			encoding = FontEncodingNormalValue.KnuthTexText;
 			break;
 		case "T1":
-			encoding = LatexFontEncodingNormalValue.ExtendedText;
+			encoding = FontEncodingNormalValue.ExtendedText;
 			break;
 		case "OML":
-			encoding = LatexFontEncodingNormalValue.MathItalic;
+			encoding = FontEncodingNormalValue.MathItalic;
 			break;
 		case "OMS":
-			encoding = LatexFontEncodingNormalValue.MathSymbols;
+			encoding = FontEncodingNormalValue.MathSymbols;
 			break;
 		case "OMX":
-			encoding = LatexFontEncodingNormalValue.MathLargeSymbols;
+			encoding = FontEncodingNormalValue.MathLargeSymbols;
 			break;
 		case "U":
-			encoding = LatexFontEncodingNormalValue.Unknown;
+			encoding = FontEncodingNormalValue.Unknown;
 			break;
 		default:
 			throw new Error(`Unrecognized encoding value: ${rawCommand}`);
 	}
 
 	const fontEncoding = {
-		type: LatexFontEncodingType.Normal,
+		type: FontEncodingType.Normal,
 		encoding,
 	};
 
@@ -66,10 +66,10 @@ export function parseFontFamily(rawCommand: string): string {
 
 const FONT_SERIES_RE = /^([ues]?[lb])?([ues]?[cx])?$/;
 // TODO: Decide error handling and unknown values.
-export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
+export function parseFontSeries(rawCommand: string): FontSeriesValue {
 	const series = {
-		weight: LatexFontWeight.Medium,
-		width: LatexFontWidth.Medium,
+		weight: FontWeight.Medium,
+		width: FontWidth.Medium,
 	};
 	if (rawCommand === "m") {
 		return series;
@@ -89,28 +89,28 @@ export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
 	if (rawWeight) {
 		switch (rawWeight.toLocaleLowerCase()) {
 			case "ul":
-				series.weight = LatexFontWeight.UltraLight;
+				series.weight = FontWeight.UltraLight;
 				break;
 			case "el":
-				series.weight = LatexFontWeight.ExtraLight;
+				series.weight = FontWeight.ExtraLight;
 				break;
 			case "l":
-				series.weight = LatexFontWeight.Light;
+				series.weight = FontWeight.Light;
 				break;
 			case "sl":
-				series.weight = LatexFontWeight.SemiLight;
+				series.weight = FontWeight.SemiLight;
 				break;
 			case "sb":
-				series.weight = LatexFontWeight.SemiBold;
+				series.weight = FontWeight.SemiBold;
 				break;
 			case "b":
-				series.weight = LatexFontWeight.Bold;
+				series.weight = FontWeight.Bold;
 				break;
 			case "eb":
-				series.weight = LatexFontWeight.ExtraBold;
+				series.weight = FontWeight.ExtraBold;
 				break;
 			case "ub":
-				series.weight = LatexFontWeight.UltraBold;
+				series.weight = FontWeight.UltraBold;
 				break;
 			default:
 				throw new Error(`Unrecognized weight: ${rawWeight}`);
@@ -120,28 +120,28 @@ export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
 	if (rawWidth) {
 		switch (rawWidth.toLocaleLowerCase()) {
 			case "uc":
-				series.width = LatexFontWidth.UltraCondensed;
+				series.width = FontWidth.UltraCondensed;
 				break;
 			case "ec":
-				series.width = LatexFontWidth.ExtraCondensed;
+				series.width = FontWidth.ExtraCondensed;
 				break;
 			case "c":
-				series.width = LatexFontWidth.Condensed;
+				series.width = FontWidth.Condensed;
 				break;
 			case "sc":
-				series.width = LatexFontWidth.SemiCondensed;
+				series.width = FontWidth.SemiCondensed;
 				break;
 			case "sx":
-				series.width = LatexFontWidth.SemiExpanded;
+				series.width = FontWidth.SemiExpanded;
 				break;
 			case "x":
-				series.width = LatexFontWidth.Expanded;
+				series.width = FontWidth.Expanded;
 				break;
 			case "ex":
-				series.width = LatexFontWidth.ExtraExpanded;
+				series.width = FontWidth.ExtraExpanded;
 				break;
 			case "ux":
-				series.width = LatexFontWidth.UltraExpanded;
+				series.width = FontWidth.UltraExpanded;
 				break;
 			default:
 				throw new Error(`Unrecognized width: ${rawWidth}`);
@@ -151,26 +151,26 @@ export function parseFontSeries(rawCommand: string): LatexFontSeriesValue {
 	return series;
 }
 
-export function parseFontShape(rawCommand: string): LatexFontShapeValue {
+export function parseFontShape(rawCommand: string): FontShapeValue {
 	switch (rawCommand.toLocaleLowerCase()) {
 		case "n":
-			return LatexFontShapeValue.Normal;
+			return FontShapeValue.Normal;
 		case "it":
-			return LatexFontShapeValue.Italic;
+			return FontShapeValue.Italic;
 		case "sl":
-			return LatexFontShapeValue.Oblique;
+			return FontShapeValue.Oblique;
 		case "sc":
-			return LatexFontShapeValue.CapsAndSmallCaps;
+			return FontShapeValue.CapsAndSmallCaps;
 		case "scit":
-			return LatexFontShapeValue.CapsAndSmallCapsItalics;
+			return FontShapeValue.CapsAndSmallCapsItalics;
 		case "scsl":
-			return LatexFontShapeValue.CapsAndSmallCapsOblique;
+			return FontShapeValue.CapsAndSmallCapsOblique;
 		case "sw":
-			return LatexFontShapeValue.Swash;
+			return FontShapeValue.Swash;
 		case "ssc":
-			return LatexFontShapeValue.SpacedCapsAndSmallCaps;
+			return FontShapeValue.SpacedCapsAndSmallCaps;
 		case "ui":
-			return LatexFontShapeValue.UprightItalic;
+			return FontShapeValue.UprightItalic;
 		default:
 			throw new Error(`Unrecognized font shape: ${rawCommand}`);
 	}
@@ -184,7 +184,7 @@ const FONT_SIZE_RE =
 	/^([0-9]+)(\.[0-9]+)?(pt|mm|cm|in|ex|em|mu|sp|vmin|vmax|vh|vw|cc|bp|dd|pc|px)?$/;
 export function parseFontMeasurement(
 	rawMeasurement: string,
-): LatexFontMeasurementValue {
+): FontMeasurementValue {
 	const matches = rawMeasurement.match(FONT_SIZE_RE);
 	if (!matches || matches.length !== 4) {
 		throw new Error(`Unrecognized font measurement: ${rawMeasurement}`);
@@ -199,57 +199,57 @@ export function parseFontMeasurement(
 	return { value, unit };
 }
 
-function parseFontSizeUnit(rawUnit?: string): LatexFontSizeUnit {
+function parseFontSizeUnit(rawUnit?: string): FontSizeUnit {
 	switch (rawUnit) {
 		case "in":
-			return LatexFontSizeUnit.Inch;
+			return FontSizeUnit.Inch;
 		case "mm":
-			return LatexFontSizeUnit.Millimeter;
+			return FontSizeUnit.Millimeter;
 		case "cm":
-			return LatexFontSizeUnit.Centimeter;
+			return FontSizeUnit.Centimeter;
 		case "pc":
-			return LatexFontSizeUnit.Pica;
+			return FontSizeUnit.Pica;
 		case "dd":
-			return LatexFontSizeUnit.DidotPoint;
+			return FontSizeUnit.DidotPoint;
 		case "cc":
-			return LatexFontSizeUnit.Cicero;
+			return FontSizeUnit.Cicero;
 		case "sp":
-			return LatexFontSizeUnit.ScaledPoint;
+			return FontSizeUnit.ScaledPoint;
 		case "bp":
-			return LatexFontSizeUnit.BigPoint;
+			return FontSizeUnit.BigPoint;
 		case "em":
-			return LatexFontSizeUnit.Em;
+			return FontSizeUnit.Em;
 		case "ex":
-			return LatexFontSizeUnit.Ex;
+			return FontSizeUnit.Ex;
 		case "mu":
-			return LatexFontSizeUnit.Mu;
+			return FontSizeUnit.Mu;
 		case "px":
-			return LatexFontSizeUnit.Pixel;
+			return FontSizeUnit.Pixel;
 		case "vh":
-			return LatexFontSizeUnit.ViewportHeight;
+			return FontSizeUnit.ViewportHeight;
 		case "vw":
-			return LatexFontSizeUnit.ViewportWidth;
+			return FontSizeUnit.ViewportWidth;
 		case "vmin":
-			return LatexFontSizeUnit.ViewportMin;
+			return FontSizeUnit.ViewportMin;
 		case "vmax":
-			return LatexFontSizeUnit.ViewportMax;
+			return FontSizeUnit.ViewportMax;
 		default:
-			return LatexFontSizeUnit.Point;
+			return FontSizeUnit.Point;
 	}
 }
 
 export function parseToFontValue<T>(
-	token: LatexToken,
+	token: Token,
 	callback: (value: string) => T,
 ): FontValue<T> {
-	if (token.type === LatexTokenType.Command) {
+	if (token.type === TokenType.Command) {
 		return {
 			type: FontValueType.CommandToken,
 			value: token,
 		};
 	}
 
-	if (token.type === LatexTokenType.Content) {
+	if (token.type === TokenType.Content) {
 		return {
 			type: FontValueType.FontValue,
 			value: callback(token.literal.trim()),

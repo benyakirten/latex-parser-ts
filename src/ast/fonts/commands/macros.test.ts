@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import type { LatexFontCurrentValues } from "../types";
+import type { FontCurrentValues } from "../types";
 import { determineCurrentFontKey } from "./macros";
 
 describe("determineCurrentFontKey", () => {
@@ -16,6 +16,6 @@ describe("determineCurrentFontKey", () => {
 		["unknownCommand", null],
 	])("should return %s given %s", (commandName, expected) => {
 		const result = determineCurrentFontKey(commandName);
-		expect(result).toEqual(expected as keyof LatexFontCurrentValues);
+		expect(result).toEqual(expected as keyof FontCurrentValues);
 	});
 });

@@ -1,12 +1,12 @@
 import { describe, expect, it, test } from "bun:test";
 
 import {
+	CommandArgumentType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	type LatexToken,
-	LatexTokenType,
+	type Token,
+	TokenType,
 } from "../../lexer/types";
-import { LatexFontSizeUnit } from "../fonts/types";
+import { FontSizeUnit } from "../fonts/types";
 import {
 	declareMathAccent,
 	declareMathDelimiter,
@@ -41,16 +41,16 @@ describe("getMathSymbolType", () => {
 		[MathSymbolType.AlphabetChar, "7"],
 		[MathSymbolType.AlphabetChar, "mathalpha"],
 	])("should return %s for input %s", (want, input) => {
-		let token: LatexToken;
+		let token: Token;
 		if (input.length === 1) {
 			token = {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: input,
 				originalLength: 1,
 			};
 		} else {
 			token = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				name: input,
 				literal: `\\${input}`,
 				arguments: [],
@@ -62,7 +62,7 @@ describe("getMathSymbolType", () => {
 
 	it("should return null for an unrecognized command", () => {
 		const got = getMathSymbolType({
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			name: "unknown",
 			literal: "\\unknown",
 			arguments: [],
@@ -72,17 +72,17 @@ describe("getMathSymbolType", () => {
 
 	it("should return null for a command token that's not a simple macro", () => {
 		const got = getMathSymbolType({
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			name: "mathrel",
 			literal: "\\mathrel",
-			arguments: [{ type: LatexCommandArgumentType.Required, content: [] }],
+			arguments: [{ type: CommandArgumentType.Required, content: [] }],
 		});
 		expect(got).toBeNull();
 	});
 
 	it("should return null for a content token with an unrecognized value", () => {
 		const got = getMathSymbolType({
-			type: LatexTokenType.Content,
+			type: TokenType.Content,
 			literal: "unknown",
 			originalLength: 7,
 		});
@@ -91,7 +91,7 @@ describe("getMathSymbolType", () => {
 
 	it("should return null for a token that's not content or a command", () => {
 		const got = getMathSymbolType({
-			type: LatexTokenType.Placeholder,
+			type: TokenType.Placeholder,
 			literal: "#1",
 			content: 1,
 		});
@@ -104,43 +104,43 @@ describe("declareMathSymbol", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -156,7 +156,7 @@ describe("declareMathSymbol", () => {
 		const command: CommandToken = {
 			name: "DeclareMathSymbol",
 			literal: "\\DeclareMathSymbol",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 		const got = declareMathSymbol(command);
@@ -168,46 +168,46 @@ describe("declareMathSymbol", () => {
 			name: "DeclareMathSymbol",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Optional,
+					type: CommandArgumentType.Optional,
 					content: {
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: '"00',
 						originalLength: 3,
 					},
 				},
 			],
 			literal: "\\DeclareMathSymbol",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 
 		const got = declareMathSymbol(command);
@@ -219,45 +219,45 @@ describe("declareMathSymbol", () => {
 			name: "DeclareMathSymbol",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -265,7 +265,7 @@ describe("declareMathSymbol", () => {
 				},
 			],
 			literal: "\\DeclareMathSymbol",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathSymbol(command);
 		expect(got).toBeNull();
@@ -276,34 +276,34 @@ describe("declareMathSymbol", () => {
 			name: "DeclareMathSymbol",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -311,7 +311,7 @@ describe("declareMathSymbol", () => {
 				},
 			],
 			literal: "\\DeclareMathSymbol",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathSymbol(command);
 		expect(got).toBeNull();
@@ -322,40 +322,40 @@ describe("declareMathSymbol", () => {
 			name: "DeclareMathSymbol",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "2000",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -363,7 +363,7 @@ describe("declareMathSymbol", () => {
 				},
 			],
 			literal: "\\DeclareMathSymbol",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathSymbol(command);
 		expect(got).toBeNull();
@@ -374,40 +374,40 @@ describe("declareMathSymbol", () => {
 			name: "DeclareMathSymbol",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "invalid",
 							originalLength: 7,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -415,7 +415,7 @@ describe("declareMathSymbol", () => {
 				},
 			],
 			literal: "\\DeclareMathSymbol",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathSymbol(command);
 		expect(got).toBeNull();
@@ -426,40 +426,40 @@ describe("declareMathSymbol", () => {
 			name: "DeclareMathSymbol",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "symbolFont",
 							originalLength: 10,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -467,7 +467,7 @@ describe("declareMathSymbol", () => {
 				},
 			],
 			literal: "\\DeclareMathSymbol",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const symbolFonts = ["symbolFont"];
 		const got = declareMathSymbol(command, symbolFonts);
@@ -484,43 +484,43 @@ describe("declareMathAccent", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -536,7 +536,7 @@ describe("declareMathAccent", () => {
 		const command: CommandToken = {
 			name: "DeclareMathAccent",
 			literal: "\\DeclareMathAccent",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 		const got = declareMathAccent(command);
@@ -548,46 +548,46 @@ describe("declareMathAccent", () => {
 			name: "DeclareMathAccent",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Optional,
+					type: CommandArgumentType.Optional,
 					content: {
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: '"00',
 						originalLength: 3,
 					},
 				},
 			],
 			literal: "\\DeclareMathAccent",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 
 		const got = declareMathAccent(command);
@@ -599,45 +599,45 @@ describe("declareMathAccent", () => {
 			name: "DeclareMathAccent",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -645,7 +645,7 @@ describe("declareMathAccent", () => {
 				},
 			],
 			literal: "\\DeclareMathAccent",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathAccent(command);
 		expect(got).toBeNull();
@@ -656,34 +656,34 @@ describe("declareMathAccent", () => {
 			name: "DeclareMathAccent",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -691,7 +691,7 @@ describe("declareMathAccent", () => {
 				},
 			],
 			literal: "\\DeclareMathAccent",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathAccent(command);
 		expect(got).toBeNull();
@@ -702,40 +702,40 @@ describe("declareMathAccent", () => {
 			name: "DeclareMathAccent",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "2000",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -743,7 +743,7 @@ describe("declareMathAccent", () => {
 				},
 			],
 			literal: "\\DeclareMathAccent",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathAccent(command);
 		expect(got).toBeNull();
@@ -754,40 +754,40 @@ describe("declareMathAccent", () => {
 			name: "DeclareMathAccent",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "invalid",
 							originalLength: 7,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -795,7 +795,7 @@ describe("declareMathAccent", () => {
 				},
 			],
 			literal: "\\DeclareMathAccent",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathAccent(command);
 		expect(got).toBeNull();
@@ -806,40 +806,40 @@ describe("declareMathAccent", () => {
 			name: "DeclareMathAccent",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "symbolFont",
 							originalLength: 10,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -847,7 +847,7 @@ describe("declareMathAccent", () => {
 				},
 			],
 			literal: "\\DeclareMathAccent",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const symbolFonts = ["symbolFont"];
 		const got = declareMathAccent(command, symbolFonts);
@@ -864,63 +864,63 @@ describe("declareMathDelimiter", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.LargeSymbols,
 							originalLength: MathSymbolFont.LargeSymbols.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"01',
 							originalLength: 3,
 						},
@@ -936,7 +936,7 @@ describe("declareMathDelimiter", () => {
 		const command: CommandToken = {
 			name: "DeclareMathDelimiter",
 			literal: "\\DeclareMathDelimiter",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 		const got = declareMathDelimiter(command);
@@ -948,58 +948,58 @@ describe("declareMathDelimiter", () => {
 			name: "DeclareMathDelimiter",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Optional,
+					type: CommandArgumentType.Optional,
 					content: {
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: '"00',
 						originalLength: 3,
 					},
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.LargeSymbols,
 							originalLength: MathSymbolFont.LargeSymbols.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"01',
 							originalLength: 3,
 						},
@@ -1007,7 +1007,7 @@ describe("declareMathDelimiter", () => {
 				},
 			],
 			literal: "\\DeclareMathDelimiter",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 
 		const got = declareMathDelimiter(command);
@@ -1019,65 +1019,65 @@ describe("declareMathDelimiter", () => {
 			name: "DeclareMathDelimiter",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.LargeSymbols,
 							originalLength: MathSymbolFont.LargeSymbols.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"01',
 							originalLength: 3,
 						},
@@ -1085,7 +1085,7 @@ describe("declareMathDelimiter", () => {
 				},
 			],
 			literal: "\\DeclareMathDelimiter",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathDelimiter(command);
 		expect(got).toBeNull();
@@ -1096,54 +1096,54 @@ describe("declareMathDelimiter", () => {
 			name: "DeclareMathDelimiter",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -1151,7 +1151,7 @@ describe("declareMathDelimiter", () => {
 				},
 			],
 			literal: "\\DeclareMathDelimiter",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathDelimiter(command);
 		expect(got).toBeNull();
@@ -1162,60 +1162,60 @@ describe("declareMathDelimiter", () => {
 			name: "DeclareMathDelimiter",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "2000",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -1223,7 +1223,7 @@ describe("declareMathDelimiter", () => {
 				},
 			],
 			literal: "\\DeclareMathDelimiter",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathDelimiter(command);
 		expect(got).toBeNull();
@@ -1234,60 +1234,60 @@ describe("declareMathDelimiter", () => {
 			name: "DeclareMathDelimiter",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "invalid",
 							originalLength: 7,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "invalid",
 							originalLength: 7,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
@@ -1295,7 +1295,7 @@ describe("declareMathDelimiter", () => {
 				},
 			],
 			literal: "\\DeclareMathDelimiter",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathDelimiter(command);
 		expect(got).toBeNull();
@@ -1305,63 +1305,63 @@ describe("declareMathDelimiter", () => {
 		const command: CommandToken = {
 			name: "DeclareMathDelimiter",
 			literal: "\\DeclareMathDelimiter",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "0",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: MathSymbolFont.Operators.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.LargeSymbols,
 							originalLength: MathSymbolFont.LargeSymbols.length,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"01',
 							originalLength: 3,
 						},
@@ -1384,53 +1384,53 @@ describe("declareMathRadical", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 7,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"01',
 							originalLength: 7,
 						},
@@ -1446,7 +1446,7 @@ describe("declareMathRadical", () => {
 		const command: CommandToken = {
 			name: "DeclareMathRadical",
 			literal: "\\DeclareMathRadical",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 		const got = declareMathRadical(command);
@@ -1458,56 +1458,56 @@ describe("declareMathRadical", () => {
 			name: "DeclareMathRadical",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 7,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Optional,
+					type: CommandArgumentType.Optional,
 					content: {
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: '"01',
 						originalLength: 7,
 					},
 				},
 			],
 			literal: "\\DeclareMathRadical",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 
 		const got = declareMathRadical(command);
@@ -1519,55 +1519,55 @@ describe("declareMathRadical", () => {
 			name: "DeclareMathRadical",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 7,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: 1,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"01',
 							originalLength: 7,
 						},
@@ -1575,7 +1575,7 @@ describe("declareMathRadical", () => {
 				},
 			],
 			literal: "\\DeclareMathRadical",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathRadical(command);
 		expect(got).toBeNull();
@@ -1585,53 +1585,53 @@ describe("declareMathRadical", () => {
 		const command: CommandToken = {
 			name: "DeclareMathRadical",
 			literal: "\\DeclareMathRadical",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "-",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.Operators,
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"00',
 							originalLength: 7,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: MathSymbolFont.LargeSymbols,
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: '"01',
 							originalLength: 7,
 						},
@@ -1653,43 +1653,43 @@ describe("declareMathSizes", () => {
 		const command: CommandToken = {
 			name: "InvalidCommand",
 			literal: "\\InvalidCommand",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "10pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "12pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "14pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "16pt",
 							originalLength: 4,
 						},
@@ -1705,7 +1705,7 @@ describe("declareMathSizes", () => {
 		const command: CommandToken = {
 			name: "DeclareMathSizes",
 			literal: "\\DeclareMathSizes",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			arguments: [],
 		};
 		const got = declareMathSizes(command);
@@ -1717,46 +1717,46 @@ describe("declareMathSizes", () => {
 			name: "DeclareMathSizes",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "10pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "12pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "14pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Optional,
+					type: CommandArgumentType.Optional,
 					content: {
-						type: LatexTokenType.Content,
+						type: TokenType.Content,
 						literal: "16pt",
 						originalLength: 4,
 					},
 				},
 			],
 			literal: "\\DeclareMathSizes",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 
 		const got = declareMathSizes(command);
@@ -1768,45 +1768,45 @@ describe("declareMathSizes", () => {
 			name: "DeclareMathSizes",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "10pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "12pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "14pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "16pt",
 							originalLength: 4,
 						},
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "18pt",
 							originalLength: 4,
 						},
@@ -1814,7 +1814,7 @@ describe("declareMathSizes", () => {
 				},
 			],
 			literal: "\\DeclareMathSizes",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathSizes(command);
 		expect(got).toBeNull();
@@ -1825,40 +1825,40 @@ describe("declareMathSizes", () => {
 			name: "DeclareMathSizes",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "10pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "12pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "14pt",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "16pt",
 							originalLength: 4,
 						},
@@ -1866,14 +1866,14 @@ describe("declareMathSizes", () => {
 				},
 			],
 			literal: "\\DeclareMathSizes",
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 		};
 		const got = declareMathSizes(command);
 		const expected: MathSize = {
-			mathTextSize: { value: 12, unit: LatexFontSizeUnit.Point },
-			currentTextSize: { value: 10, unit: LatexFontSizeUnit.Point },
-			scriptSize: { value: 14, unit: LatexFontSizeUnit.Point },
-			scriptScriptSize: { value: 16, unit: LatexFontSizeUnit.Point },
+			mathTextSize: { value: 12, unit: FontSizeUnit.Point },
+			currentTextSize: { value: 10, unit: FontSizeUnit.Point },
+			scriptSize: { value: 14, unit: FontSizeUnit.Point },
+			scriptScriptSize: { value: 16, unit: FontSizeUnit.Point },
 		};
 		expect(got).toEqual(expected);
 	});

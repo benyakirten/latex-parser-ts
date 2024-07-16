@@ -18,26 +18,24 @@ export enum FontValueType {
 	FontValue = 2,
 }
 
-export enum LatexFontEncodingType {
+export enum FontEncodingType {
 	Normal = 1,
 	Local = 2,
 }
 
-export type LatexFontEncoding = FontValue<LatexFontEncodingValue>;
-export type LatexFontEncodingValue =
-	| LatexFontEncodingLocal
-	| LatexFontEncodingNormal;
-export type LatexFontEncodingLocal = {
-	type: LatexFontEncodingType.Local;
+export type FontEncoding = FontValue<FontEncodingValue>;
+export type FontEncodingValue = FontEncodingLocal | FontEncodingNormal;
+export type FontEncodingLocal = {
+	type: FontEncodingType.Local;
 	encoding: string;
 };
 
-export type LatexFontEncodingNormal = {
-	type: LatexFontEncodingType.Normal;
-	encoding: LatexFontEncodingNormalValue;
+export type FontEncodingNormal = {
+	type: FontEncodingType.Normal;
+	encoding: FontEncodingNormalValue;
 };
 
-export enum LatexFontEncodingNormalValue {
+export enum FontEncodingNormalValue {
 	KnuthTexText = "ot1",
 	ExtendedText = "t1",
 	MathItalic = "oml",
@@ -46,14 +44,14 @@ export enum LatexFontEncodingNormalValue {
 	Unknown = "u",
 }
 
-export type LatexFontSeries = FontValue<LatexFontSeriesValue>;
-export type LatexFontSeriesValue = {
-	weight: LatexFontWeight;
-	width: LatexFontWidth;
+export type FontSeries = FontValue<FontSeriesValue>;
+export type FontSeriesValue = {
+	weight: FontWeight;
+	width: FontWidth;
 };
 
 /** corresponds to font-stretch */
-export enum LatexFontWidth {
+export enum FontWidth {
 	UltraCondensed = "uc",
 	ExtraCondensed = "ec",
 	Condensed = "c",
@@ -79,7 +77,7 @@ export enum LatexFontWidth {
  *
  * Corresponds to css font-weight
  */
-export enum LatexFontWeight {
+export enum FontWeight {
 	UltraLight = "ul",
 	ExtraLight = "el",
 	Light = "l",
@@ -91,13 +89,13 @@ export enum LatexFontWeight {
 	UltraBold = "ub",
 }
 
-export type LatexFontShape = FontValue<LatexFontShapeValue>;
+export type FontShape = FontValue<FontShapeValue>;
 /**
  * Small caps comes from font variant
  * Italic and slanted (oblique) come from font style
  * TODO: Find out what spaced caps, swash and upright italic are.
  */
-export enum LatexFontShapeValue {
+export enum FontShapeValue {
 	Normal = "n",
 	Italic = "it",
 	UprightItalic = "ui",
@@ -109,7 +107,7 @@ export enum LatexFontShapeValue {
 	SpacedCapsAndSmallCaps = "ssc",
 }
 
-export enum LatexFontSizeUnit {
+export enum FontSizeUnit {
 	Point = "pt",
 	Inch = "in",
 	Millimeter = "mm",
@@ -129,36 +127,36 @@ export enum LatexFontSizeUnit {
 	ViewportMax = "vmax",
 }
 
-export type LatexFontMeasurement = FontValue<LatexFontMeasurementValue>;
-export type LatexFontMeasurementValue = {
+export type FontMeasurement = FontValue<FontMeasurementValue>;
+export type FontMeasurementValue = {
 	value: number;
-	unit: LatexFontSizeUnit;
+	unit: FontSizeUnit;
 };
 
-export type LatexFontFamily = FontValue<LatexFontFamilyPreference | string>;
-export enum LatexFontFamilyPreference {
+export type FontFamily = FontValue<FontFamilyPreference | string>;
+export enum FontFamilyPreference {
 	PrefersSerif = "@@prefers-serif",
 	PrefersSansSerif = "@@prefers-sans-serif",
 	PrefersMonospace = "@@prefers-monospace",
 }
 
-export type LatexFontLineSpread = FontValue<number>;
+export type FontLineSpread = FontValue<number>;
 
-export type LatexFont = Partial<{
-	encoding: LatexFontEncoding;
-	family: LatexFontFamily;
-	size: LatexFontMeasurement;
-	baselineSkip: LatexFontMeasurement;
-	series: LatexFontSeries;
-	shape: LatexFontShape;
-	lineSpread: LatexFontLineSpread;
+export type Font = Partial<{
+	encoding: FontEncoding;
+	family: FontFamily;
+	size: FontMeasurement;
+	baselineSkip: FontMeasurement;
+	series: FontSeries;
+	shape: FontShape;
+	lineSpread: FontLineSpread;
 }>;
 
 // I tried to source these but couldn't find a good singular source.
 // You may want to look at https://tug.org/FontCatalogue/
 // To simplif work, we will only allow a selected amount of fonts
 // I am also not sure of how useful these are.
-export const latexFontCorrespondence: Record<string, string> = {
+export const FontCorrespondence: Record<string, string> = {
 	cm: "Computer Modern",
 	cc: "Concrete",
 	phv: "Helvetica",
@@ -189,64 +187,64 @@ export enum SelectionCommandType {
 
 export type SelectionCommandFontEncoding = {
 	type: SelectionCommandType.Encoding;
-	encoding: LatexFontEncoding;
+	encoding: FontEncoding;
 };
 
 export type SelectionCommandFontFamily = {
 	type: SelectionCommandType.Family;
-	family: LatexFontFamily;
+	family: FontFamily;
 };
 
 export type SelectionCommandFontSeries = {
 	type: SelectionCommandType.Series;
-	series: LatexFontSeries;
+	series: FontSeries;
 };
 
 export type SelectionCommandFontShape = {
 	type: SelectionCommandType.Shape;
-	shape: LatexFontShape;
+	shape: FontShape;
 };
 
 export type SelectionCommandFontSize = {
 	type: SelectionCommandType.Size;
-	size: LatexFontMeasurement;
-	baselineSkip: LatexFontMeasurement;
+	size: FontMeasurement;
+	baselineSkip: FontMeasurement;
 };
 
 export type SelectionCommandFontLineSpread = {
 	type: SelectionCommandType.LineSpread;
-	value: LatexFontLineSpread;
+	value: FontLineSpread;
 };
 
-export type LatexFontCurrentValues = Partial<{
-	encoding: LatexFontEncoding;
-	family: LatexFontFamily;
-	series: LatexFontSeries;
-	shape: LatexFontShape;
-	size: LatexFontMeasurement;
-	baselineSkip: LatexFontMeasurement;
-	mathSize: LatexFontMeasurement;
-	mathScriptSize: LatexFontMeasurement;
-	mathScriptScriptSize: LatexFontMeasurement;
+export type FontCurrentValues = Partial<{
+	encoding: FontEncoding;
+	family: FontFamily;
+	series: FontSeries;
+	shape: FontShape;
+	size: FontMeasurement;
+	baselineSkip: FontMeasurement;
+	mathSize: FontMeasurement;
+	mathScriptSize: FontMeasurement;
+	mathScriptScriptSize: FontMeasurement;
 }>;
 
-export type LatexAuthorDefaults = Partial<{
-	serif: LatexFontFamily;
-	sans: LatexFontFamily;
-	monospace: LatexFontFamily;
-	family: LatexFontFamily;
-	series: LatexFontSeries;
-	shape: LatexFontShape;
-	bold: LatexFontSeries;
-	medium: LatexFontSeries;
-	italics: LatexFontShape;
-	oblique: LatexFontShape;
-	smallCaps: LatexFontShape;
-	spacedSmallCaps: LatexFontShape;
-	swash: LatexFontShape;
-	upcase: LatexFontShape;
-	lowercase: LatexFontShape;
-	normal: LatexFont;
+export type AuthorDefaults = Partial<{
+	serif: FontFamily;
+	sans: FontFamily;
+	monospace: FontFamily;
+	family: FontFamily;
+	series: FontSeries;
+	shape: FontShape;
+	bold: FontSeries;
+	medium: FontSeries;
+	italics: FontShape;
+	oblique: FontShape;
+	smallCaps: FontShape;
+	spacedSmallCaps: FontShape;
+	swash: FontShape;
+	upcase: FontShape;
+	lowercase: FontShape;
+	normal: Font;
 }>;
 
 export enum AuthorCommandType {
@@ -257,15 +255,15 @@ export enum AuthorCommandType {
 export type AuthorCommand =
 	| {
 			type: AuthorCommandType.AuthorDefault;
-			value: keyof LatexAuthorDefaults;
+			value: keyof AuthorDefaults;
 	  }
 	| {
 			type: AuthorCommandType.FontSize;
-			value: LatexFontMeasurement;
+			value: FontMeasurement;
 	  };
 
 // Special declarations
-export type DeclareFixedFontCommand = LatexFont & { name: string };
+export type DeclareFixedFontCommand = Font & { name: string };
 export type DeclareTextFontCommand = {
 	name: string;
 	switches: AuthorCommand[];

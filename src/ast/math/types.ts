@@ -1,9 +1,9 @@
 import type {
-	LatexFontEncoding,
-	LatexFontFamily,
-	LatexFontMeasurementValue,
-	LatexFontSeries,
-	LatexFontShape,
+	FontEncoding,
+	FontFamily,
+	FontMeasurementValue,
+	FontSeries,
+	FontShape,
 } from "../fonts/types";
 
 export enum MathFont {
@@ -43,10 +43,10 @@ export enum MathAlphabetDeclarationType {
 }
 
 export type MathAlphabetBase = {
-	encoding: MathAlphabetDeclarationValue<LatexFontEncoding>;
-	family: MathAlphabetDeclarationValue<LatexFontFamily>;
-	series: MathAlphabetDeclarationValue<LatexFontSeries>;
-	shape: MathAlphabetDeclarationValue<LatexFontShape>;
+	encoding: MathAlphabetDeclarationValue<FontEncoding>;
+	family: MathAlphabetDeclarationValue<FontFamily>;
+	series: MathAlphabetDeclarationValue<FontSeries>;
+	shape: MathAlphabetDeclarationValue<FontShape>;
 };
 
 export type MathAlphabetDeclaration = MathAlphabetBase & {
@@ -116,8 +116,8 @@ export type MathRadical = {
 };
 
 export type MathSize = {
-	currentTextSize: LatexFontMeasurementValue;
-	mathTextSize: LatexFontMeasurementValue;
-	scriptSize: LatexFontMeasurementValue;
-	scriptScriptSize: LatexFontMeasurementValue;
+	currentTextSize: FontMeasurementValue;
+	mathTextSize: FontMeasurementValue;
+	scriptSize: FontMeasurementValue;
+	scriptScriptSize: FontMeasurementValue;
 };

@@ -1,19 +1,19 @@
 import { describe, expect, it, test } from "bun:test";
 
 import {
+	CommandArgumentType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	LatexTokenType,
+	TokenType,
 } from "../../../lexer/types";
 import {
 	type AuthorCommand,
 	AuthorCommandType,
+	type AuthorDefaults,
+	FontShapeValue,
+	FontSizeUnit,
 	FontValueType,
-	type LatexAuthorDefaults,
-	LatexFontShapeValue,
-	LatexFontSizeUnit,
-	LatexFontWeight,
-	LatexFontWidth,
+	FontWeight,
+	FontWidth,
 } from "../types";
 import { parseAuthorCommand, setFontDefaults } from "./author";
 
@@ -186,7 +186,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 5, unit: LatexFontSizeUnit.Point },
+					value: { value: 5, unit: FontSizeUnit.Point },
 				},
 			},
 			"tiny",
@@ -196,7 +196,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 7, unit: LatexFontSizeUnit.Point },
+					value: { value: 7, unit: FontSizeUnit.Point },
 				},
 			},
 			"scriptsize",
@@ -206,7 +206,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 8, unit: LatexFontSizeUnit.Point },
+					value: { value: 8, unit: FontSizeUnit.Point },
 				},
 			},
 			"footnotesize",
@@ -216,7 +216,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 10, unit: LatexFontSizeUnit.Point },
+					value: { value: 10, unit: FontSizeUnit.Point },
 				},
 			},
 			"normalsize",
@@ -226,7 +226,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 12, unit: LatexFontSizeUnit.Point },
+					value: { value: 12, unit: FontSizeUnit.Point },
 				},
 			},
 			"large",
@@ -236,7 +236,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 14.4, unit: LatexFontSizeUnit.Point },
+					value: { value: 14.4, unit: FontSizeUnit.Point },
 				},
 			},
 			"Large",
@@ -246,7 +246,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 17.28, unit: LatexFontSizeUnit.Point },
+					value: { value: 17.28, unit: FontSizeUnit.Point },
 				},
 			},
 			"LARGE",
@@ -256,7 +256,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 20.74, unit: LatexFontSizeUnit.Point },
+					value: { value: 20.74, unit: FontSizeUnit.Point },
 				},
 			},
 			"huge",
@@ -266,7 +266,7 @@ describe("parseAuthorCommand", () => {
 				type: AuthorCommandType.FontSize,
 				value: {
 					type: FontValueType.FontValue,
-					value: { value: 24.88, unit: LatexFontSizeUnit.Point },
+					value: { value: 24.88, unit: FontSizeUnit.Point },
 				},
 			},
 			"Huge",
@@ -280,15 +280,15 @@ describe("parseAuthorCommand", () => {
 describe("setFontDefaults", () => {
 	it("should throw an error if the command is not renewcommand", () => {
 		const renewCommand: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\notrenewcommand",
 			name: "notrenewcommand",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\defaultrm",
 							name: "defaultrm",
 							arguments: [],
@@ -296,10 +296,10 @@ describe("setFontDefaults", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "bx",
 							originalLength: 2,
 						},
@@ -312,7 +312,7 @@ describe("setFontDefaults", () => {
 
 	it("should throw an error if the number of arguments is not 2", () => {
 		const renewCommand: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\renewcommand",
 			name: "renewcommand",
 			arguments: [],
@@ -322,25 +322,25 @@ describe("setFontDefaults", () => {
 
 	it("should throw an error if the first argument is not a command", () => {
 		const renewCommand: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\renewcommand",
 			name: "renewcommand",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "bx",
 							originalLength: 2,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\defaultrm",
 							name: "defaultrm",
 							arguments: [],
@@ -356,15 +356,15 @@ describe("setFontDefaults", () => {
 
 	it("should throw an error if the second argument is not a command or argument", () => {
 		const renewCommand: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\renewcommand",
 			name: "renewcommand",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\rmdefault",
 							name: "rmdefault",
 							arguments: [],
@@ -372,10 +372,10 @@ describe("setFontDefaults", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Placeholder,
+							type: TokenType.Placeholder,
 							literal: "#1",
 							content: 1,
 						},
@@ -386,7 +386,7 @@ describe("setFontDefaults", () => {
 		expect(() => setFontDefaults(renewCommand)).toThrow();
 	});
 
-	test.each<[LatexAuthorDefaults, string, string]>([
+	test.each<[AuthorDefaults, string, string]>([
 		[
 			{
 				serif: {
@@ -432,8 +432,8 @@ describe("setFontDefaults", () => {
 				bold: {
 					type: FontValueType.FontValue,
 					value: {
-						width: LatexFontWidth.Expanded,
-						weight: LatexFontWeight.Bold,
+						width: FontWidth.Expanded,
+						weight: FontWeight.Bold,
 					},
 				},
 			},
@@ -445,8 +445,8 @@ describe("setFontDefaults", () => {
 				series: {
 					type: FontValueType.FontValue,
 					value: {
-						width: LatexFontWidth.Expanded,
-						weight: LatexFontWeight.Bold,
+						width: FontWidth.Expanded,
+						weight: FontWeight.Bold,
 					},
 				},
 			},
@@ -458,8 +458,8 @@ describe("setFontDefaults", () => {
 				medium: {
 					type: FontValueType.FontValue,
 					value: {
-						width: LatexFontWidth.Expanded,
-						weight: LatexFontWeight.Bold,
+						width: FontWidth.Expanded,
+						weight: FontWeight.Bold,
 					},
 				},
 			},
@@ -470,7 +470,7 @@ describe("setFontDefaults", () => {
 			{
 				shape: {
 					type: FontValueType.FontValue,
-					value: LatexFontShapeValue.Italic,
+					value: FontShapeValue.Italic,
 				},
 			},
 			"shapedefault",
@@ -480,7 +480,7 @@ describe("setFontDefaults", () => {
 			{
 				italics: {
 					type: FontValueType.FontValue,
-					value: LatexFontShapeValue.Italic,
+					value: FontShapeValue.Italic,
 				},
 			},
 			"itdefault",
@@ -490,7 +490,7 @@ describe("setFontDefaults", () => {
 			{
 				smallCaps: {
 					type: FontValueType.FontValue,
-					value: LatexFontShapeValue.Italic,
+					value: FontShapeValue.Italic,
 				},
 			},
 			"scdefault",
@@ -500,7 +500,7 @@ describe("setFontDefaults", () => {
 			{
 				spacedSmallCaps: {
 					type: FontValueType.FontValue,
-					value: LatexFontShapeValue.Italic,
+					value: FontShapeValue.Italic,
 				},
 			},
 			"sscdefault",
@@ -510,7 +510,7 @@ describe("setFontDefaults", () => {
 			{
 				swash: {
 					type: FontValueType.FontValue,
-					value: LatexFontShapeValue.Italic,
+					value: FontShapeValue.Italic,
 				},
 			},
 			"swdefault",
@@ -520,7 +520,7 @@ describe("setFontDefaults", () => {
 			{
 				oblique: {
 					type: FontValueType.FontValue,
-					value: LatexFontShapeValue.Italic,
+					value: FontShapeValue.Italic,
 				},
 			},
 			"sldefault",
@@ -530,15 +530,15 @@ describe("setFontDefaults", () => {
 		"should return $o given a command name of %s and a value of %s",
 		(want, commandName, value) => {
 			const renewCommand: CommandToken = {
-				type: LatexTokenType.Command,
+				type: TokenType.Command,
 				literal: "\\renewcommand",
 				name: "renewcommand",
 				arguments: [
 					{
-						type: LatexCommandArgumentType.Required,
+						type: CommandArgumentType.Required,
 						content: [
 							{
-								type: LatexTokenType.Command,
+								type: TokenType.Command,
 								literal: `\\${commandName}`,
 								name: `${commandName}`,
 								arguments: [],
@@ -546,10 +546,10 @@ describe("setFontDefaults", () => {
 						],
 					},
 					{
-						type: LatexCommandArgumentType.Required,
+						type: CommandArgumentType.Required,
 						content: [
 							{
-								type: LatexTokenType.Content,
+								type: TokenType.Content,
 								literal: value,
 								originalLength: value.length,
 							},

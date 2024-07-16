@@ -1,13 +1,13 @@
 import {
+	type Argument,
+	CommandArgumentType,
 	type CommandToken,
-	type LatexArgument,
-	LatexCommandArgumentType,
-	type LatexToken,
-	LatexTokenType,
 	type RequiredArgument,
+	type Token,
+	TokenType,
 } from "../../lexer/types";
 import { getRequiredContent, isSimpleMacro } from "../../lexer/utils";
-import type { LatexFontMeasurementValue } from "../fonts/types";
+import type { FontMeasurementValue } from "../fonts/types";
 import { parseFontMeasurement } from "../fonts/utils";
 import { isSymbolFont } from "./selection";
 import {
@@ -22,15 +22,15 @@ import {
 	type SymbolFontWithSlot,
 } from "./types";
 
-export function getMathSymbolType(token?: LatexToken): MathSymbolType | null {
+export function getMathSymbolType(token?: Token): MathSymbolType | null {
 	let symbol: string;
 	if (!token) {
 		return null;
 	}
 
-	if (token.type === LatexTokenType.Content) {
+	if (token.type === TokenType.Content) {
 		symbol = token.literal;
-	} else if (token.type === LatexTokenType.Command && isSimpleMacro(token)) {
+	} else if (token.type === TokenType.Command && isSimpleMacro(token)) {
 		symbol = token.name;
 	} else {
 		return null;
@@ -66,19 +66,19 @@ export function getMathSymbolType(token?: LatexToken): MathSymbolType | null {
 	}
 }
 
-function getMathSymbolName(token?: LatexToken): MathSymbolValue | null {
+function getMathSymbolName(token?: Token): MathSymbolValue | null {
 	if (!token) {
 		return null;
 	}
 
-	if (token.type === LatexTokenType.Command) {
+	if (token.type === TokenType.Command) {
 		return {
 			type: MathSymbolValueType.Command,
 			value: token.name,
 		};
 	}
 
-	if (token.type === LatexTokenType.Content) {
+	if (token.type === TokenType.Content) {
 		const name = token.literal.trim();
 		if (name.length !== 1) {
 			return null;
@@ -94,11 +94,11 @@ function getMathSymbolName(token?: LatexToken): MathSymbolValue | null {
 }
 
 function validateSymbolFontWithSlot(
-	symbolFontToken: LatexToken | undefined,
-	slotToken: LatexToken | undefined,
+	symbolFontToken: Token | undefined,
+	slotToken: Token | undefined,
 	symbolFonts: string[],
 ): SymbolFontWithSlot | null {
-	if (!symbolFontToken || symbolFontToken.type !== LatexTokenType.Content) {
+	if (!symbolFontToken || symbolFontToken.type !== TokenType.Content) {
 		return null;
 	}
 
@@ -107,7 +107,7 @@ function validateSymbolFontWithSlot(
 		return null;
 	}
 
-	if (!slotToken || slotToken.type !== LatexTokenType.Content) {
+	if (!slotToken || slotToken.type !== TokenType.Content) {
 		return null;
 	}
 
@@ -126,8 +126,7 @@ function validateMathSymbol(
 		command.arguments.length !== 4 ||
 		command.arguments.some(
 			(arg) =>
-				arg.type !== LatexCommandArgumentType.Required ||
-				arg.content.length !== 1,
+				arg.type !== CommandArgumentType.Required || arg.content.length !== 1,
 		)
 	) {
 		return null;
@@ -182,8 +181,7 @@ export function declareMathDelimiter(
 		command.arguments.length !== 6 ||
 		command.arguments.some(
 			(arg) =>
-				arg.type !== LatexCommandArgumentType.Required ||
-				arg.content.length !== 1,
+				arg.type !== CommandArgumentType.Required || arg.content.length !== 1,
 		)
 	) {
 		return null;
@@ -242,8 +240,7 @@ export function declareMathRadical(
 		command.arguments.length !== 5 ||
 		command.arguments.some(
 			(arg) =>
-				arg.type !== LatexCommandArgumentType.Required ||
-				arg.content.length !== 1,
+				arg.type !== CommandArgumentType.Required || arg.content.length !== 1,
 		)
 	) {
 		return null;
@@ -278,9 +275,7 @@ export function declareMathRadical(
 	};
 }
 
-function parseMeasurementFromArg(
-	arg?: LatexArgument,
-): LatexFontMeasurementValue | null {
+function parseMeasurementFromArg(arg?: Argument): FontMeasurementValue | null {
 	const currentSize = getRequiredContent(arg);
 	if (!currentSize) {
 		return null;
@@ -294,8 +289,7 @@ export function declareMathSizes(command: CommandToken): MathSize | null {
 		command.arguments.length !== 4 ||
 		command.arguments.some(
 			(arg) =>
-				arg.type !== LatexCommandArgumentType.Required ||
-				arg.content.length !== 1,
+				arg.type !== CommandArgumentType.Required || arg.content.length !== 1,
 		)
 	) {
 		return null;

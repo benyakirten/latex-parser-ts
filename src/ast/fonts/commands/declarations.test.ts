@@ -1,19 +1,19 @@
 import { describe, expect, it } from "bun:test";
 
 import {
+	CommandArgumentType,
 	type CommandToken,
-	LatexCommandArgumentType,
-	LatexTokenType,
+	TokenType,
 } from "../../../lexer/types";
 import {
 	AuthorCommandType,
+	FontEncodingNormalValue,
+	FontEncodingType,
+	FontShapeValue,
+	FontSizeUnit,
 	FontValueType,
-	LatexFontEncodingNormalValue,
-	LatexFontEncodingType,
-	LatexFontShapeValue,
-	LatexFontSizeUnit,
-	LatexFontWeight,
-	LatexFontWidth,
+	FontWeight,
+	FontWidth,
 } from "../types";
 import {
 	parseDeclareFixedFont,
@@ -23,7 +23,7 @@ import {
 describe("parseDeclareFixedFont", () => {
 	it("should throw an error if the command is not named DeclareFixedFont", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareTextFont",
 			name: "DeclareTextFont",
 			arguments: [],
@@ -33,7 +33,7 @@ describe("parseDeclareFixedFont", () => {
 
 	it("should throw an error if the command does not have 6 arguments", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareFixedFont",
 			name: "DeclareFixedFont",
 			arguments: [],
@@ -43,65 +43,65 @@ describe("parseDeclareFixedFont", () => {
 
 	it("should throw an error if the first argument is not a macro", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareFixedFont",
 			name: "DeclareFixedFont",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "name",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "OT1",
 							originalLength: 3,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "cmr",
 							originalLength: 3,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "m",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "n",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "5",
 							originalLength: 1,
 						},
@@ -114,15 +114,15 @@ describe("parseDeclareFixedFont", () => {
 
 	it("should create a fixed font if all the parameters are valid values", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareFixedFont",
 			name: "DeclareFixedFont",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\myfont",
 							name: "myfont",
 							arguments: [],
@@ -130,50 +130,50 @@ describe("parseDeclareFixedFont", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "OT1",
 							originalLength: 3,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "cmr",
 							originalLength: 3,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "m",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "n",
 							originalLength: 1,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "5",
 							originalLength: 1,
 						},
@@ -187,8 +187,8 @@ describe("parseDeclareFixedFont", () => {
 			encoding: {
 				type: FontValueType.FontValue,
 				value: {
-					encoding: LatexFontEncodingNormalValue.KnuthTexText,
-					type: LatexFontEncodingType.Normal,
+					encoding: FontEncodingNormalValue.KnuthTexText,
+					type: FontEncodingType.Normal,
 				},
 			},
 			family: {
@@ -199,18 +199,18 @@ describe("parseDeclareFixedFont", () => {
 			series: {
 				type: FontValueType.FontValue,
 				value: {
-					weight: LatexFontWeight.Medium,
-					width: LatexFontWidth.Medium,
+					weight: FontWeight.Medium,
+					width: FontWidth.Medium,
 				},
 			},
 			shape: {
 				type: FontValueType.FontValue,
-				value: LatexFontShapeValue.Normal,
+				value: FontShapeValue.Normal,
 			},
 			size: {
 				type: FontValueType.FontValue,
 				value: {
-					unit: LatexFontSizeUnit.Point,
+					unit: FontSizeUnit.Point,
 					value: 5,
 				},
 			},
@@ -221,7 +221,7 @@ describe("parseDeclareFixedFont", () => {
 describe("parseDeclareTextFontCommand", () => {
 	it("should throw an error if the command is not named DeclareTextFontCommand", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareFixedFont",
 			name: "DeclareFixedFont",
 			arguments: [],
@@ -231,7 +231,7 @@ describe("parseDeclareTextFontCommand", () => {
 
 	it("should throw an error if the command does not have 2 arguments", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareTextFont",
 			name: "DeclareTextFont",
 			arguments: [],
@@ -241,25 +241,25 @@ describe("parseDeclareTextFontCommand", () => {
 
 	it("should throw an error if the first argument is not a macro", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareTextFont",
 			name: "DeclareTextFont",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "name",
 							originalLength: 4,
 						},
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Content,
+							type: TokenType.Content,
 							literal: "switch1 switch2",
 							originalLength: 16,
 						},
@@ -272,15 +272,15 @@ describe("parseDeclareTextFontCommand", () => {
 
 	it("should throw an error if the second argument contains invalid switches", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareTextFont",
 			name: "DeclareTextFont",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\myfont",
 							name: "myfont",
 							arguments: [],
@@ -288,10 +288,10 @@ describe("parseDeclareTextFontCommand", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\invalidswitch",
 							name: "invalidswitch",
 							arguments: [],
@@ -305,15 +305,15 @@ describe("parseDeclareTextFontCommand", () => {
 
 	it("should parse the command correctly if all arguments are valid", () => {
 		const command: CommandToken = {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: "\\DeclareTextFont",
 			name: "DeclareTextFont",
 			arguments: [
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\myswitch",
 							name: "myswitch",
 							arguments: [],
@@ -321,16 +321,16 @@ describe("parseDeclareTextFontCommand", () => {
 					],
 				},
 				{
-					type: LatexCommandArgumentType.Required,
+					type: CommandArgumentType.Required,
 					content: [
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\normalfont",
 							name: "normalfont",
 							arguments: [],
 						},
 						{
-							type: LatexTokenType.Command,
+							type: TokenType.Command,
 							literal: "\\itshape",
 							name: "itshape",
 							arguments: [],

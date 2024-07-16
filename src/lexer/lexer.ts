@@ -2,17 +2,15 @@ import { clamp } from "../utils";
 import { NoCache } from "./cache";
 import {
 	type AccentToken,
+	type Arguments,
+	type BlockRequiredAccent,
 	type BlockToken,
+	CharType,
+	CommandArgumentType,
 	type CommandToken,
 	type CommentToken,
 	type ContentToken,
 	type LabeledArgContent,
-	LatexAccentType,
-	type LatexArguments,
-	LatexCharType,
-	LatexCommandArgumentType,
-	type LatexToken,
-	LatexTokenType,
 	type LexerCache,
 	MathPosition,
 	type MathToken,
@@ -21,6 +19,9 @@ import {
 	type RequiredArgument,
 	type ScriptToken,
 	ScriptTokenType,
+	type Token,
+	TokenType,
+	type VariableAccent,
 } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
@@ -29,7 +30,7 @@ import {
  *
  * If no cache is provided, it defaults to no caching.
  */
-export class LatexLexer {
+export class Lexer {
 	static readonly REPLACE_ESCAPE_CHARACTER_MAP = {
 		// \ followed by a newline means continue as if the line didn't break
 		"\\#": "@@<!HASH!>",
@@ -44,6 +45,26 @@ export class LatexLexer {
 		"\\~{}": "@@<!TILDE!>",
 	};
 
+	static readonly VARIABLE_ACCENT_CHARACTERS = new Set([
+		"^",
+		"~",
+		"`",
+		"'",
+		'"',
+		"=",
+		".",
+	]);
+
+	static readonly BLOCK_REQUIRED_ACCENT_CHARACTERS = new Set([
+		"H",
+		"c",
+		"b",
+		"d",
+		"u",
+		"v",
+		"t",
+	]);
+
 	private position = 0;
 	private input: string;
 	constructor(
@@ -56,7 +77,7 @@ export class LatexLexer {
 	private escapeInput(input: string): string {
 		let escapedInput = input;
 		for (const [escapedSequence, escapeSequence] of Object.entries(
-			LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
+			Lexer.REPLACE_ESCAPE_CHARACTER_MAP,
 		)) {
 			escapedInput = escapedInput.replaceAll(escapedSequence, escapeSequence);
 		}
@@ -68,7 +89,7 @@ export class LatexLexer {
 	private unescapeContent(input: string): string {
 		let unescapedInput = input;
 		for (const [escapedSequence, escapeSequence] of Object.entries(
-			LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
+			Lexer.REPLACE_ESCAPE_CHARACTER_MAP,
 		)) {
 			unescapedInput = unescapedInput.replaceAll(
 				escapeSequence,
@@ -82,7 +103,7 @@ export class LatexLexer {
 	private deescapeContent(input: string): string {
 		let deescapedInput = input;
 		for (const [escapedSequence, escapeSequence] of Object.entries(
-			LatexLexer.REPLACE_ESCAPE_CHARACTER_MAP,
+			Lexer.REPLACE_ESCAPE_CHARACTER_MAP,
 		)) {
 			deescapedInput = deescapedInput.replaceAll(
 				escapeSequence,
@@ -102,7 +123,7 @@ export class LatexLexer {
 		this.position = clamp(pos, 0, this.input.length);
 	}
 
-	public insert(position: number, value: string): LatexLexer {
+	public insert(position: number, value: string): Lexer {
 		let pos = position;
 		if (pos < 0) {
 			pos = this.input.length + pos;
@@ -122,7 +143,7 @@ export class LatexLexer {
 		return this;
 	}
 
-	public remove(start: number, end: number): LatexLexer {
+	public remove(start: number, end: number): Lexer {
 		let removeStart = start;
 		let removeEnd = end;
 
@@ -165,20 +186,20 @@ export class LatexLexer {
 	private buildContent(startPosition: number): ContentToken {
 		const content = this.readUntil(startPosition, (c) => {
 			return (
-				c === LatexCharType.Backslash ||
-				c === LatexCharType.OpenBrace ||
-				c === LatexCharType.CloseBrace ||
-				c === LatexCharType.Percent ||
-				c === LatexCharType.Dollar ||
-				c === LatexCharType.Ampersand ||
-				c === LatexCharType.Hash ||
-				c === LatexCharType.Underscore ||
-				c === LatexCharType.Caret
+				c === CharType.Backslash ||
+				c === CharType.OpenBrace ||
+				c === CharType.CloseBrace ||
+				c === CharType.Percent ||
+				c === CharType.Dollar ||
+				c === CharType.Ampersand ||
+				c === CharType.Hash ||
+				c === CharType.Underscore ||
+				c === CharType.Caret
 			);
 		});
 
 		return {
-			type: LatexTokenType.Content,
+			type: TokenType.Content,
 			literal: this.unescapeContent(content),
 			originalLength: content.length,
 		};
@@ -186,12 +207,12 @@ export class LatexLexer {
 
 	private buildParagraphMath(
 		startPosition: number,
-		startMathCharacter: LatexCharType.OpenBracket | LatexCharType.OpenParen,
+		startMathCharacter: CharType.OpenBracket | CharType.OpenParen,
 	): MathToken {
 		const endMathCharacter =
-			startMathCharacter === LatexCharType.OpenBracket
-				? LatexCharType.CloseBracket
-				: LatexCharType.CloseParen;
+			startMathCharacter === CharType.OpenBracket
+				? CharType.CloseBracket
+				: CharType.CloseParen;
 
 		const endIndex = this.input.indexOf(`\\${endMathCharacter}`);
 		if (endIndex === -1) {
@@ -200,44 +221,41 @@ export class LatexLexer {
 
 		const content = this.input.slice(startPosition, endIndex);
 		const mathPosition =
-			endMathCharacter === LatexCharType.CloseBracket
+			endMathCharacter === CharType.CloseBracket
 				? MathPosition.Centered
 				: MathPosition.Block;
 
-		const lexer = new LatexLexer(content);
+		const lexer = new Lexer(content);
 
 		return {
-			type: LatexTokenType.Math,
+			type: TokenType.Math,
 			literal: `\\${startMathCharacter}${content}\\${endMathCharacter}`,
 			content: lexer.readToEnd(),
 			position: mathPosition,
 		};
 	}
 
-	private buildAccent(
+	private buildVariableAccent(
 		startPosition: number,
-		accentChar: LatexCharType.Tilde | LatexCharType.Caret,
+		accentChar: VariableAccent,
 	): AccentToken {
 		const token = this.buildModifiableToken(startPosition);
 		return {
-			type: LatexTokenType.Accent,
+			type: TokenType.Accent,
 			literal: `\\${accentChar}${token.literal}`,
-			detail:
-				accentChar === LatexCharType.Tilde
-					? LatexAccentType.Tilde
-					: LatexAccentType.Circumflex,
+			detail: accentChar,
 			content: token,
 		};
 	}
 
 	private getSectionWithPossibleNesting(
 		startPosition: number,
-		endCharacter: LatexCharType,
+		endCharacter: CharType,
 		mustClose = false,
 	): string {
 		let position = startPosition;
 		let char = this.readChar(position);
-		const stack: LatexCommandArgumentType[] = [];
+		const stack: CommandArgumentType[] = [];
 
 		let arg = "";
 		while (true) {
@@ -258,18 +276,18 @@ export class LatexLexer {
 			arg += char;
 			position++;
 
-			if (char === LatexCharType.OpenBrace) {
-				stack.push(LatexCommandArgumentType.Required);
-			} else if (char === LatexCharType.OpenBracket) {
-				stack.push(LatexCommandArgumentType.Optional);
-			} else if (char === LatexCharType.CloseBrace) {
-				if (stack[stack.length - 1] !== LatexCommandArgumentType.Required) {
+			if (char === CharType.OpenBrace) {
+				stack.push(CommandArgumentType.Required);
+			} else if (char === CharType.OpenBracket) {
+				stack.push(CommandArgumentType.Optional);
+			} else if (char === CharType.CloseBrace) {
+				if (stack[stack.length - 1] !== CommandArgumentType.Required) {
 					throw new Error("Mismatched braces");
 				}
 
 				stack.pop();
-			} else if (char === LatexCharType.CloseBracket) {
-				if (stack[stack.length - 1] !== LatexCommandArgumentType.Optional) {
+			} else if (char === CharType.CloseBracket) {
+				if (stack[stack.length - 1] !== CommandArgumentType.Optional) {
 					throw new Error("Mismatched braces");
 				}
 
@@ -290,39 +308,39 @@ export class LatexLexer {
 			throw new Error("Command never closed");
 		}
 
-		const args: LatexArguments = [];
+		const args: Arguments = [];
 		let position = startPosition + name.length;
 
 		while (true) {
 			const char = this.readChar(position);
 
-			if (char === LatexCharType.OpenBrace) {
+			if (char === CharType.OpenBrace) {
 				// getSectionWithPossibleNesting won't include the opening or closing braces
 				const content = this.getSectionWithPossibleNesting(
 					position + 1,
-					LatexCharType.CloseBrace,
+					CharType.CloseBrace,
 				);
 				const requiredArg = this.buildRequiredArg(content);
 
 				args.push(requiredArg);
 				position += content.length + 2;
-				if (this.readChar(position - 1) !== LatexCharType.CloseBrace) {
+				if (this.readChar(position - 1) !== CharType.CloseBrace) {
 					throw new Error("Required argument never closed");
 				}
 				continue;
 			}
 
-			if (char === LatexCharType.OpenBracket) {
+			if (char === CharType.OpenBracket) {
 				const content = this.getSectionWithPossibleNesting(
 					position + 1,
-					LatexCharType.CloseBracket,
+					CharType.CloseBracket,
 				);
 				const optionalArg = this.buildOptionalArg(content);
 
 				args.push(optionalArg);
 				position += content.length + 2;
 
-				if (this.readChar(position - 1) !== LatexCharType.CloseBracket) {
+				if (this.readChar(position - 1) !== CharType.CloseBracket) {
 					throw new Error("Optional argument never closed");
 				}
 				continue;
@@ -334,10 +352,38 @@ export class LatexLexer {
 		const literal = this.input.slice(startPosition, position);
 
 		return {
-			type: LatexTokenType.Command,
+			type: TokenType.Command,
 			literal: `\\${literal}`,
 			arguments: args,
 			name,
+		};
+	}
+
+	private isBracesRequiredAccent(
+		nextChar: string,
+		charAfter: string | undefined,
+	): nextChar is BlockRequiredAccent {
+		if (charAfter !== CharType.OpenBrace) {
+			return false;
+		}
+
+		return Lexer.BLOCK_REQUIRED_ACCENT_CHARACTERS.has(nextChar);
+	}
+
+	private isVariableAccent(nextChar: string): nextChar is VariableAccent {
+		return Lexer.VARIABLE_ACCENT_CHARACTERS.has(nextChar);
+	}
+
+	private buildBracketRequiredAccent(
+		startPosition: number,
+		accentChar: BlockRequiredAccent,
+	): AccentToken {
+		const token = this.buildBlock(startPosition + 1);
+		return {
+			type: TokenType.Accent,
+			literal: `\\${accentChar}${token.literal}`,
+			detail: accentChar,
+			content: token,
 		};
 	}
 
@@ -349,15 +395,18 @@ export class LatexLexer {
 			throw new Error("Command never closed");
 		}
 
-		if (
-			nextChar === LatexCharType.OpenBracket ||
-			nextChar === LatexCharType.OpenParen
-		) {
+		if (nextChar === CharType.OpenBracket || nextChar === CharType.OpenParen) {
 			return this.buildParagraphMath(startPosition + 1, nextChar);
 		}
 
-		if (nextChar === LatexCharType.Tilde || nextChar === LatexCharType.Caret) {
-			return this.buildAccent(startPosition + 1, nextChar);
+		if (this.isVariableAccent(nextChar)) {
+			return this.buildVariableAccent(startPosition + 1, nextChar);
+		}
+
+		if (
+			this.isBracesRequiredAccent(nextChar, this.readChar(startPosition + 1))
+		) {
+			return this.buildBracketRequiredAccent(startPosition + 1, nextChar);
 		}
 
 		return this.createCommandToken(startPosition);
@@ -368,7 +417,7 @@ export class LatexLexer {
 	}
 
 	private assertOptionalArgTokenOption(
-		lexer: LatexLexer,
+		lexer: Lexer,
 	): CommandToken | ContentToken {
 		const tokens = lexer.readToEnd();
 		if (tokens.length !== 1) {
@@ -377,10 +426,7 @@ export class LatexLexer {
 
 		const [token] = tokens;
 
-		if (
-			token.type === LatexTokenType.Command ||
-			token.type === LatexTokenType.Content
-		) {
+		if (token.type === TokenType.Command || token.type === TokenType.Content) {
 			return token;
 		}
 
@@ -390,10 +436,10 @@ export class LatexLexer {
 	}
 
 	private buildRequiredArg(content: string): RequiredArgument {
-		const lexer = new LatexLexer(content);
+		const lexer = new Lexer(content);
 
 		return {
-			type: LatexCommandArgumentType.Required,
+			type: CommandArgumentType.Required,
 			content: lexer.readToEnd(),
 		};
 	}
@@ -411,24 +457,22 @@ export class LatexLexer {
 
 		const [k, v] = kv;
 
-		const lexer = new LatexLexer(v);
+		const lexer = new Lexer(v);
 		const arg = this.assertOptionalArgTokenOption(lexer);
 		return { key: k.trimStart(), value: [arg] };
 	}
 
-	private getOptionalArguments(
-		tokens: LatexToken[],
-	): OptionalArgument["content"] {
+	private getOptionalArguments(tokens: Token[]): OptionalArgument["content"] {
 		// TODO: Refactor this - it's a mess right now
 		if (tokens.length === 1) {
 			const [token] = tokens;
 
-			// A singular command - we have one LatexToken
-			if (token.type === LatexTokenType.Command) {
+			// A singular command - we have one Token
+			if (token.type === TokenType.Command) {
 				return token;
 			}
 
-			if (token.type === LatexTokenType.Content) {
+			if (token.type === TokenType.Content) {
 				// We have all labeled arguments without commands
 				if (token.literal.includes("=")) {
 					const labeledArgs: LabeledArgContent[] = [];
@@ -456,13 +500,13 @@ export class LatexLexer {
 		// \\command3[a=b,b=\\arg1{%\nCool Th_in^g: #1}[a=^7,b=c,d=e],c=d]
 		const labeledArgs: LabeledArgContent[] = [];
 		let key = "";
-		let value: LatexToken[] = [];
+		let value: Token[] = [];
 		for (const token of tokens) {
 			// If we get a content section that starts with a comma
 			// then we have
 			if (
-				token.type === LatexTokenType.Content &&
-				token.literal.startsWith(LatexCharType.Comma)
+				token.type === TokenType.Content &&
+				token.literal.startsWith(CharType.Comma)
 			) {
 				const arg: LabeledArgContent = { key, value };
 				labeledArgs.push(arg);
@@ -490,13 +534,13 @@ export class LatexLexer {
 			}
 
 			if (
-				token.type === LatexTokenType.Content &&
-				token.literal.includes(LatexCharType.Comma) &&
+				token.type === TokenType.Content &&
+				token.literal.includes(CharType.Comma) &&
 				key !== ""
 			) {
 				const [v] = token.literal.split(",");
 				const vToken: ContentToken = {
-					type: LatexTokenType.Content,
+					type: TokenType.Content,
 					literal: v,
 					originalLength: v.length,
 				};
@@ -513,7 +557,7 @@ export class LatexLexer {
 			}
 
 			if (key === "") {
-				if (token.type !== LatexTokenType.Content) {
+				if (token.type !== TokenType.Content) {
 					throw new Error(
 						`Expected to receive an alphanumeric key name, instead got ${token}`,
 					);
@@ -552,11 +596,11 @@ export class LatexLexer {
 	}
 
 	private buildOptionalArg(content: string): OptionalArgument {
-		const tokens = new LatexLexer(content).readToEnd();
+		const tokens = new Lexer(content).readToEnd();
 		const args = this.getOptionalArguments(tokens);
 
 		return {
-			type: LatexCommandArgumentType.Optional,
+			type: CommandArgumentType.Optional,
 			content: args,
 		};
 	}
@@ -564,12 +608,12 @@ export class LatexLexer {
 	private buildBlock(startPosition: number): BlockToken {
 		const content = this.getSectionWithPossibleNesting(
 			startPosition,
-			LatexCharType.CloseBrace,
+			CharType.CloseBrace,
 			true,
 		);
-		const lexer = new LatexLexer(content);
+		const lexer = new Lexer(content);
 		return {
-			type: LatexTokenType.Block,
+			type: TokenType.Block,
 			literal: `{${content}}`,
 			content: lexer.readToEnd(),
 		};
@@ -578,14 +622,14 @@ export class LatexLexer {
 	private buildComment(startPosition: number): CommentToken {
 		const content = this.readUntil(
 			startPosition,
-			(c) => c === LatexCharType.Newline,
+			(c) => c === CharType.Newline,
 		);
 		let literal = content;
 		if (this.readChar(startPosition + content.length)) {
 			literal += "\n";
 		}
 		return {
-			type: LatexTokenType.Comment,
+			type: TokenType.Comment,
 			literal: `%${literal}`,
 			content: this.deescapeContent(content),
 		};
@@ -602,7 +646,7 @@ export class LatexLexer {
 		}
 
 		return {
-			type: LatexTokenType.Placeholder,
+			type: TokenType.Placeholder,
 			literal: `#${parsedContent}`,
 			content: parsedContent,
 		};
@@ -613,9 +657,9 @@ export class LatexLexer {
 		if (this.readChar(startPosition + content.length) !== "$") {
 			throw new Error("Inline math block not closed");
 		}
-		const lexer = new LatexLexer(content);
+		const lexer = new Lexer(content);
 		return {
-			type: LatexTokenType.Math,
+			type: TokenType.Math,
 			literal: `$${content}$`,
 			content: lexer.readToEnd(),
 			position: MathPosition.Inline,
@@ -636,19 +680,19 @@ export class LatexLexer {
 
 		if (/\w/.test(char)) {
 			return {
-				type: LatexTokenType.Content,
+				type: TokenType.Content,
 				literal: char,
 				originalLength: 1,
 			};
 		}
 
-		if (char === LatexCharType.OpenBrace) {
+		if (char === CharType.OpenBrace) {
 			return this.buildBlock(startPosition + 1);
 		}
 
-		if (char === LatexCharType.Backslash) {
+		if (char === CharType.Backslash) {
 			const command = this.buildCommand(startPosition + 1);
-			if (command.type !== LatexTokenType.Command) {
+			if (command.type !== TokenType.Command) {
 				throw err;
 			}
 			return command;
@@ -659,21 +703,19 @@ export class LatexLexer {
 
 	private buildScript(
 		startPosition: number,
-		char: LatexCharType.Caret | LatexCharType.Underscore,
+		char: CharType.Caret | CharType.Underscore,
 	): ScriptToken {
 		const token = this.buildModifiableToken(startPosition);
 		return {
-			type: LatexTokenType.Script,
+			type: TokenType.Script,
 			detail:
-				char === LatexCharType.Caret
-					? ScriptTokenType.Super
-					: ScriptTokenType.Sub,
+				char === CharType.Caret ? ScriptTokenType.Super : ScriptTokenType.Sub,
 			literal: `${char}${token.literal}`,
 			content: token,
 		};
 	}
 
-	public peek(advance = 0): LatexToken | null {
+	public peek(advance = 0): Token | null {
 		const position = this.position + advance;
 		const char = this.input.at(position);
 		if (!char) {
@@ -685,36 +727,36 @@ export class LatexLexer {
 			return cachedItem;
 		}
 
-		let token: LatexToken;
+		let token: Token;
 		switch (char) {
-			case LatexCharType.CloseBrace:
-			case LatexCharType.CloseBracket:
+			case CharType.CloseBrace:
+			case CharType.CloseBracket:
 				throw new Error(`Could not detect opening character matching ${char}`);
-			case LatexCharType.OpenBrace:
+			case CharType.OpenBrace:
 				token = this.buildBlock(position + 1);
 				break;
-			case LatexCharType.Backslash:
+			case CharType.Backslash:
 				token = this.buildCommand(position + 1);
 				break;
-			case LatexCharType.Caret:
+			case CharType.Caret:
 				token = this.buildScript(position + 1, char);
 				break;
-			case LatexCharType.Underscore:
+			case CharType.Underscore:
 				token = this.buildScript(position + 1, char);
 				break;
-			case LatexCharType.Ampersand:
+			case CharType.Ampersand:
 				token = {
-					type: LatexTokenType.ColumnAlign,
+					type: TokenType.ColumnAlign,
 					literal: char,
 				};
 				break;
-			case LatexCharType.Percent:
+			case CharType.Percent:
 				token = this.buildComment(position + 1);
 				break;
-			case LatexCharType.Hash:
+			case CharType.Hash:
 				token = this.buildPlaceholder(position + 1);
 				break;
-			case LatexCharType.Dollar:
+			case CharType.Dollar:
 				token = this.buildInlineMath(position + 1);
 				break;
 			default:
@@ -726,13 +768,13 @@ export class LatexLexer {
 		return token;
 	}
 
-	public nextToken(): LatexToken | null {
+	public nextToken(): Token | null {
 		const token = this.peek();
 		if (!token) {
 			return null;
 		}
 
-		if (token.type === LatexTokenType.Content) {
+		if (token.type === TokenType.Content) {
 			this.position += token.originalLength;
 		} else {
 			this.position += token.literal.length;
@@ -741,7 +783,7 @@ export class LatexLexer {
 		return token;
 	}
 
-	public next(): IteratorResult<LatexToken> {
+	public next(): IteratorResult<Token> {
 		const token = this.nextToken();
 		if (!token) {
 			return { done: true, value: token };
@@ -757,7 +799,7 @@ export class LatexLexer {
 	/**
 	 * Reads through the whole iterator from the beginning.
 	 */
-	public readToEnd(): LatexToken[] {
+	public readToEnd(): Token[] {
 		this.seek(0);
 		return [...this];
 	}

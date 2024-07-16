@@ -1,4 +1,4 @@
-import type { LatexToken, LexerCache } from "./types";
+import type { LexerCache, Token } from "./types";
 
 /**
  * A simple caching behavior that stores by their position.
@@ -6,9 +6,9 @@ import type { LatexToken, LexerCache } from "./types";
  * tests to see where the breakpoint is.
  */
 export class SimpleCache implements LexerCache {
-	private cache: Map<number, LatexToken>;
+	private cache: Map<number, Token>;
 
-	constructor(cache?: Map<number, LatexToken>) {
+	constructor(cache?: Map<number, Token>) {
 		this.cache = cache ?? new Map();
 	}
 
@@ -26,14 +26,14 @@ export class SimpleCache implements LexerCache {
 		return this;
 	}
 
-	public add(position: number, token: LatexToken): LexerCache {
+	public add(position: number, token: Token): LexerCache {
 		this.cache.set(position, token);
 		return this;
 	}
 
-	public insert(position: number, tokens: LatexToken[]): LexerCache {
+	public insert(position: number, tokens: Token[]): LexerCache {
 		let offset = 0;
-		const movedEntries: [number, LatexToken][] = [];
+		const movedEntries: [number, Token][] = [];
 
 		for (const [p, t] of this.cache.entries()) {
 			if (p >= position) {
@@ -67,7 +67,7 @@ export class SimpleCache implements LexerCache {
 
 		// If we removed 2-10, we want to shift item in slot 11 to 2, which is 10 - 2 + 1
 		const offset = endPosition - startPosition + 1;
-		const itemsToShift: [number, LatexToken][] = [];
+		const itemsToShift: [number, Token][] = [];
 		for (const [p, t] of this.cache.entries()) {
 			if (p > endPosition) {
 				// Store the items to shift so we don't mutate the map while iterating through it (quirk of JavaScript).
@@ -85,7 +85,7 @@ export class SimpleCache implements LexerCache {
 		return this;
 	}
 
-	public get(position: number): LatexToken | null {
+	public get(position: number): Token | null {
 		return this.cache.get(position) ?? null;
 	}
 }
@@ -103,7 +103,7 @@ export class NoCache implements LexerCache {
 	remove(): LexerCache {
 		return this;
 	}
-	get(): LatexToken | null {
+	get(): Token | null {
 		return null;
 	}
 }

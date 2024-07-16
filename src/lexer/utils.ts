@@ -1,26 +1,26 @@
 import {
+	type Argument,
+	CommandArgumentType,
 	type CommandToken,
-	type LatexArgument,
-	LatexCommandArgumentType,
-	type LatexToken,
-	LatexTokenType,
 	type SimpleMacro,
+	type Token,
+	TokenType,
 } from "./types";
 
 /**
  * Checks if a given token is a command if that command is a simple macro.
  */
-export function isSimpleMacro(token: LatexToken): token is SimpleMacro {
-	return token.type === LatexTokenType.Command && token.arguments.length === 0;
+export function isSimpleMacro(token: Token): token is SimpleMacro {
+	return token.type === TokenType.Command && token.arguments.length === 0;
 }
 
 /**
  * Verifies that an argument is required, has one content item and then returns the content.
  */
-export function getRequiredContentItem(arg?: LatexArgument): LatexToken | null {
+export function getRequiredContentItem(arg?: Argument): Token | null {
 	if (
 		!arg ||
-		arg.type !== LatexCommandArgumentType.Required ||
+		arg.type !== CommandArgumentType.Required ||
 		arg.content.length !== 1
 	) {
 		return null;
@@ -32,9 +32,7 @@ export function getRequiredContentItem(arg?: LatexArgument): LatexToken | null {
 /**
  * Verifies that an argument is required and contains a simple macro and returns the macro.
  */
-export function getRequiredSimpleMacro(
-	arg?: LatexArgument,
-): CommandToken | null {
+export function getRequiredSimpleMacro(arg?: Argument): CommandToken | null {
 	const token = getRequiredContentItem(arg);
 	if (!token || !isSimpleMacro(token)) {
 		return null;
@@ -46,9 +44,9 @@ export function getRequiredSimpleMacro(
 /**
  * Verifies that an argument is required and contains content and returns the content's literal.
  */
-export function getRequiredContent(arg?: LatexArgument): string | null {
+export function getRequiredContent(arg?: Argument): string | null {
 	const token = getRequiredContentItem(arg);
-	if (!token || token.type !== LatexTokenType.Content) {
+	if (!token || token.type !== TokenType.Content) {
 		return null;
 	}
 

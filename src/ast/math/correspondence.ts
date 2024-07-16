@@ -1,20 +1,20 @@
 import {
+	type Font,
+	FontEncodingNormalValue,
+	FontEncodingType,
+	FontShapeValue,
 	FontValueType,
-	type LatexFont,
-	LatexFontEncodingNormalValue,
-	LatexFontEncodingType,
-	LatexFontShapeValue,
-	LatexFontWeight,
-	LatexFontWidth,
+	FontWeight,
+	FontWidth,
 } from "../fonts/types";
 import { MathFont, MathSymbolFont } from "./types";
 
-const mathNormalCorrespondence: LatexFont = {
+const mathNormalCorrespondence: Font = {
 	encoding: {
 		type: FontValueType.FontValue,
 		value: {
-			type: LatexFontEncodingType.Normal,
-			encoding: LatexFontEncodingNormalValue.MathItalic,
+			type: FontEncodingType.Normal,
+			encoding: FontEncodingNormalValue.MathItalic,
 		},
 	},
 	family: {
@@ -24,22 +24,22 @@ const mathNormalCorrespondence: LatexFont = {
 	series: {
 		type: FontValueType.FontValue,
 		value: {
-			weight: LatexFontWeight.Medium,
-			width: LatexFontWidth.Medium,
+			weight: FontWeight.Medium,
+			width: FontWidth.Medium,
 		},
 	},
 	shape: {
 		type: FontValueType.FontValue,
-		value: LatexFontShapeValue.Italic,
+		value: FontShapeValue.Italic,
 	},
 };
 
-const mathSerifCorrespondence: LatexFont = {
+const mathSerifCorrespondence: Font = {
 	encoding: {
 		type: FontValueType.FontValue,
 		value: {
-			type: LatexFontEncodingType.Normal,
-			encoding: LatexFontEncodingNormalValue.KnuthTexText,
+			type: FontEncodingType.Normal,
+			encoding: FontEncodingNormalValue.KnuthTexText,
 		},
 	},
 	family: {
@@ -49,22 +49,22 @@ const mathSerifCorrespondence: LatexFont = {
 	series: {
 		type: FontValueType.FontValue,
 		value: {
-			weight: LatexFontWeight.Medium,
-			width: LatexFontWidth.Medium,
+			weight: FontWeight.Medium,
+			width: FontWidth.Medium,
 		},
 	},
 	shape: {
 		type: FontValueType.FontValue,
-		value: LatexFontShapeValue.Normal,
+		value: FontShapeValue.Normal,
 	},
 };
 
-const mathCalligraphicSymbolsCorrespondence: LatexFont = {
+const mathCalligraphicSymbolsCorrespondence: Font = {
 	encoding: {
 		type: FontValueType.FontValue,
 		value: {
-			type: LatexFontEncodingType.Normal,
-			encoding: LatexFontEncodingNormalValue.MathSymbols,
+			type: FontEncodingType.Normal,
+			encoding: FontEncodingNormalValue.MathSymbols,
 		},
 	},
 	family: {
@@ -74,22 +74,22 @@ const mathCalligraphicSymbolsCorrespondence: LatexFont = {
 	series: {
 		type: FontValueType.FontValue,
 		value: {
-			weight: LatexFontWeight.Medium,
-			width: LatexFontWidth.Medium,
+			weight: FontWeight.Medium,
+			width: FontWidth.Medium,
 		},
 	},
 	shape: {
 		type: FontValueType.FontValue,
-		value: LatexFontShapeValue.Normal,
+		value: FontShapeValue.Normal,
 	},
 };
 
-const mathCalligraphicLargeSymbolsCorrespondence: LatexFont = {
+const mathCalligraphicLargeSymbolsCorrespondence: Font = {
 	encoding: {
 		type: FontValueType.FontValue,
 		value: {
-			type: LatexFontEncodingType.Normal,
-			encoding: LatexFontEncodingNormalValue.MathLargeSymbols,
+			type: FontEncodingType.Normal,
+			encoding: FontEncodingNormalValue.MathLargeSymbols,
 		},
 	},
 	family: {
@@ -99,22 +99,22 @@ const mathCalligraphicLargeSymbolsCorrespondence: LatexFont = {
 	series: {
 		type: FontValueType.FontValue,
 		value: {
-			weight: LatexFontWeight.Medium,
-			width: LatexFontWidth.Medium,
+			weight: FontWeight.Medium,
+			width: FontWidth.Medium,
 		},
 	},
 	shape: {
 		type: FontValueType.FontValue,
-		value: LatexFontShapeValue.Normal,
+		value: FontShapeValue.Normal,
 	},
 };
 
-const mathBoldFontCorrespondence: LatexFont = {
+const mathBoldFontCorrespondence: Font = {
 	encoding: {
 		type: FontValueType.FontValue,
 		value: {
-			type: LatexFontEncodingType.Normal,
-			encoding: LatexFontEncodingNormalValue.KnuthTexText,
+			type: FontEncodingType.Normal,
+			encoding: FontEncodingNormalValue.KnuthTexText,
 		},
 	},
 	family: {
@@ -124,22 +124,22 @@ const mathBoldFontCorrespondence: LatexFont = {
 	series: {
 		type: FontValueType.FontValue,
 		value: {
-			weight: LatexFontWeight.Bold,
-			width: LatexFontWidth.Expanded,
+			weight: FontWeight.Bold,
+			width: FontWidth.Expanded,
 		},
 	},
 	shape: {
 		type: FontValueType.FontValue,
-		value: LatexFontShapeValue.Normal,
+		value: FontShapeValue.Normal,
 	},
 };
 
-const mathSansSerifCorrespondence: LatexFont = {
+const mathSansSerifCorrespondence: Font = {
 	encoding: {
 		type: FontValueType.FontValue,
 		value: {
-			type: LatexFontEncodingType.Normal,
-			encoding: LatexFontEncodingNormalValue.KnuthTexText,
+			type: FontEncodingType.Normal,
+			encoding: FontEncodingNormalValue.KnuthTexText,
 		},
 	},
 	family: {
@@ -149,22 +149,22 @@ const mathSansSerifCorrespondence: LatexFont = {
 	series: {
 		type: FontValueType.FontValue,
 		value: {
-			weight: LatexFontWeight.Medium,
-			width: LatexFontWidth.Medium,
+			weight: FontWeight.Medium,
+			width: FontWidth.Medium,
 		},
 	},
 	shape: {
 		type: FontValueType.FontValue,
-		value: LatexFontShapeValue.Normal,
+		value: FontShapeValue.Normal,
 	},
 };
 
-const mathItalicsCorrespondence: LatexFont = {
+const mathItalicsCorrespondence: Font = {
 	encoding: {
 		type: FontValueType.FontValue,
 		value: {
-			type: LatexFontEncodingType.Normal,
-			encoding: LatexFontEncodingNormalValue.KnuthTexText,
+			type: FontEncodingType.Normal,
+			encoding: FontEncodingNormalValue.KnuthTexText,
 		},
 	},
 	family: {
@@ -174,22 +174,22 @@ const mathItalicsCorrespondence: LatexFont = {
 	series: {
 		type: FontValueType.FontValue,
 		value: {
-			weight: LatexFontWeight.Medium,
-			width: LatexFontWidth.Medium,
+			weight: FontWeight.Medium,
+			width: FontWidth.Medium,
 		},
 	},
 	shape: {
 		type: FontValueType.FontValue,
-		value: LatexFontShapeValue.Italic,
+		value: FontShapeValue.Italic,
 	},
 };
 
-const mathTypewriterCorrespondence: LatexFont = {
+const mathTypewriterCorrespondence: Font = {
 	encoding: {
 		type: FontValueType.FontValue,
 		value: {
-			type: LatexFontEncodingType.Normal,
-			encoding: LatexFontEncodingNormalValue.KnuthTexText,
+			type: FontEncodingType.Normal,
+			encoding: FontEncodingNormalValue.KnuthTexText,
 		},
 	},
 	family: {
@@ -199,13 +199,13 @@ const mathTypewriterCorrespondence: LatexFont = {
 	series: {
 		type: FontValueType.FontValue,
 		value: {
-			weight: LatexFontWeight.Medium,
-			width: LatexFontWidth.Medium,
+			weight: FontWeight.Medium,
+			width: FontWidth.Medium,
 		},
 	},
 	shape: {
 		type: FontValueType.FontValue,
-		value: LatexFontShapeValue.Normal,
+		value: FontShapeValue.Normal,
 	},
 };
 
@@ -223,7 +223,7 @@ export const fontCorrespondence = {
 export function getMathCorrespondenceFont(
 	name: MathFont,
 	isLargeSymbols = false,
-): LatexFont | null {
+): Font | null {
 	switch (name) {
 		case MathFont.Normal:
 			return fontCorrespondence.normal;
@@ -248,7 +248,7 @@ export function getMathCorrespondenceFont(
 
 export function getMathSymbolsCorrespondenceFont(
 	name: MathSymbolFont,
-): LatexFont | null {
+): Font | null {
 	switch (name) {
 		case MathSymbolFont.Letters:
 			return fontCorrespondence.normal;
