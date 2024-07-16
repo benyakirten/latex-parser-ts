@@ -12,8 +12,8 @@ export type LatexToken =
 
 export type AccentToken = {
 	type: LatexTokenType.Accent;
-	literal: `\\${"^" | "~"}${string}`;
-	detail: LatexAccentType;
+	literal: `\\${AccentType}${string}`;
+	detail: AccentType;
 	content: LatexToken;
 };
 
@@ -146,9 +146,31 @@ export enum LatexCharType {
 	Comma = ",",
 }
 
-export enum LatexAccentType {
+/**
+ * Accents contain a backslash then an accent character, as shown in the LatexAccentType enum.
+ * For accents that are a non-alphabetic character, the account can either be followed by a single character
+ * or a group of characters enclosed in braces. For accents that are alphabetic characters, the accent must
+ * be followed by a group of characters (or a single character) enclosed in braces.
+ */
+export type AccentType = VariableAccent | BraceRequiredAccent;
+export enum VariableAccent {
 	Circumflex = "\\^",
 	Tilde = "\\~",
+	Grave = "\\`",
+	Acute = "\\'",
+	Diaresis = '\\"',
+	Macron = "\\=",
+	OverDot = "\\.",
+}
+
+export enum BraceRequiredAccent {
+	HungarianUmlaut = "\\H",
+	Cedilla = "\\c",
+	UnderBar = "\\b",
+	UnderDot = "\\d",
+	Breve = "\\u",
+	OverVector = "\\v",
+	Tie = "\\t",
 }
 
 export interface LexerCache {

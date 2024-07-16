@@ -3,11 +3,11 @@ import { NoCache } from "./cache";
 import {
 	type AccentToken,
 	type BlockToken,
+	type BraceRequiredAccent,
 	type CommandToken,
 	type CommentToken,
 	type ContentToken,
 	type LabeledArgContent,
-	LatexAccentType,
 	type LatexArguments,
 	LatexCharType,
 	LatexCommandArgumentType,
@@ -21,6 +21,7 @@ import {
 	type RequiredArgument,
 	type ScriptToken,
 	ScriptTokenType,
+	type VariableAccent,
 } from "./types";
 /**
  * A lexer that will read a latex file and return a series of tokens.
@@ -43,6 +44,26 @@ export class LatexLexer {
 		"\\^{}": "@@<!CARET!>",
 		"\\~{}": "@@<!TILDE!>",
 	};
+
+	static readonly VARIABLE_ACCENT_CHARACTERS = new Set([
+		"^",
+		"~",
+		"`",
+		"'",
+		'"',
+		"=",
+		".",
+	]);
+
+	static readonly BRACES_REQUIRED_ACCENT_CHARACTERS = new Set([
+		"H",
+		"c",
+		"b",
+		"d",
+		"u",
+		"v",
+		"t",
+	]);
 
 	private position = 0;
 	private input: string;
@@ -214,18 +235,15 @@ export class LatexLexer {
 		};
 	}
 
-	private buildAccent(
+	private buildVariableAccent(
 		startPosition: number,
-		accentChar: LatexCharType.Tilde | LatexCharType.Caret,
+		accentChar: VariableAccent,
 	): AccentToken {
 		const token = this.buildModifiableToken(startPosition);
 		return {
 			type: LatexTokenType.Accent,
 			literal: `\\${accentChar}${token.literal}`,
-			detail:
-				accentChar === LatexCharType.Tilde
-					? LatexAccentType.Tilde
-					: LatexAccentType.Circumflex,
+			detail: accentChar,
 			content: token,
 		};
 	}
@@ -341,6 +359,34 @@ export class LatexLexer {
 		};
 	}
 
+	private isBracesRequiredAccent(
+		nextChar: string,
+		charAfter: string | undefined,
+	): nextChar is BraceRequiredAccent {
+		if (charAfter !== LatexCharType.OpenBrace) {
+			return false;
+		}
+
+		return LatexLexer.BRACES_REQUIRED_ACCENT_CHARACTERS.has(nextChar);
+	}
+
+	private isVariableAccent(nextChar: string): nextChar is VariableAccent {
+		return LatexLexer.VARIABLE_ACCENT_CHARACTERS.has(nextChar);
+	}
+
+	private buildBracketRequiredAccent(
+		startPosition: number,
+		accentChar: BraceRequiredAccent,
+	): AccentToken {
+		const token = this.buildBlock(startPosition + 1);
+		return {
+			type: LatexTokenType.Accent,
+			literal: `\\${accentChar}${token.literal}`,
+			detail: accentChar,
+			content: token,
+		};
+	}
+
 	private buildCommand(
 		startPosition: number,
 	): CommandToken | ContentToken | MathToken | AccentToken {
@@ -356,8 +402,14 @@ export class LatexLexer {
 			return this.buildParagraphMath(startPosition + 1, nextChar);
 		}
 
-		if (nextChar === LatexCharType.Tilde || nextChar === LatexCharType.Caret) {
-			return this.buildAccent(startPosition + 1, nextChar);
+		if (this.isVariableAccent(nextChar)) {
+			return this.buildVariableAccent(startPosition + 1, nextChar);
+		}
+
+		if (
+			this.isBracesRequiredAccent(nextChar, this.readChar(startPosition + 1))
+		) {
+			return this.buildBracketRequiredAccent(startPosition + 1, nextChar);
 		}
 
 		return this.createCommandToken(startPosition);
