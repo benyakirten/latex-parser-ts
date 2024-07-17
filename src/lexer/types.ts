@@ -1,4 +1,8 @@
-export type Token =
+export type Token = {
+	position: number;
+} & TokenData;
+
+type TokenData =
 	| CommandToken
 	| MathToken
 	| BlockToken

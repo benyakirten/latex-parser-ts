@@ -1,12 +1,19 @@
+/**
+ * An result wrapper that allows easy building of stack traces and error handling
+ */
 export class Result<Item> {
 	constructor(
-		private item: Item | null,
+		private readonly item: Item | null,
 		private readonly doc: string[],
-		private errors: LatexError[] = [],
+		private readonly errors: LatexError[] = [],
 	) {}
 
 	isOk() {
 		return this.item !== null && this.errors.length === 0;
+	}
+
+	isErr() {
+		return !this.isOk();
 	}
 
 	unwrap(): Item {
@@ -17,36 +24,44 @@ export class Result<Item> {
 		return this.item;
 	}
 
+	describe(): Error | null {
+		if (this.isOk()) {
+			return null;
+		}
+
+		return this.formatErrors();
+	}
+
 	private formatErrors(): Error {
+		if (this.errors.length === 0) {
+			return new Error("No item to return");
+		}
 		const errorMessage = this.errors
 			.map((error) => this.formatError(error))
 			.join("\n");
-		return new Error(errorMessage);
+		return new Error(`\n${errorMessage}`);
 	}
 
 	private formatError(error: LatexError): string {
-		let lineNo = 0;
+		let lineNum = 0;
 		let lineStartPosition = 0;
-		let erroredPositionDiscovered = false;
 
 		for (let i = 0; i < this.doc.length; i++) {
 			const line = this.doc[i];
 			if (lineStartPosition + line.length >= error.position) {
-				lineNo = i + 1;
-				erroredPositionDiscovered = true;
+				lineNum = i;
 				break;
 			}
 
-			lineStartPosition += line.length + 1;
+			lineStartPosition += line.length;
 		}
 
-		if (!erroredPositionDiscovered) {
+		const line = this.doc[lineNum];
+		if (error.position > lineStartPosition + line.length) {
 			return `Error at position ${error.position}: ${error.message}`;
 		}
-
-		const line = this.doc[lineNo - 1];
-		const errorPosition = error.position - lineStartPosition;
-		return `Error at line ${lineNo}, column:${errorPosition}: ${error.message}\n${line}\n${" ".repeat(errorPosition)}^\n`;
+		const colNum = error.position - lineStartPosition;
+		return `Error at line ${lineNum + 1}, column ${colNum} ${error.fnName ? `in ${error.fnName}` : ""}:\n${error.message}\n${line}\n${" ".repeat(colNum)}^`;
 	}
 
 	context(err: LatexError | (() => LatexError)): Result<Item> {
@@ -55,7 +70,7 @@ export class Result<Item> {
 		}
 
 		const newErrs = this.errors.concat(typeof err === "function" ? err() : err);
-		return new Result(null, this.doc, newErrs) as Result<Item>;
+		return new Result<Item>(null, this.doc, newErrs);
 	}
 
 	map<NewType>(
@@ -75,10 +90,19 @@ export class Result<Item> {
 	}
 }
 
+export function Ok<Item>(item: Item, doc: string[]): Result<Item> {
+	return new Result(item, doc, []);
+}
+
+export function Err<Item>(doc: string[], error: LatexError): Result<Item> {
+	return new Result<Item>(null, doc, [error]);
+}
+
 export class LatexError extends Error {
 	constructor(
 		message: string,
 		public position: number,
+		public fnName?: string,
 	) {
 		super(message);
 	}
